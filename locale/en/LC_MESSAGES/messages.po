@@ -1,0 +1,174 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2018-03-07 14:04+0800\n"
+"PO-Revision-Date: 2018-03-07 14:04+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 2.0.6\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: layout.py:469
+msgid "Search character:"
+msgstr ""
+
+#: layout.py:484
+msgid "F1: Ok"
+msgstr ""
+
+#: layout.py:484
+msgid "F2: Del"
+msgstr ""
+
+#: layout.py:484
+msgid "F3: Cancel"
+msgstr ""
+
+#: layout.py:484
+msgid "F4:"
+msgstr ""
+
+#: playlist.py:64
+msgid "Add song: "
+msgstr ""
+
+#: playlist.py:185 playlist.py:282
+msgid "Now playing: "
+msgstr ""
+
+#: playlist.py:187
+msgid "Prepare for: "
+msgstr ""
+
+#: playlist.py:263
+msgid "Left"
+msgstr ""
+
+#: playlist.py:263
+msgid "Right"
+msgstr ""
+
+#: playlist.py:263
+msgid "Stereo"
+msgstr ""
+
+#: playlist.py:267
+msgid "Video does not support vocal"
+msgstr ""
+
+#: playlist.py:270
+msgid "Vocal off"
+msgstr ""
+
+#: playlist.py:270
+msgid "Vocal on"
+msgstr ""
+
+#: playlist.py:284
+msgid "Coming up: "
+msgstr ""
+
+#: screen.py:55 screen.py:93
+msgid "F1:Search Songs"
+msgstr "Search Songs"
+
+#: screen.py:56 screen.py:94 screen.py:101
+msgid "F2:Index Search"
+msgstr "Index Search"
+
+#: screen.py:57 screen.py:95 screen.py:102
+msgid "F3:Playlist"
+msgstr "Playlist"
+
+#: screen.py:71
+msgid "Index"
+msgstr ""
+
+#: screen.py:72
+msgid "Title"
+msgstr ""
+
+#: screen.py:73
+msgid "Artist"
+msgstr ""
+
+#: screen.py:74
+msgid "Language"
+msgstr ""
+
+#: screen.py:75
+msgid "Category"
+msgstr ""
+
+#: screen.py:76
+msgid "Char number"
+msgstr ""
+
+#: screen.py:77
+msgid "Popular"
+msgstr ""
+
+#: screen.py:78
+msgid "Youtube"
+msgstr ""
+
+#: screen.py:100
+msgid "F1:Search"
+msgstr "Search"
+
+#: screen.py:152
+msgid "All Artist"
+msgstr ""
+
+#: screen.py:173
+msgid "All Category"
+msgstr ""
+
+#: screen.py:328 screen.py:329
+msgid "{} character"
+msgstr ""
+
+#: screen.py:329
+msgid "s and above"
+msgstr ""
+
+#: screen.py:371
+msgid "F1:Priority"
+msgstr "Priority"
+
+#: screen.py:372
+msgid "F3:Delete"
+msgstr "Delete"
+
+#: screen.py:385
+msgid "[Priority]"
+msgstr ""
+
+#: screen.py:386 screen.py:396
+msgid "Choose song"
+msgstr "Choose song ⯆"
+
+#: screen.py:387 screen.py:397
+msgid "F4:Cancel"
+msgstr "Cancel"
+
+#: screen.py:395
+msgid "[Delete]"
+msgstr ""
+
+#: screen.py:551
+msgid "F5:Page up"
+msgstr "Page up"
+
+#: screen.py:552
+msgid "F6:Page down"
+msgstr "Page down"

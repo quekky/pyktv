@@ -1,0 +1,9 @@
+version 2018.03.07 beta
+
+Initial release
+* Video playback using VLC 3
+* GUI using pyqt5
+* YouTube features using youtube-dl
+* Chinese text to pinyin using xpinyin, from https://github.com/lxneng/xpinyin
+  * Updated Mandarin.dat from https://github.com/fayland/perl-lingua-han/blob/master/Lingua-Han-PinYin/lib/Lingua/Han/PinYin/Mandarin.dat
+
