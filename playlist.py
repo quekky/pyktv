@@ -52,12 +52,24 @@ playlist_uuid = 0
 videostatushasbeenset = False
 channelhasbeenset = False
 videostarttime = 0
+videoendtime = 0
 #wait for x seconds for video to start (sometime youtube is slower to start)
 videowaittimeout = 10
+randomplaytimeout = 0
+
+
+def __post_init__():
+    global videoendtime, randomplaytimeout, timer
+    videoendtime=time.time()
+    randomplaytimeout=settings.config.getint('randomplay', 999999999)
+    timer = QTimer()
+    timer.timeout.connect(checkMediaPlayback)
+    timer.start(100)
+
 
 def addVideo(video):
     global video_playlist, current_playing, playlist_uuid
-    print(video)
+    # print(video)
     song = video.copy()
     video_playlist.append(song)
 
@@ -157,10 +169,6 @@ def playNextSong():
             videostarttime=time.time()
             youtube_channel = 0
 
-            timer = QTimer()
-            timer.timeout.connect(checkMediaPlayback)
-            timer.start(100)
-
         except:
             print("error", sys.exc_info())
             #if error, try next song
@@ -178,7 +186,8 @@ def playNextSong():
 
 
 def checkMediaPlayback():
-    global video_playlist, current_playing, videostarttime, videowaittimeout, videostatushasbeenset, channelhasbeenset
+    global video_playlist, current_playing, videostarttime, videowaittimeout, videoendtime
+    global videostatushasbeenset, channelhasbeenset, randomtimer
     player = settings.vlcMediaPlayer
     timenow=time.time()
     if player.is_playing():
@@ -200,11 +209,38 @@ def checkMediaPlayback():
         current_playing = None
         if len(video_playlist) > 0:
             playNextSong()
-        else:
+        elif videostarttime>0:
+            #for randomplay, this will not run
             player.stop()
+            videostarttime = 0
+            videoendtime = timenow
             settings.selectorWindow.setStatusText('')
             settings.videoWindow.stopStatusTempText()
+        elif timenow - videoendtime > randomplaytimeout:
+            videostatushasbeenset = True
+            channelhasbeenset = True
+            randomPlay()
 
+def setPlayerChannel(channel):
+    player = settings.vlcMediaPlayer
+    if channel == 'L':
+        player.audio_set_channel(vlc.AudioOutputChannel.Left.value)
+    elif channel == 'R':
+        player.audio_set_channel(vlc.AudioOutputChannel.Right.value)
+    elif channel == '':
+        player.audio_set_channel(vlc.AudioOutputChannel.Stereo.value)
+        player.audio_set_track(0)
+    elif type(channel) == int:
+        try:
+            tracks = player.audio_get_track_description()
+            tracks = list(filter(lambda x: x[0] >= 0, tracks))  # positive tracks only
+            if channel > len(tracks): channel = 0
+
+            player.audio_set_track(tracks[channel][0])
+            player.audio_set_channel(vlc.AudioOutputChannel.Stereo.value)
+        except:
+            player.audio_set_track(0)
+            player.audio_set_channel(vlc.AudioOutputChannel.Stereo.value)
 
 def setChannel():
     global current_playing, current_channel, youtube_channel
@@ -214,12 +250,7 @@ def setChannel():
     player = settings.vlcMediaPlayer
 
     if 'youtube' in current_playing.keys():
-        if youtube_channel==0:
-            player.audio_set_channel(vlc.AudioOutputChannel.Stereo.value)
-        elif youtube_channel == 1:
-            player.audio_set_channel(vlc.AudioOutputChannel.Left.value)
-        elif youtube_channel == 2:
-            player.audio_set_channel(vlc.AudioOutputChannel.Right.value)
+        channel=['','L','R'][youtube_channel]
     else:
         channel = current_playing['channel']
         try:
@@ -237,25 +268,7 @@ def setChannel():
             elif channel>=1:
                 channel = 0
 
-        if channel=='L':
-            player.audio_set_channel(vlc.AudioOutputChannel.Left.value)
-        elif channel=='R':
-            player.audio_set_channel(vlc.AudioOutputChannel.Right.value)
-        elif channel=='':
-            player.audio_set_channel(vlc.AudioOutputChannel.Stereo.value)
-            player.audio_set_track(0)
-        elif type(channel)==int:
-            try:
-                tracks = player.audio_get_track_description()
-                tracks=list(filter(lambda x: x[0] >= 0, tracks)) #positive tracks only
-                if channel>len(tracks): channel=0
-
-                player.audio_set_track(tracks[channel][0])
-                player.audio_set_channel(vlc.AudioOutputChannel.Stereo.value)
-            except:
-                player.audio_set_track(0)
-                player.audio_set_channel(vlc.AudioOutputChannel.Stereo.value)
-
+    setPlayerChannel(channel)
 
 def switchChannel():
     """Toggle voice/music"""
@@ -286,4 +299,38 @@ def setStatusText():
     if len(video_playlist):
         text +=" &nbsp;&nbsp;&nbsp;&nbsp; "+_("Coming up: ")+video_playlist[0]['display']
     settings.selectorWindow.setStatusText(text)
+
+def randomPlay():
+    try:
+        rows = settings.dbconn.execute(r"select * from song where [index]!=0 order by random() limit 1")
+        song=rows.fetchone()
+        library=song['library']
+        mediafile=str(song['media_file'])
+        if library=='':
+            path=mediafile
+        else:
+            mediafile=mediafile.lstrip(os.path.sep)
+            path=os.path.join(library,mediafile)
+        print("Playing random file",path)
+        media = settings.vlcInstance.media_new(path)
+        media.parse()
+        player = settings.vlcMediaPlayer
+        player.set_media(media)
+        player.play()
+
+        #set voice track
+        time.sleep(0.1)
+        channel=song['channel']
+        if channel=='L':
+            setPlayerChannel('R')
+        elif channel=='R':
+            setPlayerChannel('L')
+        elif channel is int:
+            setPlayerChannel(not(channel))
+        else:
+            setPlayerChannel('')
+    except:
+        print("error",sys.exc_info())
+        pass
+
 

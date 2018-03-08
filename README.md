@@ -25,6 +25,27 @@ Current pyktv features:
 * Youtube playlist
 
 
+# USAGE
+
+Keyboard:
+
+key       | description
+------------------------------------------
+F1-F4     | As seen on screen
+0-9       | As seen on screen
+F5/Pgup   | Page up
+F6/Pgdn   | Page down
+F10       | Next song
+F12       | Main menu
+Spacebar  | (Local) Switch between voice and music tracks
+          | (Youtube) Switch between stereo/left/right
+Backspace | Previous page
+A-Z       | During search, you can use A-Z to search          
+
+
+Mouse/touchscreen works as well
+
+
 # CONFIGURATION
 
 Read config.ini on how to edit
@@ -112,3 +133,33 @@ To run from sourcecode, the following python packages is required:
 
 
 # FAQ
+
+### Unable to play xxx file format
+
+As the program using VLC to play file, report it to VLC
+
+### Some delay when switching channel
+
+This is a known problem in VLC 3.0.1
+
+### Unable to show certain YouTube playlist
+
+The program is using youtube-dl to download the playlist (current version 2018.3.3)
+   
+Try downloading youtube-dl.exe and run ```youtube-dl.exe -j --flat-playlist url``` If it is not able to download,
+report bug under youtube-dl project. If the latest version is working, let me know the url so that I can update the 
+library
+
+### Will you implement pitch control? (key-up/key-down)
+
+I've not found any working way to call the VLC API to control the pitch. If you've found a way, please let me know 
+with source codes
+
+### When I try your program after unzipping the release, videos are not playing
+
+Due to copyright (and huge video files), I *cannot* provide you with the ktv video files. You'll need to buy the video
+files/vcd and edit the database yourself. 
+
+### Why is the release so big?
+
+Ask PyQt5

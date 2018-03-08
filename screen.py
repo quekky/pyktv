@@ -148,6 +148,7 @@ def indexSearch(data=None, page=0):
     for r in rows:
         d=dict(r)
         extractSingersAndSetDisplay(d, str(d['index']) + ' - ')
+        d['search']=str(d['index'])
         tracks.append(d)
 
     try:
