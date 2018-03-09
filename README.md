@@ -37,8 +37,7 @@ Keyboard:
  F6/Pgdn   | Page down
  F10       | Next song
  F12       | Main menu
- Spacebar  | (Local) Switch between voice and music tracks
-           | (Youtube) Switch between stereo/left/right
+ Spacebar  | (Local) Switch between voice and music tracks <br> (Youtube) Switch between stereo/left/right
  Backspace | Previous page
  A-Z       | During search, you can use A-Z to search
 
