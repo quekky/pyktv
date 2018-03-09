@@ -29,18 +29,18 @@ Current pyktv features:
 
 Keyboard:
 
-key       | description
-------------------------------------------
-F1-F4     | As seen on screen
-0-9       | As seen on screen
-F5/Pgup   | Page up
-F6/Pgdn   | Page down
-F10       | Next song
-F12       | Main menu
-Spacebar  | (Local) Switch between voice and music tracks
-          | (Youtube) Switch between stereo/left/right
-Backspace | Previous page
-A-Z       | During search, you can use A-Z to search          
+ key       | description
+ -----------------------------------------------------------
+ F1-F4     | As seen on screen
+ 0-9       | As seen on screen
+ F5/Pgup   | Page up
+ F6/Pgdn   | Page down
+ F10       | Next song
+ F12       | Main menu
+ Spacebar  | (Local) Switch between voice and music tracks
+           | (Youtube) Switch between stereo/left/right
+ Backspace | Previous page
+ A-Z       | During search, you can use A-Z to search
 
 
 Mouse/touchscreen works as well
