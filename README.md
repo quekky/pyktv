@@ -30,7 +30,7 @@ Current pyktv features:
 Keyboard:
 
  key       | description
- -----------------------------------------------------------
+ ----------|------------------------------------------------
  F1-F4     | As seen on screen
  0-9       | As seen on screen
  F5/Pgup   | Page up
