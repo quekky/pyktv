@@ -1,5 +1,6 @@
 import sys
 from cx_Freeze import setup, Executable
+import version
 
 # GUI applications require a different base on Windows (the default is for a console application).
 base = None
@@ -16,9 +17,9 @@ options = {
 }
 
 setup(
-    name = "<any name>",
+    name = "pyktv",
     options = options,
-    version = "<any number>",
-    description = '<any description>',
+    version = version.__version__,
+    description = 'A simple KTV program',
     executables = executables
 )
