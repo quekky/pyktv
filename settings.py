@@ -3,7 +3,7 @@
 
 """
 
-import vlc
+import mpv
 import configparser
 import os
 import sys
@@ -13,23 +13,22 @@ import gettext
 import playlist
 
 
-vlcInstance = None
-vlcMediaPlayer = None
+mpvMediaPlayer = None
 config = None
 themeDir = None
 
 videoWindow = None
 selectorWindow = None
+ignoreInputKey=False
 
 dbconn = None
 
 
 def __init__():
-    global vlcInstance, vlcMediaPlayer, config, themeDir, dbconn
-    vlcInstance = vlc.Instance(["--sub-source=marq"])
-    vlcMediaPlayer = vlcInstance.media_player_new()
-    vlcMediaPlayer.video_set_mouse_input(False)
-    vlcMediaPlayer.video_set_key_input(False)
+    global mpvMediaPlayer, config, themeDir, dbconn
+
+    mpvMediaPlayer = mpv.MPV(hwdec=True, log_handler=logger.warning, loglevel='warn')
+    # vlcMediaPlayer = mpv.MPV(log_handler=print, loglevel='debug')
 
     scriptpath=os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 
@@ -37,7 +36,7 @@ def __init__():
     config.read(os.path.join(scriptpath,"config.ini"))
     config = config['DEFAULT']
 
-    vlcMediaPlayer.video_set_aspect_ratio(config.get('video.aspect_ratio','None'))
+    mpvMediaPlayer.video_aspect = config.get('video.aspect_ratio', '-1')
     playlist.current_channel=config.getboolean('video.startup_channel',False)
 
     themeDir = os.path.join(config.get('theme.dir'), '')

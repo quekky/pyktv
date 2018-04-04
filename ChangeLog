@@ -3,7 +3,20 @@ version 2018.03.07 beta
 Initial release
 * Video playback using VLC 3
 * GUI using pyqt5
-* YouTube features using youtube-dl
+* YouTube features using youtube-dl 2018.3.3
 * Chinese text to pinyin using xpinyin, from https://github.com/lxneng/xpinyin
   * Updated Mandarin.dat from https://github.com/fayland/perl-lingua-han/blob/master/Lingua-Han-PinYin/lib/Lingua/Han/PinYin/Mandarin.dat
 
+
+version 2018.03.09-beta
+
+* implement randomplay on idle
+* minor bugfix
+
+
+version 2018.04.04-beta
+
+* Change from VLC to MPV (switching audio tracks do not have long delay now)
+* Implement pitch control (key-up/key-down)
+* update to youtube_dl 2018.4.3
+* minor bugfix

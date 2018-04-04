@@ -441,7 +441,7 @@ class youtubeLogger(object):
     def debug(self, msg):
         settings.selectorWindow.setTempStatusText(msg, 500)
         #refresh the app, if not the video will appear hang while processing
-        QApplication.processEvents(QEventLoop.ExcludeUserInputEvents)
+        QApplication.processEvents(QEventLoop.AllEvents)
 
     def warning(self, msg):
         pass
@@ -473,6 +473,7 @@ def youtubeScreen2(data=None, page=0):
     addHistory(youtubeScreen2, data, True)
 
     try:
+        settings.ignoreInputKey=True
         settings.selectorWindow.setTempStatusText("Youtube: downloading list...", 1000)
         ydl = YoutubeDL({'quiet':False,'extract_flat':True,'dump_single_json':True,'logger':youtubeLogger()})
 
@@ -500,6 +501,8 @@ def youtubeScreen2(data=None, page=0):
         pager.startDisplay(page)
     except:
         settings.logger.printException()
+    else:
+        settings.ignoreInputKey=False
 
 
 

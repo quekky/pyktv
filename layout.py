@@ -36,51 +36,61 @@ class CommonWindow(QWidget):
     def keyReleaseEvent(self, QKeyEvent):
         """Key press"""
         key = QKeyEvent.key()
-        if settings.selectorWindow.insearch:
-            if Qt.Key_0 <= key <= Qt.Key_9:
-                index = key - Qt.Key_0 - 1
-                if index == -1: index = 9
-                # print("Search number pressed", index)
-                settings.selectorWindow.searchcontentoption[index].click()
-            if Qt.Key_A <= key <= Qt.Key_Z:
-                index = key
-                # print("Search number pressed", index)
-                settings.selectorWindow.searchKeyPressedAlpha(chr(index))
-            elif Qt.Key_F1 <= key <= Qt.Key_F4:
-                index = key - Qt.Key_F1
-                # print("Search F_key pressed", index)
-                settings.selectorWindow.searchfunctionoption[index].click()
-            elif key == Qt.Key_Backspace:
-                # print("Search backspace pressed")
-                settings.selectorWindow.searchbackspaceoption.click()
-            elif key == Qt.Key_Enter or key==Qt.Key_Return:
-                # print(key, Qt.Key_Enter, Qt.Key_Return, settings.selectorWindow.searchenteroption)
-                settings.selectorWindow.searchenteroption.click()
-        else:
-            if Qt.Key_0 <= key <= Qt.Key_9:
-                index=key-Qt.Key_0-1
-                if index==-1: index=9
-                # print("Number pressed", index)
-                settings.selectorWindow.contentoption[settings.selectorWindow.stackedlayout.currentIndex()][index].click()
-            elif Qt.Key_F1 <= key <= Qt.Key_F4:
-                index=key-Qt.Key_F1
-                # print("F_key pressed", index)
-                settings.selectorWindow.functionoption[index].click()
-            elif key == Qt.Key_PageUp or key == Qt.Key_F5:
-                settings.selectorWindow.footeroption[0].click()
-            elif key == Qt.Key_PageDown or key == Qt.Key_F6:
-                settings.selectorWindow.footeroption[1].click()
-            elif key == Qt.Key_Backspace:
-                settings.selectorWindow.backoption.click()
+        if not settings.ignoreInputKey:
+            #keys affecting selector screen
+            if settings.selectorWindow.insearch:
+                if Qt.Key_0 <= key <= Qt.Key_9:
+                    index = key - Qt.Key_0 - 1
+                    if index == -1: index = 9
+                    # print("Search number pressed", index)
+                    settings.selectorWindow.searchcontentoption[index].click()
+                if Qt.Key_A <= key <= Qt.Key_Z:
+                    index = key
+                    # print("Search number pressed", index)
+                    settings.selectorWindow.searchKeyPressedAlpha(chr(index))
+                elif Qt.Key_F1 <= key <= Qt.Key_F4:
+                    index = key - Qt.Key_F1
+                    # print("Search F_key pressed", index)
+                    settings.selectorWindow.searchfunctionoption[index].click()
+                elif key == Qt.Key_Backspace:
+                    # print("Search backspace pressed")
+                    settings.selectorWindow.searchbackspaceoption.click()
+                elif key == Qt.Key_Enter or key==Qt.Key_Return:
+                    # print(key, Qt.Key_Enter, Qt.Key_Return, settings.selectorWindow.searchenteroption)
+                    settings.selectorWindow.searchenteroption.click()
+            else:
+                if Qt.Key_0 <= key <= Qt.Key_9:
+                    index=key-Qt.Key_0-1
+                    if index==-1: index=9
+                    # print("Number pressed", index)
+                    settings.selectorWindow.contentoption[settings.selectorWindow.stackedlayout.currentIndex()][index].click()
+                elif Qt.Key_F1 <= key <= Qt.Key_F4:
+                    index=key-Qt.Key_F1
+                    # print("F_key pressed", index)
+                    settings.selectorWindow.functionoption[index].click()
+                elif key == Qt.Key_PageUp or key == Qt.Key_F5:
+                    settings.selectorWindow.footeroption[0].click()
+                elif key == Qt.Key_PageDown or key == Qt.Key_F6:
+                    settings.selectorWindow.footeroption[1].click()
+                elif key == Qt.Key_Backspace:
+                    settings.selectorWindow.backoption.click()
+            if key == Qt.Key_F12:
+                settings.selectorWindow.stopSearch()
+                settings.selectorWindow.homeoption.click()
+        #keys affecting video
         if key == Qt.Key_Space:
             playlist.switchChannel()
         elif key == Qt.Key_F10:
             playlist.playNextSong()
-        elif key == Qt.Key_F12:
-            settings.selectorWindow.stopSearch()
-            settings.selectorWindow.homeoption.click()
+        elif key == Qt.Key_Plus:
+            playlist.setPitchUp()
+        elif key == Qt.Key_Minus:
+            playlist.setPitchDown()
+        elif key == Qt.Key_Equal:
+            playlist.setPitchFlat()
 
     def closeEvent(self, QCloseEvent):
+        settings.mpvMediaPlayer.terminate()
         qApp.quit()
 
 
@@ -99,17 +109,6 @@ class VideoWindow(CommonWindow):
 
         self.timer.timeout.connect(self.stopStatusTempText)
 
-        ### Using qlabel to set the image, so not sure if MacOS will still work for vlc
-        # In this widget, the video will be drawn
-        # if sys.platform == "darwin":  # for MacOS
-        #     from PyQt5.QtWidgets import QMacCocoaViewContainer
-        #     self.videoframe = QMacCocoaViewContainer(0)
-        # else:
-        #     self.videoframe = QFrame()
-        #
-        # self.videolayout = setZeroMargins(QHBoxLayout(self))
-        # self.videolayout.addWidget(self.videoframe)
-
         self.bglabel = QLabel()
         self.backgroundimage = QPixmap(settings.themeDir + "video.jpg")
         self.bglabel.setScaledContents(True)
@@ -121,19 +120,7 @@ class VideoWindow(CommonWindow):
 
         self.videoframe = self.bglabel
 
-        self.mediaplayer = settings.vlcMediaPlayer
-        # the media player has to be 'connected' to the QFrame
-        # (otherwise a video would be displayed in it's own window)
-        # this is platform specific!
-        # you have to give the id of the QFrame (or similar object) to
-        # vlc, different platforms have different functions for this
-        if sys.platform.startswith('linux'):  # for Linux using the X Server
-            self.mediaplayer.set_xwindow(self.videoframe.winId())
-        elif sys.platform == "win32":  # for Windows
-            self.mediaplayer.set_hwnd(self.videoframe.winId())
-            pass
-        elif sys.platform == "darwin":  # for MacOS
-            self.mediaplayer.set_nsobject(int(self.videoframe.winId()))
+        settings.mpvMediaPlayer.wid = int(self.videoframe.winId())
 
         self.globalfont = QFont()
         self.statuslabel = QLabel(self)

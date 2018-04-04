@@ -3,11 +3,10 @@
 _Installation had been tested only in Windows. Other OS might work (provided VLC can run), however I'll not be able 
 to test it out._
 
-1. Install VLC 3.x. Make sure the libvlc is able to find your VLC installation (for Windows it should be automatic)
-2. Edit the config.ini according to your needs
-3. Find some KTV videos (due to copyright and file size, I'm not able to provide them)
-4. Use any sqlite program to modify the database
-5. Run the program
+1. Edit the config.ini according to your needs
+2. Find some KTV videos (due to copyright and file size, I'm not able to provide them)
+3. Use any sqlite program to modify the database
+4. Run the program
 
 
 # DESCRIPTION
@@ -40,6 +39,9 @@ Keyboard:
  Spacebar  | (Local) Switch between voice and music tracks <br> (Youtube) Switch between stereo/left/right
  Backspace | Previous page
  A-Z       | During search, you can use A-Z to search
+ -         | Key down
+ +         | Key up
+ =         | Key reset
 
 
 Mouse/touchscreen works as well
@@ -127,32 +129,29 @@ And of course Internet connection is required for YouTube to work.
 To run from sourcecode, the following python packages is required:
 
 * PyQt5 
-* python-vlc 3.x
 * youtube_dl
+* python-mpv
+
+Download mpv library from https://mpv.io/ and put it in the path (For Windows, download **mpv-1.dll**)
+
+After downloading youtube_dl, edit the code https://github.com/rg3/youtube-dl/issues/15787
 
 
 # FAQ
 
 ### Unable to play xxx file format
 
-As the program using VLC to play file, report it to VLC
+As the program using MPV to play file, report it to MPV.
 
-### Some delay when switching channel
-
-This is a known problem in VLC 3.0.1
+_(MPV uses ffmpeg to decode almost all videos, so there should be able to play almost any video)_
 
 ### Unable to show certain YouTube playlist
 
-The program is using youtube-dl to download the playlist (current version 2018.3.3)
+The program is using youtube-dl to download the playlist (current version 2018.4.3)
    
 Try downloading youtube-dl.exe and run ```youtube-dl.exe -j --flat-playlist url``` If it is not able to download,
 report bug under youtube-dl project. If the latest version is working, let me know the url so that I can update the 
 library
-
-### Will you implement pitch control? (key-up/key-down)
-
-I've not found any working way to call the VLC API to control the pitch. If you've found a way, please let me know 
-with source codes
 
 ### When I try your program after unzipping the release, videos are not playing
 

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2018-03-07 14:04+0800\n"
+"POT-Creation-Date: 2018-04-04 12:44+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,75 +15,83 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: layout.py:469
+#: layout.py:477
 msgid "Search character:"
 msgstr ""
 
-#: layout.py:484
+#: layout.py:492
 msgid "F1: Ok"
 msgstr ""
 
-#: layout.py:484
+#: layout.py:492
 msgid "F2: Del"
 msgstr ""
 
-#: layout.py:484
+#: layout.py:492
 msgid "F3: Cancel"
 msgstr ""
 
-#: layout.py:484
+#: layout.py:492
 msgid "F4:"
 msgstr ""
 
-#: playlist.py:64
+#: playlist.py:81
 msgid "Add song: "
 msgstr ""
 
-#: playlist.py:185 playlist.py:282
+#: playlist.py:229 playlist.py:362
 msgid "Now playing: "
 msgstr ""
 
-#: playlist.py:187
+#: playlist.py:231
 msgid "Prepare for: "
 msgstr ""
 
-#: playlist.py:263
+#: playlist.py:318
 msgid "Left"
 msgstr ""
 
-#: playlist.py:263
+#: playlist.py:318
 msgid "Right"
 msgstr ""
 
-#: playlist.py:263
+#: playlist.py:318
 msgid "Stereo"
 msgstr ""
 
-#: playlist.py:267
+#: playlist.py:322
 msgid "Video does not support vocal"
 msgstr ""
 
-#: playlist.py:270
+#: playlist.py:325
 msgid "Vocal off"
 msgstr ""
 
-#: playlist.py:270
+#: playlist.py:325
 msgid "Vocal on"
 msgstr ""
 
-#: playlist.py:284
+#: playlist.py:334
+msgid "Key reset"
+msgstr ""
+
+#: playlist.py:334
+msgid "Key {0:+d}"
+msgstr ""
+
+#: playlist.py:364
 msgid "Coming up: "
 msgstr ""
 
-#: screen.py:55 screen.py:93
+#: screen.py:55 screen.py:108
 msgid "F1:Search Songs"
 msgstr ""
 
-#: screen.py:56 screen.py:94 screen.py:101
+#: screen.py:56 screen.py:109 screen.py:116
 msgid "F2:Index Search"
 msgstr ""
 
-#: screen.py:57 screen.py:95 screen.py:102
+#: screen.py:57 screen.py:110 screen.py:117
 msgid "F3:Playlist"
 msgstr ""
 
@@ -111,63 +119,59 @@ msgstr ""
 msgid "Char number"
 msgstr ""
 
-#: screen.py:77
-msgid "Popular"
-msgstr ""
-
 #: screen.py:78
 msgid "Youtube"
 msgstr ""
 
-#: screen.py:100
+#: screen.py:115
 msgid "F1:Search"
 msgstr ""
 
-#: screen.py:152
+#: screen.py:168
 msgid "All Artist"
 msgstr ""
 
-#: screen.py:173
+#: screen.py:189
 msgid "All Category"
 msgstr ""
 
-#: screen.py:328 screen.py:329
+#: screen.py:345 screen.py:346
 msgid "{} character"
 msgstr ""
 
-#: screen.py:329
+#: screen.py:346
 msgid "s and above"
 msgstr ""
 
-#: screen.py:371
+#: screen.py:388
 msgid "F1:Priority"
 msgstr ""
 
-#: screen.py:372
+#: screen.py:389
 msgid "F3:Delete"
 msgstr ""
 
-#: screen.py:385
+#: screen.py:402
 msgid "[Priority]"
 msgstr ""
 
-#: screen.py:386 screen.py:396
+#: screen.py:403 screen.py:413
 msgid "Choose song"
 msgstr ""
 
-#: screen.py:387 screen.py:397
+#: screen.py:404 screen.py:414
 msgid "F4:Cancel"
 msgstr ""
 
-#: screen.py:395
+#: screen.py:412
 msgid "[Delete]"
 msgstr ""
 
-#: screen.py:551
+#: screen.py:568
 msgid "F5:Page up"
 msgstr ""
 
-#: screen.py:552
+#: screen.py:569
 msgid "F6:Page down"
 msgstr ""
 
