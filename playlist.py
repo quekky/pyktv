@@ -102,6 +102,16 @@ def deleteSong(video):
     except:
         pass
 
+class youtubeLogger(object):
+    def debug(self, msg):
+        pass
+
+    def warning(self, msg):
+        pass
+
+    def error(self, msg):
+        settings.logger.error(msg)
+
 def playNextSong():
     global video_playlist, current_playing, timer, videostarttime, videostatushasbeenset, channelhasbeenset, youtube_channel
     # print(current_playing)
@@ -126,7 +136,7 @@ def playNextSong():
             # print("try youtube")
             try:
                 subs=settings.config.get('youtube.subtitleslangs','').split(',')
-                option={'quiet': True, 'simulate': True, 'format': settings.config.get('youtube.format','best')}
+                option={'quiet': True, 'simulate': True, 'format': settings.config.get('youtube.format','best'),'logger':youtubeLogger()}
                 if len(subs) > 0: option.update({'writesubtitles':True, 'subtitleslangs': subs})
                 ydl = youtube_dl.YoutubeDL(option)
                 res = ydl.extract_info(current_playing['url'])
@@ -144,15 +154,18 @@ def playNextSong():
                 media = settings.vlcInstance.media_new(res['requested_formats'][0]['url'])
                 for i in range(1, len(res['requested_formats'])):
                     media.slaves_add(vlc.MediaSlaveType.audio.value, 4, res['requested_formats'][i]['url'])
-                for v in res['requested_subtitles'].values():
-                    media.slaves_add(vlc.MediaSlaveType.subtitle.value, 4, v['url'])
+                try:
+                    for v in res['requested_subtitles'].values():
+                        media.slaves_add(vlc.MediaSlaveType.subtitle.value, 4, v['url'])
+                except:
+                    pass
                 media.parse()
             except youtube_dl.utils.DownloadError as err:
-                print("Youtube error:",err)
+                settings.logger.printException("Youtube error:")
                 settings.selectorWindow.setTempStatusText(str(err), 2000)
                 current_playing=None
             except:
-                print("error", sys.exc_info())
+                settings.logger.printException()
 
         try:
             # timer.stop()
@@ -170,7 +183,7 @@ def playNextSong():
             youtube_channel = 0
 
         except:
-            print("error", sys.exc_info())
+            settings.logger.printException()
             #if error, try next song
             playNextSong()
 
@@ -180,7 +193,7 @@ def playNextSong():
             browserhistory[0](browserhistory[1],browserhistory[2])
 
     except:
-        print("err",sys.exc_info())
+        settings.logger.printException()
 
     setStatusText()
 
@@ -311,7 +324,7 @@ def randomPlay():
         else:
             mediafile=mediafile.lstrip(os.path.sep)
             path=os.path.join(library,mediafile)
-        print("Playing random file",path)
+        settings.logger.debug("Playing random file:",path)
         media = settings.vlcInstance.media_new(path)
         media.parse()
         player = settings.vlcMediaPlayer
@@ -330,7 +343,5 @@ def randomPlay():
         else:
             setPlayerChannel('')
     except:
-        print("error",sys.exc_info())
-        pass
-
+        settings.logger.printException()
 

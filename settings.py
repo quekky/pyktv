@@ -7,6 +7,7 @@ import vlc
 import configparser
 import os
 import sys
+import traceback
 import sqlite3
 import gettext
 import playlist
@@ -48,3 +49,29 @@ def __init__():
     localedir = os.path.join(scriptpath, 'locale')
     translate = gettext.translation('messages', localedir, languages=[config['language']])
     translate.install()
+
+
+
+class mainLogger(object):
+    _out_file = sys.stdout
+    _err_file = sys.stderr
+
+    def debug(self, *args, **kwargs):
+        if self._err_file is not None:
+            print(*args, file=self._out_file, **kwargs)
+
+    def warning(self, *args, **kwargs):
+        if self._err_file is not None:
+            print(*args, file=self._out_file, **kwargs)
+
+    def error(self, *args, **kwargs):
+        if self._err_file is not None:
+            print(*args, file=self._out_file, **kwargs)
+
+    def printException(self, *args, **kwargs):
+        if self._err_file is not None:
+            print(*args, file=self._out_file, **kwargs)
+            traceback.print_exc()
+            self._err_file.flush()
+
+logger = mainLogger()

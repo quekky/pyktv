@@ -692,7 +692,7 @@ class SelectorWindow(CommonWindow):
                     if callable(options[i]['func']):
                         option.clicked.connect(options[i]['func'])
                 except:
-                    print("Error",sys.exc_info())
+                    settings.logger.printException()
             else:
                 option.setText('')
 
@@ -708,7 +708,7 @@ class SelectorWindow(CommonWindow):
                     if callable(options[i]['func']):
                         option.clicked.connect(options[i]['func'])
                 except:
-                    print("Error",sys.exc_info())
+                    settings.logger.printException()
             else:
                 option.setText('')
         if 'pagertext' in options.keys():
@@ -731,7 +731,7 @@ class SelectorWindow(CommonWindow):
                             option.clicked.connect(options[i]['func'])
                             option.connect=options[i]['func']
                     except:
-                        print("Error",sys.exc_info())
+                        settings.logger.printException()
                 else:
                     option.setText('')
 
@@ -753,7 +753,7 @@ class SelectorWindow(CommonWindow):
                         if callable(options[i]['func']):
                             option.clicked.connect(options[i]['func'])
                     except:
-                        print("Error", sys.exc_info())
+                        settings.logger.printException()
                 else:
                     option.clear()
 
@@ -767,7 +767,7 @@ class SelectorWindow(CommonWindow):
             if callable(backcallback):
                 self.backoption.clicked.connect(backcallback)
         except:
-            print("Error", sys.exc_info())
+            settings.logger.printException()
 
     def setStatusText(self, p_str):
         self.statustext=p_str
@@ -889,5 +889,5 @@ class QLabelButton(QLabel):
         try:
             self.clicked.emit(self.index)
         except:
-            print(sys.exc_info())
+            settings.logger.printException()
 

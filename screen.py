@@ -3,7 +3,7 @@ import sys
 import os
 import math
 import re
-from PyQt5.QtCore import pyqtSlot, QTimer, QThread
+from PyQt5.QtCore import pyqtSlot, QTimer, QThread, QEventLoop
 from PyQt5.QtWidgets import QApplication
 from youtube_dl import YoutubeDL
 from pprint import pprint
@@ -134,7 +134,7 @@ def titleSearch(data=None, page=0):
         pager = pagerContent(tracks, 1, getCommon1_h_options(), playlist.addVideo)
         pager.startSearch(page,0 )
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 
 @pyqtSlot(object, int)
@@ -155,7 +155,7 @@ def indexSearch(data=None, page=0):
         pager = pagerContent(tracks, 1, getCommon1_h_options(), playlist.addVideo)
         pager.startSearch(page,1 )
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 
 @pyqtSlot(object, int)
@@ -173,7 +173,7 @@ def artistSearch1(data=None, page=0):
         pager = pagerContent(artists, 1, getCommon1_h_options(), artistSearch2)
         pager.startDisplay(page)
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 
 @pyqtSlot(object, int)
@@ -194,7 +194,7 @@ def artistSearch2(data, page=0):
         pager = pagerContent(artists, 1, getCommon1_h_options(), artistSearch3)
         pager.startDisplay(page)
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 
 @pyqtSlot(object, int)
@@ -231,7 +231,7 @@ def artistSearch3(data, page=0):
         pager = pagerContent(artists, 2, getCommon2_h_options(), artistSearch4)
         pager.startDisplay(page)
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 
 @pyqtSlot(object, int)
@@ -254,7 +254,7 @@ def artistSearch4(data, page=0):
         pager = pagerContent(tracks, 1, h_options, playlist.addVideo)
         pager.startDisplay(page)
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 
 @pyqtSlot(object, int)
@@ -273,7 +273,7 @@ def langSearch1(data=None, page=0):
         pager = pagerContent(langs, 1, getCommon1_h_options(), langSearch2)
         pager.startDisplay(page)
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 
 @pyqtSlot(object, int)
@@ -293,7 +293,7 @@ def langSearch2(data, page=0):
         pager = pagerContent(tracks, 1, getCommon2_h_options(), playlist.addVideo)
         pager.startDisplay(page)
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 
 @pyqtSlot(object, int)
@@ -312,7 +312,7 @@ def categorySearch1(data=None, page=0):
         pager = pagerContent(cats, 1, getCommon1_h_options(), categorySearch2)
         pager.startDisplay(page)
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 
 @pyqtSlot(object, int)
@@ -332,7 +332,7 @@ def categorySearch2(data, page=0):
         pager = pagerContent(tracks, 1, getCommon2_h_options(), playlist.addVideo)
         pager.startDisplay(page)
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 
 @pyqtSlot(object, int)
@@ -349,7 +349,7 @@ def charSearch1(data=None, page=0):
         pager = pagerContent(chars, 1, getCommon1_h_options(), charSearch2)
         pager.startDisplay(page)
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 
 @pyqtSlot(object, int)
@@ -372,7 +372,7 @@ def charSearch2(data, page=0):
         pager = pagerContent(tracks, 1, getCommon2_h_options(), playlist.addVideo)
         pager.startDisplay(page)
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 """
 Functions related to playlist
@@ -392,7 +392,7 @@ def playelistSearch(data=None, page=0):
         pager = pagerContent(list(playlist.video_playlist), 1, h_options, songPlaylistSelected)
         pager.startDisplay(page)
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 
 @pyqtSlot(object, int)
@@ -440,8 +440,8 @@ Functions related to youtube
 class youtubeLogger(object):
     def debug(self, msg):
         settings.selectorWindow.setTempStatusText(msg, 500)
-        #refresh the app, if not the video will hang while processing
-        QApplication.processEvents()
+        #refresh the app, if not the video will appear hang while processing
+        QApplication.processEvents(QEventLoop.ExcludeUserInputEvents)
 
     def warning(self, msg):
         pass
@@ -466,7 +466,7 @@ def youtubeScreen1(data=None, page=0):
         pager = pagerContent(youtubelists, 1, getCommon2_h_options(), youtubeScreen2)
         pager.startDisplay(page)
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 @pyqtSlot(object, int)
 def youtubeScreen2(data=None, page=0):
@@ -499,7 +499,7 @@ def youtubeScreen2(data=None, page=0):
 
         pager.startDisplay(page)
     except:
-        print("error", sys.exc_info())
+        settings.logger.printException()
 
 
 
