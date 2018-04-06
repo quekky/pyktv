@@ -143,9 +143,12 @@ After downloading youtube_dl source (or from pip), edit the code https://github.
 
 ### Unable to play xxx file format
 
-As the program using MPV to play file, report it to MPV.
+As the program using MPV to play file.
 
-_(MPV uses ffmpeg to decode almost all videos, so there should be able to play almost any video)_
+Try download MPV from their site and playing the video using MPV. If it not able to play the video file, but other
+players is able to play it, report the bug to MPV.
+
+_(MPV uses ffmpeg to decode almost all videos, so it should be able to play almost any video)_
 
 ### Unable to show certain YouTube playlist
 

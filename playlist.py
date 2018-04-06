@@ -9,6 +9,7 @@ from PyQt5.QtCore import QTimer
 import settings
 import screen
 import youtube_dl
+from pprint import pprint
 
 #Song structure is a dict:
 songstructure_enum={
@@ -121,10 +122,8 @@ def playNextSong():
     try:
         current_playing = video_playlist.popleft()
 
-        audiopath = []
-        subpath = []
-        #normal files
         if 'media_file' in current_playing.keys():
+            # normal files
             library=current_playing['library']
             mediafile=str(current_playing['media_file'])
             if library=='':
@@ -134,38 +133,13 @@ def playNextSong():
                 videopath=os.path.join(library,mediafile)
         else:
             #youtube
-            # print("try youtube")
-            try:
-                subs=settings.config.get('youtube.subtitleslangs','').split(',')
-                option={'quiet': True, 'simulate': True, 'format': settings.config.get('youtube.format','best'),'logger':youtubeLogger()}
-                if len(subs) > 0: option.update({'writesubtitles':True, 'subtitleslangs': subs})
-                ydl = youtube_dl.YoutubeDL(option)
-                res = ydl.extract_info(current_playing['url'])
-
-                # if the video and audio is spilt, 1st item is viideo, then look for audio
-                videopath=res['requested_formats'][0]['url']
-                for i in res['requested_formats']:
-                    if i['acodec']!='none':
-                        audiopath.append(i['url'])
-                try:
-                    for v in res['requested_subtitles'].values():
-                        subpath.append(v['url'])
-                except:
-                    pass
-            except youtube_dl.utils.DownloadError as err:
-                settings.logger.printException("Youtube error:")
-                settings.selectorWindow.setTempStatusText(str(err), 2000)
-                current_playing=None
-            except:
-                settings.logger.printException()
+            videopath=current_playing['url']
+            if not (videopath.startswith('http://') or videopath.startswith('https://')):
+                videopath='http://youtu.be/'+videopath
 
         try:
             player = settings.mpvMediaPlayer
             player.play(videopath)
-            for i in audiopath:
-                player.command('audio-add', i)
-            for v in subpath:
-                player.command('sub-add', v)
 
             videostatushasbeenset=False
             channelhasbeenset=False
@@ -229,7 +203,8 @@ def checkMediaPlayback():
 def setPlayerFilter():
     global audiopanstr, audiopitch
     try:
-        audiopitchstr = 'rubberband=pitch-scale=' + str(1 + audiopitch / 10)
+        #start with no rubberband (in MPV, for vorbis/opus, if there's rubberband the sound is not playing)
+        audiopitchstr = None if audiopitch==0 else 'rubberband=pitch-scale=' + str(1 + audiopitch / 10)
         str1=','.join(filter(None, (audiopanstr, audiopitchstr)))
         settings.mpvMediaPlayer.command('af', 'clr', '')
         if str1: settings.mpvMediaPlayer.command('af', 'set', str1)

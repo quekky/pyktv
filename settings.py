@@ -36,6 +36,8 @@ def __init__():
     config = config['DEFAULT']
 
     mpvMediaPlayer.video_aspect = config.get('video.aspect_ratio', '-1')
+    mpvMediaPlayer.ytdl_format=config.get('youtube.format','best')
+    mpvMediaPlayer.slang = config.get('youtube.subtitleslangs', '')
     playlist.current_channel=config.getboolean('video.startup_channel',False)
 
     themeDir = os.path.join(config.get('theme.dir'), '')

@@ -36,5 +36,8 @@ if __name__ == '__main__':
     # playlist.addVideo({"display":"test","url":"https://www.youtube.com/watch?v=vMCqvEPBGlA","youtube":True})
     # playlist.addVideo({'channel': 'R', 'library': 'Z:\\KTV\\Videos\\流行歌曲','media_file': '\\0.其他\\羅嘉良 + 吳鎮宇 + 張可頤 + 宣萱 - 難兄難弟 [KTV].mpg', 'remark': '羅嘉良 + 吳鎮宇 + 張可頤 + 宣萱', 'display': '難兄難弟 《羅嘉良,吳鎮宇,張可頤,宣萱》  （粵,合唱）'})
     # playlist.addVideo({'channel': '1', 'library': r'Z:\KTV\Videos\流行歌曲','media_file': r'\男\黃明志\黃明志 feat  王力宏 - 漂向北方(KTV).mp4', 'display': '漂向北方 《黃明志,王力宏》  （粵,合唱）'})
+    # playlist.addVideo({'url': 'pWvPXTWUexk', 'display': '王力宏 Leehom Wang《奇遇的起點 Singularity》官方 Official MV', 'youtube': True})
+    # playlist.addVideo({'url': 'W5LzxmZUwhs', 'display': '68 鄭君綿 + 許艷秋 中馬票 1970', 'youtube': True})
+    # playlist.addVideo({'url': 'JQGRg8XBnB4', 'display': '[MV] MOMOLAND (모모랜드) _ BBoom BBoom (뿜뿜)', 'youtube': True})
 
     sys.exit(app.exec_())
