@@ -21,6 +21,7 @@ if __name__ == '__main__':
     settings.videoWindow = VideoWindow()
     settings.selectorWindow = SelectorWindow()
     screen.startHomeScreen()
+    settings.videoWindow.raise_()
     playlist.__post_init__()
 
     ###debuging

@@ -28,7 +28,6 @@ def __init__():
     global mpvMediaPlayer, config, themeDir, dbconn
 
     mpvMediaPlayer = mpv.MPV(hwdec=True, log_handler=logger.warning, loglevel='warn')
-    # vlcMediaPlayer = mpv.MPV(log_handler=print, loglevel='debug')
 
     scriptpath=os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 

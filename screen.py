@@ -54,8 +54,8 @@ Home page
 def startHomeScreen(data=None, page=None):
     h_options = {0: {'text': _('F1:Search Songs'), 'func': titleSearch},
                  1: {'text': _('F2:Index Search'), 'func': indexSearch},
-                 2: {'text': _('F3:Playlist'), 'func': playelistSearch}
-                 #3: {'text': _('F4:Video'), 'func':None}
+                 2: {'text': _('F3:Playlist'), 'func': playelistSearch},
+                 3: {'text': _('Artist'), 'func':artistSearch1}
                  }
     # c_options = {0: {'text': 'Index', 'func': indexSearch},
     #              1: {'text': 'Title', 'func': titleSearch},
@@ -98,7 +98,7 @@ def extractSingersAndSetDisplay(song, prefix=''):
     return song
 
 def setDisplaySongText(song, prefix=''):
-    song['display'] = prefix + song['title'] + "<span style='color:#BBBBBB'> 《" + ",".join(song['singers']) + '》  （' + song['language'] + '）</span>'
+    song['display'] = prefix + song['title'] + "<span style='color:"+settings.config['font.secondarycolor']+"'> 《" + ",".join(song['singers']) + '》  （' + song['language'] + '）</span>'
 
 
 """
@@ -108,15 +108,15 @@ Functions related to searching songs
 def getCommon1_h_options():
     return {0: {'text': _('F1:Search Songs'), 'func': titleSearch},
             1: {'text': _('F2:Index Search'), 'func': indexSearch},
-            2: {'text': _('F3:Playlist'), 'func': playelistSearch}
-            #3: {'text': _('F4:Video'), 'func': None}
+            2: {'text': _('F3:Playlist'), 'func': playelistSearch},
+            3: {'text': _('Artist'), 'func': artistSearch1}
             }
 
 def getCommon2_h_options():
     return {0: {'text': _('F1:Search'), 'search': 1}, #if ['search']=1, then calls the builtin pagerContent.searcher
             1: {'text': _('F2:Index Search'), 'func': indexSearch},
-            2: {'text': _('F3:Playlist'), 'func': playelistSearch}
-            #3: {'text': 'F4:Video', 'func': None}
+            2: {'text': _('F3:Playlist'), 'func': playelistSearch},
+            3: {'text': _('Artist'), 'func': artistSearch1}
             }
 
 @pyqtSlot(object, int)
@@ -141,7 +141,7 @@ def indexSearch(data=None, page=0):
 
     rows = settings.dbconn.execute("select * from song where [index]!=0 order by [index]")
 
-    tracks = [extractSingersAndSetDisplay(dict(r)) for r in rows]
+    tracks = [extractSingersAndSetDisplay(dict(r), str(r['index'])+' - ') for r in rows]
     for d in tracks:
         d['search'] = str(d['index'])
 

@@ -1,3 +1,3 @@
 from __future__ import unicode_literals
 
-__version__ = '2018.04.04-beta'
+__version__ = '2018.04.07-beta'

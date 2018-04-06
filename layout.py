@@ -15,6 +15,26 @@ def setZeroMargins(layout):
     return layout
 
 
+# raise the correct window
+selectorshowntime = 0
+raisewindowtimer = QTimer()
+raisewindowtimer.setInterval(1000)
+
+def raiseSelectorWindow():
+    global selectorshowntime, raisewindowtimer
+    selectorshowntime=time.time()
+    settings.selectorWindow.raise_()
+    raisewindowtimer.timeout.connect(raiseVideoWindow)
+    raisewindowtimer.start()
+
+def raiseVideoWindow():
+    global selectorshowntime, raisewindowtimer
+    #after some time, raise the video in front of selector
+    if time.time()-15 > selectorshowntime:
+        raisewindowtimer.stop()
+        settings.videoWindow.raise_()
+
+
 class CommonWindow(QWidget):
     """Common window for both windows"""
 
@@ -44,42 +64,45 @@ class CommonWindow(QWidget):
             #keys affecting selector screen
             if settings.selectorWindow.insearch:
                 if Qt.Key_0 <= key <= Qt.Key_9:
+                    raiseSelectorWindow()
                     index = key - Qt.Key_0 - 1
                     if index == -1: index = 9
-                    # print("Search number pressed", index)
                     settings.selectorWindow.searchcontentoption[index].click()
                 if Qt.Key_A <= key <= Qt.Key_Z:
+                    raiseSelectorWindow()
                     index = key
-                    # print("Search number pressed", index)
                     settings.selectorWindow.searchKeyPressedAlpha(chr(index))
                 elif Qt.Key_F1 <= key <= Qt.Key_F4:
+                    raiseSelectorWindow()
                     index = key - Qt.Key_F1
-                    # print("Search F_key pressed", index)
                     settings.selectorWindow.searchfunctionoption[index].click()
                 elif key == Qt.Key_Backspace:
-                    # print("Search backspace pressed")
+                    raiseSelectorWindow()
                     settings.selectorWindow.searchbackspaceoption.click()
                 elif key == Qt.Key_Enter or key==Qt.Key_Return:
-                    # print(key, Qt.Key_Enter, Qt.Key_Return, settings.selectorWindow.searchenteroption)
+                    raiseSelectorWindow()
                     settings.selectorWindow.searchenteroption.click()
             else:
                 if Qt.Key_0 <= key <= Qt.Key_9:
+                    raiseSelectorWindow()
                     index=key-Qt.Key_0-1
                     if index==-1: index=9
-                    # print("Number pressed", index)
                     settings.selectorWindow.contentoption[settings.selectorWindow.stackedlayout.currentIndex()][index].click()
-                    # settings.selectorWindow.contentoption[0][index].click()
                 elif Qt.Key_F1 <= key <= Qt.Key_F4:
+                    raiseSelectorWindow()
                     index=key-Qt.Key_F1
-                    # print("F_key pressed", index)
                     settings.selectorWindow.functionoption[index].click()
                 elif key == Qt.Key_PageUp or key == Qt.Key_F5:
+                    raiseSelectorWindow()
                     settings.selectorWindow.footeroption[0].click()
                 elif key == Qt.Key_PageDown or key == Qt.Key_F6:
+                    raiseSelectorWindow()
                     settings.selectorWindow.footeroption[1].click()
                 elif key == Qt.Key_Backspace:
+                    raiseSelectorWindow()
                     settings.selectorWindow.backoption.click()
             if key == Qt.Key_F12:
+                raiseSelectorWindow()
                 self.gohome()
         #keys affecting video
         if key == Qt.Key_Space:
@@ -131,11 +154,11 @@ class VideoWindow(CommonWindow):
         self.statuslabel.setStyleSheet('color:' + settings.config['font.color'] + '; background:black')
         self.statuslabel.hide()
 
-        self.show()
         geo=list(map(int, settings.config['video.window'].split(',')))
-        self.move(geo[0], geo[1])
-        self.resize(geo[2], geo[3])
         if settings.config.getboolean('video.frameless'): self.setWindowFlag(Qt.FramelessWindowHint)
+        self.move(geo[0], geo[1])
+        self.show()
+        self.resize(geo[2], geo[3])
         if settings.config.getboolean('video.fullscreen'): self.setWindowState(Qt.WindowFullScreen)
 
     def resizeEvent(self, QResizeEvent):
@@ -182,11 +205,11 @@ class SelectorWindow(CommonWindow):
 
         self.createLayout()
 
-        self.show()
         geo=list(map(int, settings.config['selector.window'].split(',')))
-        self.move(geo[0], geo[1])
-        self.resize(geo[2], geo[3])
         if settings.config.getboolean('selector.frameless'): self.setWindowFlag(Qt.FramelessWindowHint)
+        self.move(geo[0], geo[1])
+        self.show()
+        self.resize(geo[2], geo[3])
         if settings.config.getboolean('selector.fullscreen'): self.setWindowState(Qt.WindowFullScreen)
 
 
@@ -304,7 +327,7 @@ class SelectorWindow(CommonWindow):
         self.pageroption.setFont(self.globalfont)
         self.statusframe.setPixelSize(self.statusframe.size().height()*0.7)
 
-        if self.searchframe.isVisible():
+        if self.searchbg.isVisible():
             self.setSearchTextSize()
 
 
@@ -325,97 +348,101 @@ class SelectorWindow(CommonWindow):
 
     def createSearchLayout(self):
         fontstylesheet=self.fontstylesheet
+        btnstylesheet='color: white; border-radius: 5px;' + \
+            'background-color: qradialgradient(spread:pad, cx:0.272, cy:0.354515, radius:0.848, fx:0.071, fy:0.199045, stop:0 rgba(130, 130, 130, 255), stop:0.2 rgba(101, 101, 101, 255), stop:1 rgba(27, 27, 27, 170));' + \
+            'border: 1px solid #858585;border-right: 1px solid #414141;border-bottom: solid 3px #414141;'
 
-        # create the search window
-        self.searchframe = QLabel(self.bglabel)
+        self.searchbg = QLabel(self)
+        self.searchbg.setCursor(Qt.WaitCursor)
+
+        self.searchbglayout = setZeroMargins(QGridLayout(self.searchbg))
+        self.searchframe = QLabel()
         self.searchframe.setScaledContents(True)
         self.searchframe.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        self.searchimage = QPixmap(settings.themeDir + "menu_search.jpg")
+        self.searchimage = QPixmap(settings.themeDir + "search.jpg")
+        self.searchframe.setCursor(Qt.ArrowCursor)
         self.searchframe.setPixmap(self.searchimage)
-        self.searchframe.hide()
+        self.searchbglayout.addWidget(QWidget(), 0, 1)
+        self.searchbglayout.addWidget(QWidget(), 1, 0)
+        self.searchbglayout.addWidget(QWidget(), 2, 1)
+        self.searchbglayout.addWidget(QWidget(), 3, 0)
+        self.searchbglayout.addWidget(self.searchframe, 1, 1)
+        self.searchbglayout.setColumnStretch(0, 70)
+        self.searchbglayout.setColumnStretch(1, 40)
+        self.searchbglayout.setColumnStretch(2, 1)
+        self.searchbglayout.setRowStretch(0, 3)
+        self.searchbglayout.setRowStretch(1, 4)
+        self.searchbglayout.setRowStretch(2, 1)
 
-        searchlayout1h = setZeroMargins(QHBoxLayout(self.searchframe))
-        searchframe1h_1 = QWidget()
-        searchframe1h_2 = QWidget()
-        searchframe1h_3 = QWidget()
-        searchlayout1h.addStretch(43)
-        searchlayout1h.addWidget(searchframe1h_1,730)
-        searchlayout1h.addStretch(62)
-        searchlayout1h.addWidget(searchframe1h_2,653)
-        searchlayout1h.addWidget(searchframe1h_3,94)
-        searchlayout1h.addStretch(18)
+        self.searchlayout = QGridLayout(self.searchframe)
+        self.searchlayout.setSpacing(10)
 
-        searchlayout2v = setZeroMargins(QVBoxLayout(searchframe1h_1))
+        # title
         self.searchtitle = QLabel()
         self.searchtitle.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.searchtitle.setStyleSheet(fontstylesheet+';font:bold;')
         self.searchtitle.setText(_("Search character:"))
-        self.searchlabel = QLabel()
-        self.searchlabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        self.searchlabel.setStyleSheet(fontstylesheet+"; padding: 0 10%;")
-        # self.searchlabel.setStyleSheet("color:lightyellow; background-color: rgba(255,0,0,150); padding: 0px 10px")
-        # self.searchlabel.setText("A B <font color=\"cyan\">C</font>")
-        searchframe2v_3 = QWidget()
-        searchlayout2v.addStretch(3)
-        searchlayout2v.addWidget(self.searchtitle,40)
-        searchlayout2v.addStretch(3)
-        searchlayout2v.addWidget(self.searchlabel,56)
-        searchlayout2v.addStretch(6)
-        searchlayout2v.addWidget(searchframe2v_3,52)
-        searchlayout2v.addStretch(3)
+        self.searchlayout.addWidget(self.searchtitle, 0, 0, 1, 3)
 
+        # F1 to F4
         f_text=(_('F1: Ok'),_('F2: Del'),_('F3: Cancel'),_('F4:'))
-        searchlayout3h = setZeroMargins(QHBoxLayout(searchframe2v_3))
         self.searchfunctionoption = []
         #create a filler "F4"
         for i in range(4):
             self.searchfunctionoption.append(QLabelButton())
             self.searchfunctionoption[i].setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
             self.searchfunctionoption[i].setText(f_text[i])
-            self.searchfunctionoption[i].setStyleSheet(fontstylesheet)
-            # self.searchfunctionoption[i].setStyleSheet("color:lightyellow; background-color: rgba(255,0,0,150)")
+            self.searchfunctionoption[i].setStyleSheet(btnstylesheet)
             self.searchfunctionoption[i].setAlignment(Qt.AlignCenter)
-            self.searchfunctionoption[i].setCursor(Qt.PointingHandCursor)
             self.searchfunctionoption[i].index="F" + str(i + 1)
             self.searchfunctionoption[i].clicked.connect(self.searchButtonPressedFunction)
         for i in range(3):
-            searchlayout3h.addWidget(self.searchfunctionoption[i])
+            self.searchlayout.addWidget(self.searchfunctionoption[i], 1 , i)
 
-        searchlayout4g = setZeroMargins(QGridLayout(searchframe1h_2))
+        # display text
+        self.searchlabel = QLabel()
+        self.searchlabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.searchlabel.setStyleSheet(fontstylesheet+"; padding: 0 10%; border: 1px solid blue;")
+        self.searchlabel.setStyleSheet(self.fontstylesheet+'border: 3px solid black; border-radius: 5px; background-color: qlineargradient(spread:pad, x1:0, x2:1, stop:0 rgba(0, 0, 0, 200), stop:1 rgba(120, 120, 120, 100));padding: 0px 10%;')
+        self.searchlayout.addWidget(self.searchlabel, 2, 0, 1, 3)
+
+        # 0 -9
         self.searchcontentoption = []
-        #create a filler btn "0"
         for i in range(10):
             self.searchcontentoption.append(QLabelButton())
             self.searchcontentoption[i].setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-            self.searchcontentoption[i].setStyleSheet(fontstylesheet)
-            # self.searchcontentoption[i].setStyleSheet("color:lightyellow; background-color: rgba(255,255,0,150)")
+            self.searchcontentoption[i].setStyleSheet(btnstylesheet)
             self.searchcontentoption[i].setAlignment(Qt.AlignCenter)
-            self.searchcontentoption[i].setCursor(Qt.PointingHandCursor)
             self.searchcontentoption[i].index=i
             self.searchcontentoption[i].clicked.connect(self.searchButtonPressedNumber)
         for i in range(9):
-            searchlayout4g.addWidget(self.searchcontentoption[i], i/3, i%3)
+            self.searchlayout.addWidget(self.searchcontentoption[i], 3+i/3, i%3)
+        self.searchlayout.addWidget(self.searchcontentoption[9], 6, 1)
 
-        searchlayout5v = setZeroMargins(QVBoxLayout(searchframe1h_3))
-        searchlayout5v.addStretch(2)
-        searchlayout5v.addWidget(self.searchcontentoption[9],1)
-
-        #fillers
+        # backspace
         self.searchbackspaceoption = QLabelButton()
         self.searchbackspaceoption.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        self.searchbackspaceoption.setStyleSheet(fontstylesheet)
+        self.searchbackspaceoption.setStyleSheet(btnstylesheet)
+        self.searchbackspaceoption.setAlignment(Qt.AlignCenter)
         self.searchbackspaceoption.setText("🡄")
         self.searchbackspaceoption.clicked.connect(self.searchButtonPressedBackspace)
+        # self.searchlayout.addWidget(self.searchbackspaceoption, 6, 0)
 
+        # enter
         self.searchenteroption = QLabelButton()
         self.searchenteroption.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        self.searchenteroption.setStyleSheet(fontstylesheet)
-        self.searchenteroption.setText("Enter")
+        self.searchenteroption.setStyleSheet(btnstylesheet)
+        self.searchenteroption.setAlignment(Qt.AlignCenter)
+        self.searchenteroption.setText("[Enter]")
         self.searchenteroption.clicked.connect(self.searchButtonPressedEnter)
+        # self.searchlayout.addWidget(self.searchenteroption, 6, 2)
+
+        self.searchbg.hide()
 
         self.searchtimer.setSingleShot(True)
         self.searchtimer.setInterval(self.searchthreshold*1000)
         self.searchtimer.timeout.connect(self.searchButtonPressedTimeout)
+
 
     def setSearchTextSize(self):
         self.globalfont.setPixelSize(self.searchfunctionoption[0].size().height() * 0.7)
@@ -424,6 +451,8 @@ class SelectorWindow(CommonWindow):
         self.globalfont.setPixelSize(self.searchcontentoption[0].size().height() * 0.7)
         for option in self.searchcontentoption:
             option.setFont(self.globalfont)
+        self.searchbackspaceoption.setFont(self.globalfont)
+        self.searchenteroption.setFont(self.globalfont)
         self.globalfont.setPixelSize(self.searchtitle.size().height() * 0.9)
         self.searchtitle.setFont(self.globalfont)
         self.globalfont.setPixelSize(self.searchlabel.size().height() * 0.7)
@@ -431,15 +460,8 @@ class SelectorWindow(CommonWindow):
 
 
     def setSearchPos(self):
-        if self.searchframe.isVisible():
-            width = self.geometry().width()
-            height = self.geometry().height()
-            x = int(width*0.6)
-            y = int(height*0.6)
-            x = int(width*0)
-            y = int(height*0.82)
-            self.searchframe.move(x, y)
-            self.searchframe.setFixedSize(width-x, height-y)
+        if self.searchbg.isVisible():
+            self.searchbg.setFixedSize(self.width(), self.height())
 
     def startSearch(self, searchtype=0):
         """display the search bar
@@ -455,7 +477,7 @@ class SelectorWindow(CommonWindow):
         for i in range(10):
             self.searchcontentoption[i].setText(self.cell_keyboard[self.searchtype][i])
 
-        self.searchframe.show()
+        self.searchbg.show()
         self.setSearchPos()
         self.setSearchTextSize()
         self.searchTextDisplay()
@@ -463,7 +485,7 @@ class SelectorWindow(CommonWindow):
 
     def stopSearch(self):
         self.insearch=False
-        self.searchframe.hide()
+        self.searchbg.hide()
 
     def setSearchCallback(self, callback):
         self.searchcallback=callback
