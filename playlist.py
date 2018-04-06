@@ -4,13 +4,11 @@
 
 from collections import deque
 import os
-import sys
 import time
 from PyQt5.QtCore import QTimer
 import settings
 import screen
 import youtube_dl
-from pprint import pprint
 
 #Song structure is a dict:
 songstructure_enum={
@@ -60,7 +58,6 @@ randomplaytimeout = 0
 maxpitchvariance = 5
 audiopanstr= ''
 audiopitch=0
-audiopitchstr= ''
 
 
 def __post_init__():
@@ -231,11 +228,12 @@ def checkMediaPlayback():
             randomPlay()
 
 def setPlayerFilter():
-    global audiopanstr, audiopitchstr
+    global audiopanstr, audiopitch
     try:
-        str=','.join(filter(None, (audiopanstr, audiopitchstr)))
+        audiopitchstr = 'rubberband=pitch-scale=' + str(1 + audiopitch / 10)
+        str1=','.join(filter(None, (audiopanstr, audiopitchstr)))
         settings.mpvMediaPlayer.command('af', 'clr', '')
-        if str: settings.mpvMediaPlayer.command('af', 'set', str)
+        if str1: settings.mpvMediaPlayer.command('af', 'set', str1)
     except:
         settings.logger.printException()
 
@@ -308,8 +306,7 @@ def switchChannel():
         settings.videoWindow.setStatusTempText(text, 2000)
 
 def setPitch():
-    global audiopitch, audiopitchstr
-    audiopitchstr='rubberband=pitch-scale='+str(1+audiopitch/10)
+    global audiopitch
     setPlayerFilter()
     text=_("Key {0:+d}").format(audiopitch) if audiopitch else _("Key reset")
     settings.selectorWindow.setTempStatusText(text, 2000)
@@ -345,6 +342,7 @@ def setStatusText():
     settings.selectorWindow.setStatusText(text)
 
 def randomPlay():
+    global audiopitch
     try:
         rows = settings.dbconn.execute(r"select * from song where [index]!=0 order by random() limit 1")
         song=rows.fetchone()
@@ -359,8 +357,8 @@ def randomPlay():
         player = settings.mpvMediaPlayer
         player.play(path)
 
+        audiopitch = 0
         #set voice track
-        # time.sleep(0.1)
         channel=song['channel']
         if channel=='L':
             setPlayerChannel('R')

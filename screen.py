@@ -95,9 +95,10 @@ def extractSingersAndSetDisplay(song, prefix=''):
             singers.append(song['singer'+str(i)])
     song['singers']=singers
     setDisplaySongText(song, prefix)
+    return song
 
 def setDisplaySongText(song, prefix=''):
-    song['display'] = prefix + song['title'] + " 《" + ",".join(song['singers']) + '》  （' + song['language'] + '）'
+    song['display'] = prefix + song['title'] + "<span style='color:#BBBBBB'> 《" + ",".join(song['singers']) + '》  （' + song['language'] + '）</span>'
 
 
 """
@@ -124,14 +125,10 @@ def titleSearch(data=None, page=0):
 
     rows = settings.dbconn.execute("select * from song where [index]!=0 order by title COLLATE NOCASE")
 
-    tracks = []
-    for r in rows:
-        d=dict(r)
-        extractSingersAndSetDisplay(d)
-        tracks.append(d)
+    tracks = [extractSingersAndSetDisplay(dict(r)) for r in rows]
 
     try:
-        pager = pagerContent(tracks, 1, getCommon1_h_options(), playlist.addVideo)
+        pager = pagerContent(tracks, 0, getCommon1_h_options(), playlist.addVideo)
         pager.startSearch(page,0 )
     except:
         settings.logger.printException()
@@ -144,15 +141,12 @@ def indexSearch(data=None, page=0):
 
     rows = settings.dbconn.execute("select * from song where [index]!=0 order by [index]")
 
-    tracks = []
-    for r in rows:
-        d=dict(r)
-        extractSingersAndSetDisplay(d, str(d['index']) + ' - ')
-        d['search']=str(d['index'])
-        tracks.append(d)
+    tracks = [extractSingersAndSetDisplay(dict(r)) for r in rows]
+    for d in tracks:
+        d['search'] = str(d['index'])
 
     try:
-        pager = pagerContent(tracks, 1, getCommon1_h_options(), playlist.addVideo)
+        pager = pagerContent(tracks, 0, getCommon1_h_options(), playlist.addVideo)
         pager.startSearch(page,1 )
     except:
         settings.logger.printException()
@@ -165,12 +159,10 @@ def artistSearch1(data=None, page=0):
 
     rows = settings.dbconn.execute("select distinct region from singer where region!='' order by region COLLATE NOCASE")
 
-    artists = [{'display': _('All Artist'), 'region': ''}]
-    for r in rows:
-        artists.append({'display':r[0],'region':r[0]})
+    artists = [{'display': _('All Artist'), 'region': ''}] + [{'display':r[0],'region':r[0]} for r in rows]
 
     try:
-        pager = pagerContent(artists, 1, getCommon1_h_options(), artistSearch2)
+        pager = pagerContent(artists, 0, getCommon1_h_options(), artistSearch2)
         pager.startDisplay(page)
     except:
         settings.logger.printException()
@@ -186,12 +178,11 @@ def artistSearch2(data, page=0):
     else:
         rows = settings.dbconn.execute("select distinct type from singer where type!='' and region=? order by type", (region,))
 
-    artists = [{'display': _('All Category'), 'region': region, 'type': ''}]
-    for r in rows:
-        artists.append({'display':r[0], 'region':region, 'type':r[0]})
+    artists = [{'display': _('All Category'), 'region': region, 'type': ''}] + \
+              [{'display':r[0], 'region':region, 'type':r[0]} for r in rows]
 
     try:
-        pager = pagerContent(artists, 1, getCommon1_h_options(), artistSearch3)
+        pager = pagerContent(artists, 0, getCommon1_h_options(), artistSearch3)
         pager.startDisplay(page)
     except:
         settings.logger.printException()
@@ -224,11 +215,12 @@ def artistSearch3(data, page=0):
             if os.path.isfile(image):
                 d['image']=image
             artists.append(d)
+
     except:
         print(sys.exc_info())
 
     try:
-        pager = pagerContent(artists, 2, getCommon2_h_options(), artistSearch4)
+        pager = pagerContent(artists, 1, getCommon2_h_options(), artistSearch4)
         pager.startDisplay(page)
     except:
         settings.logger.printException()
@@ -242,16 +234,12 @@ def artistSearch4(data, page=0):
         "select * from song where [index]!=0 and (singer=? or singer2=? or singer3=? or singer4=? or singer5=? or singer6=? or singer7=? or singer8=? or singer9=? or singer10=? ) order by title COLLATE NOCASE",
         [data['name']] * 10)
 
-    tracks = []
-    for r in rows:
-        d=dict(r)
-        extractSingersAndSetDisplay(d)
-        tracks.append(d)
+    tracks = [extractSingersAndSetDisplay(dict(r)) for r in rows]
 
     try:
         h_options=getCommon2_h_options()
         h_options[0]['search']=2
-        pager = pagerContent(tracks, 1, h_options, playlist.addVideo)
+        pager = pagerContent(tracks, 0, h_options, playlist.addVideo)
         pager.startDisplay(page)
     except:
         settings.logger.printException()
@@ -264,13 +252,10 @@ def langSearch1(data=None, page=0):
 
     rows = settings.dbconn.execute("select distinct language from song where language!='' order by language COLLATE NOCASE")
 
-    langs = []
-    #langs.append({'display':'All Language','language':''})
-    for r in rows:
-        langs.append({'display':r[0],'language':r[0]})
+    langs = [{'display':r[0],'language':r[0]} for r in rows]
 
     try:
-        pager = pagerContent(langs, 1, getCommon1_h_options(), langSearch2)
+        pager = pagerContent(langs, 0, getCommon1_h_options(), langSearch2)
         pager.startDisplay(page)
     except:
         settings.logger.printException()
@@ -283,14 +268,10 @@ def langSearch2(data, page=0):
     language = data['language']
     rows = settings.dbconn.execute("select * from song where [index]!=0 and language=? order by title COLLATE NOCASE", (language,))
 
-    tracks = []
-    for r in rows:
-        d=dict(r)
-        d['display ']= d['title']+" 《"+d['singer']+'》  （'+d['language']+'）'
-        tracks.append(d)
+    tracks = [extractSingersAndSetDisplay(dict(r)) for r in rows]
 
     try:
-        pager = pagerContent(tracks, 1, getCommon2_h_options(), playlist.addVideo)
+        pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
         pager.startDisplay(page)
     except:
         settings.logger.printException()
@@ -303,13 +284,10 @@ def categorySearch1(data=None, page=0):
 
     rows = settings.dbconn.execute("select distinct style from song where style!='' order by style COLLATE NOCASE")
 
-    cats = []
-    #cats.append({'display':'All Category','style':''})
-    for r in rows:
-        cats.append({'display':r[0],'style':r[0]})
+    cats = [{'display':r[0],'style':r[0]} for r in rows]
 
     try:
-        pager = pagerContent(cats, 1, getCommon1_h_options(), categorySearch2)
+        pager = pagerContent(cats, 0, getCommon1_h_options(), categorySearch2)
         pager.startDisplay(page)
     except:
         settings.logger.printException()
@@ -322,14 +300,10 @@ def categorySearch2(data, page=0):
     style = data['style']
     rows = settings.dbconn.execute("select * from song where [index]!=0 and style=? order by title COLLATE NOCASE", (style,))
 
-    tracks = []
-    for r in rows:
-        d=dict(r)
-        d['display ']= d['title']+" 《"+d['singer']+'》  （'+d['language']+'）'
-        tracks.append(d)
+    tracks = [extractSingersAndSetDisplay(dict(r)) for r in rows]
 
     try:
-        pager = pagerContent(tracks, 1, getCommon2_h_options(), playlist.addVideo)
+        pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
         pager.startDisplay(page)
     except:
         settings.logger.printException()
@@ -340,13 +314,11 @@ def charSearch1(data=None, page=0):
     # print('find music by char 1')
     addHistory(charSearch1, data)
 
-    chars = []
-    for r in range(1,10):
-        chars.append({'display':_('{} character').format(r),'index':r})
-    chars.append({'display':_('{} character').format(10)+_('s and above'),'index':10})
+    chars = [{'display':_('{} character').format(r),'index':r} for r in range(1,10)] + \
+            [{'display':_('{} character').format(10)+_('s and above'),'index':10}]
 
     try:
-        pager = pagerContent(chars, 1, getCommon1_h_options(), charSearch2)
+        pager = pagerContent(chars, 0, getCommon1_h_options(), charSearch2)
         pager.startDisplay(page)
     except:
         settings.logger.printException()
@@ -362,14 +334,10 @@ def charSearch2(data, page=0):
     else:
         rows = settings.dbconn.execute("select * from song where [index]!=0 and chars=? order by title COLLATE NOCASE", (index,))
 
-    tracks = []
-    for r in rows:
-        d=dict(r)
-        extractSingersAndSetDisplay(d)
-        tracks.append(d)
+    tracks = [extractSingersAndSetDisplay(dict(r)) for r in rows]
 
     try:
-        pager = pagerContent(tracks, 1, getCommon2_h_options(), playlist.addVideo)
+        pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
         pager.startDisplay(page)
     except:
         settings.logger.printException()
@@ -386,10 +354,10 @@ def playelistSearch(data=None, page=0):
 
     playlistSelection=''
     h_options = {0: {'text': _('F1:Priority'), 'func': prioritySongPlaylist},
-                 2: {'text': _('F3:Delete'), 'func': deleteSongPlaylist}}
+                 1: {'text': _('F3:Delete'), 'func': deleteSongPlaylist}}
 
     try:
-        pager = pagerContent(list(playlist.video_playlist), 1, h_options, songPlaylistSelected)
+        pager = pagerContent(list(playlist.video_playlist), 0, h_options, songPlaylistSelected)
         pager.startDisplay(page)
     except:
         settings.logger.printException()
@@ -463,7 +431,7 @@ def youtubeScreen1(data=None, page=0):
             d['search'] = pinyin.get_initials(d['name'], '').upper()
             youtubelists.append(d)
 
-        pager = pagerContent(youtubelists, 1, getCommon2_h_options(), youtubeScreen2)
+        pager = pagerContent(youtubelists, 0, getCommon2_h_options(), youtubeScreen2)
         pager.startDisplay(page)
     except:
         settings.logger.printException()
@@ -487,7 +455,7 @@ def youtubeScreen2(data=None, page=0):
             for t in tracks:
                 t['display'] = t['title']+" (Playlist)"
                 t['search'] = pinyin.get_initials(t['title'],'').upper()
-            pager = pagerContent(tracks, 1, getCommon2_h_options(), youtubeScreen2)
+            pager = pagerContent(tracks, 0, getCommon2_h_options(), youtubeScreen2)
 
         else:
             #remove "[Deleted video]" and "[Private video]"
@@ -496,7 +464,7 @@ def youtubeScreen2(data=None, page=0):
                 t['display'] = t['title']
                 t['search'] = pinyin.get_initials(t['title'],'').upper()
                 t['youtube'] = True
-            pager = pagerContent(tracks, 1, getCommon2_h_options(), playlist.addVideo)
+            pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
 
         pager.startDisplay(page)
     except:
@@ -530,7 +498,7 @@ class pagerContent:
         self.displaylist = displaylist
         self.filterlist = displaylist
         self.maxpage = math.ceil(len(self.filterlist) / 10)
-        assert screenNum==1 or screenNum==2, "Invalid screenNum"
+        assert 0<=screenNum<=1, "Invalid screenNum"
         self.screenNum = screenNum
         self.h_options = h_options
         self.contentcallback = callback

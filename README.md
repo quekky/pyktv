@@ -1,11 +1,11 @@
 # INSTALLATION
 
-_Installation had been tested only in Windows. Other OS might work (provided VLC can run), however I'll not be able 
+_Installation had been tested only in Windows. Other OS might work (provided MPV can run), however I'll not be able
 to test it out._
 
 1. Edit the config.ini according to your needs
 2. Find some KTV videos (due to copyright and file size, I'm not able to provide them)
-3. Use any sqlite program to modify the database
+3. Use any sqlite program to modify the database. See <a href="databse-format">below</a> for more info
 4. Run the program
 
 
@@ -39,8 +39,8 @@ Keyboard:
  Spacebar  | (Local) Switch between voice and music tracks <br> (Youtube) Switch between stereo/left/right
  Backspace | Previous page
  A-Z       | During search, you can use A-Z to search
- -         | Key down
- +         | Key up
+ \-        | Key down
+ \+        | Key up
  =         | Key reset
 
 
@@ -52,7 +52,7 @@ Mouse/touchscreen works as well
 Read config.ini on how to edit
 
 
-# DATABASE FORMAT
+# DATABASE FORMAT[#database-format]
 
 Google for programs to edit sqlite file.
 
@@ -128,13 +128,15 @@ And of course Internet connection is required for YouTube to work.
 
 To run from sourcecode, the following python packages is required:
 
-* PyQt5 
+* PyQt5 (supports only Python 3.5 and above)
 * youtube_dl
 * python-mpv
 
-Download mpv library from https://mpv.io/ and put it in the path (For Windows, download **mpv-1.dll**)
+Download MPV library from https://mpv.io/ and put it in the path (For Windows, download **mpv-1.dll**)
+If there's no library for the OS you're using, you'll need to compile it from MPV source and drop the library file
+in the root of the project
 
-After downloading youtube_dl, edit the code https://github.com/rg3/youtube-dl/issues/15787
+After downloading youtube_dl source (or from pip), edit the code https://github.com/rg3/youtube-dl/issues/15787
 
 
 # FAQ
@@ -155,9 +157,9 @@ library
 
 ### When I try your program after unzipping the release, videos are not playing
 
-Due to copyright (and huge video files), I *cannot* provide you with the ktv video files. You'll need to buy the video
+Due to copyright (and huge video files), I **cannot** provide you with the ktv video files. You'll need to buy the video
 files/vcd and edit the database yourself. 
 
 ### Why is the release so big?
 
-Ask PyQt5
+Due to the number of 3rd party libraries used, those libraries are huge!
