@@ -4,7 +4,7 @@ version 2018.04.07-beta
   Now the background image does not need to manually draw the lines/boxes/numberings for the labels
 - Add shortcuts on right-click menu
 - Show/hide the selector window on keyboard input
-- Minor bugfix
+- Bugfix
 
 
 version 2018.04.04-beta

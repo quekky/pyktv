@@ -12,6 +12,8 @@ if sys.platform == "win32":
     import ctypes.util
     lib=ctypes.util.find_library('mpv-1.dll')
     if lib: include_files.append(lib)
+    lib=ctypes.util.find_library('youtube-dl.exe')
+    if lib: include_files.append(lib)
 
 
 executables = [Executable("pyktv.py", base=base)]
