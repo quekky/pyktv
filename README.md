@@ -5,7 +5,7 @@ to test it out._
 
 1. Edit the config.ini according to your needs
 2. Find some KTV videos (due to copyright and file size, I'm not able to provide them)
-3. Use any sqlite program to modify the database. See <a href="databse-format">below</a> for more info
+3. Use any sqlite program to modify the database. See <a href="#databse-format">below</a> for more info
 4. Run the program
 
 
@@ -52,7 +52,7 @@ Mouse/touchscreen works as well
 Read config.ini on how to edit
 
 
-# DATABASE FORMAT[#database-format]
+# DATABASE FORMAT
 
 Google for programs to edit sqlite file.
 
