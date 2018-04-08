@@ -131,6 +131,7 @@ To run from sourcecode, the following python packages is required:
 * PyQt5 (supports only Python 3.5 and above)
 * youtube_dl
 * python-mpv
+* requests
 
 Download MPV library from https://mpv.io/ and put it in the path (For Windows, download **mpv-1.dll**)
 If there's no library for the OS you're using, you'll need to compile it from MPV source and drop the library file

@@ -155,7 +155,7 @@ def playNextSong():
 
         #if the screen on playlist, refresh it
         try:
-            browserhistory=screen.browserhistory[len(screen.browserhistory) - 1]
+            browserhistory=screen.getHistoryLastObject()
             if browserhistory[0]==screen.playelistSearch:
                 browserhistory[0](browserhistory[1],browserhistory[2])
         except:

@@ -6,10 +6,12 @@ import re
 from PyQt5.QtCore import pyqtSlot, QTimer, QThread, QEventLoop
 from PyQt5.QtWidgets import QApplication
 from youtube_dl import YoutubeDL
+import time
 from pprint import pprint
 
 import settings
 import playlist
+import upnp_dlna
 from xpinyin import Pinyin
 
 
@@ -25,11 +27,18 @@ def addHistory(func, data, allowduplicate=False):
 
 def setHistoryPage(page):
     global browserhistory
-    browserhistory[len(browserhistory)-1][2]=page
+    if len(browserhistory)>0:
+        browserhistory[len(browserhistory)-1][2]=page
 
 def getHistoryPage():
     global browserhistory
-    return browserhistory[len(browserhistory)-1][2]
+    if len(browserhistory)>0:
+        return browserhistory[len(browserhistory)-1][2]
+
+def getHistoryLastObject():
+    global browserhistory
+    if len(browserhistory)>0:
+        return browserhistory[len(browserhistory)-1]
 
 def backcallback(data):
     global browserhistory
@@ -75,6 +84,7 @@ def startHomeScreen(data=None, page=None):
                  4: {'text': _('Category'), 'func': categorySearch1},
                  5: {'text': _('Char number'), 'func': charSearch1},
                  # 6: {'text': _('Popular'), 'func': None},
+                 8: {'text': _('Local Network'), 'func': networkSearch1},
                  9: {'text': _('Youtube'), 'func': youtubeScreen1}
                  }
     global browserhistory
@@ -217,7 +227,7 @@ def artistSearch3(data, page=0):
             artists.append(d)
 
     except:
-        print(sys.exc_info())
+        settings.logger.printException()
 
     try:
         pager = pagerContent(artists, 1, getCommon2_h_options(), artistSearch4)
@@ -402,7 +412,7 @@ def songPlaylistSelected(data, page=0):
 
 
 """
-Functions related to youtube
+Functions related to youtube below
 """
 
 class youtubeLogger(object):
@@ -473,6 +483,93 @@ def youtubeScreen2(data=None, page=0):
         settings.ignoreInputKey=False
 
 
+"""
+Functions related to local network (DLNA) below
+"""
+
+networktimer = QTimer()
+previousservers = []
+
+
+class networkRefresh(QThread):
+    """Keep looking for DLNA servers"""
+    waittime = 5000
+    def run(self):
+        global previousservers
+        while True:
+            servers = upnp_dlna.discoverDLNA()
+            if len(servers) != len(previousservers):
+                for s in servers:
+                    s['display'] = s['name']
+                previousservers = servers
+            time.sleep(self.waittime)
+# start the thread immediately
+networktimerrefresh = networkRefresh()
+networktimerrefresh.start()
+
+
+@pyqtSlot(object, int)
+def networkSearch1(data=None, page=0):
+    global networktimer, previousservers
+    addHistory(networkSearch1, data)
+    pager = pagerContent(previousservers, 0, getCommon1_h_options(), networkSearch2)
+    pager.startDisplay(0)
+    networktimer.start(100)
+
+@pyqtSlot()
+def networkSearch1timer():
+    """Keep refresing the page9"""
+    global networktimer, previousservers, networktimerrefresh
+    try:
+        if getHistoryLastObject()[0] == networkSearch1:
+            # if by now it is still at this page, then display the contents
+            pager = pagerContent(previousservers, 0, getCommon1_h_options(), networkSearch2)
+            pager.startDisplay(0)
+        else:
+            networktimer.stop()
+    except:
+        networktimer.stop()
+networktimer.timeout.connect(networkSearch1timer)
+
+
+@pyqtSlot(object, int)
+def networkSearch2(data=None, page=0):
+    #find root of the server
+    addHistory(networkSearch2, data)
+
+    try:
+        pinyin = Pinyin()
+        children = upnp_dlna.find_directories(data)
+        for child in children:
+            child['display'] = child['title']
+            child['search'] = pinyin.get_initials(child['title'], '').upper()
+            child['server'] = data
+        pager = pagerContent(children, 0, getCommon2_h_options(), networkSearch3)
+        pager.startDisplay(page)
+    except:
+        settings.logger.printException()
+
+
+@pyqtSlot(object, int)
+def networkSearch3(data=None, page=0):
+    try:
+        if data['class'].startswith('object.container'):
+            # folder
+            addHistory(networkSearch3, data, True)
+            pinyin = Pinyin()
+            children = upnp_dlna.find_directories(data['server'], data['id'])
+            for child in children:
+                child['display'] = child['title']
+                child['search'] = pinyin.get_initials(child['title'], '').upper()
+                child['server'] = data['server']
+            pager = pagerContent(children, 0, getCommon2_h_options(), networkSearch3)
+            pager.startDisplay(page)
+        elif data['class'].startswith('object.item'):
+            #something playable
+            data['youtube'] = True
+            playlist.addVideo(data)
+    except:
+        settings.logger.printException()
 
 
 """
