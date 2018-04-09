@@ -39,6 +39,8 @@ def getHistoryLastObject():
     global browserhistory
     if len(browserhistory)>0:
         return browserhistory[len(browserhistory)-1]
+    else:
+        return 0
 
 def backcallback(data):
     global browserhistory
@@ -473,7 +475,7 @@ def youtubeScreen2(data=None, page=0):
             for t in tracks:
                 t['display'] = t['title']
                 t['search'] = pinyin.get_initials(t['title'],'').upper()
-                t['youtube'] = True
+                t['network'] = True
             pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
 
         pager.startDisplay(page)
@@ -488,20 +490,21 @@ Functions related to local network (DLNA) below
 """
 
 networktimer = QTimer()
-previousservers = []
+networkservers = []
+networkpreviousshown = 0
 
 
 class networkRefresh(QThread):
     """Keep looking for DLNA servers"""
     waittime = 5000
     def run(self):
-        global previousservers
+        global networkservers, networktimer
         while True:
             servers = upnp_dlna.discoverDLNA()
-            if len(servers) != len(previousservers):
+            if len(servers) != len(networkservers):
                 for s in servers:
                     s['display'] = s['name']
-                previousservers = servers
+                networkservers = servers
             time.sleep(self.waittime)
 # start the thread immediately
 networktimerrefresh = networkRefresh()
@@ -510,21 +513,25 @@ networktimerrefresh.start()
 
 @pyqtSlot(object, int)
 def networkSearch1(data=None, page=0):
-    global networktimer, previousservers
+    global networktimer, networkservers
     addHistory(networkSearch1, data)
-    pager = pagerContent(previousservers, 0, getCommon1_h_options(), networkSearch2)
+    pager = pagerContent(networkservers, 0, getCommon1_h_options(), networkSearch2)
     pager.startDisplay(0)
     networktimer.start(100)
+
 
 @pyqtSlot()
 def networkSearch1timer():
     """Keep refresing the page9"""
-    global networktimer, previousservers, networktimerrefresh
+    global networktimer, networkservers, networkpreviousshown
     try:
         if getHistoryLastObject()[0] == networkSearch1:
             # if by now it is still at this page, then display the contents
-            pager = pagerContent(previousservers, 0, getCommon1_h_options(), networkSearch2)
-            pager.startDisplay(0)
+            if networkpreviousshown != len(networkservers):
+                # refresh only if there's any change
+                pager = pagerContent(networkservers, 0, getCommon1_h_options(), networkSearch2)
+                pager.startDisplay(getHistoryPage())
+                networkpreviousshown = len(networkservers)
         else:
             networktimer.stop()
     except:
@@ -552,6 +559,7 @@ def networkSearch2(data=None, page=0):
 
 @pyqtSlot(object, int)
 def networkSearch3(data=None, page=0):
+    # print(data)
     try:
         if data['class'].startswith('object.container'):
             # folder
@@ -562,11 +570,13 @@ def networkSearch3(data=None, page=0):
                 child['display'] = child['title']
                 child['search'] = pinyin.get_initials(child['title'], '').upper()
                 child['server'] = data['server']
+                if 'artist' in child.keys():
+                    child['display'] += "<span style='color:"+settings.config['font.secondarycolor']+"'> 《" + child['artist'] + '》</span>'
             pager = pagerContent(children, 0, getCommon2_h_options(), networkSearch3)
             pager.startDisplay(page)
         elif data['class'].startswith('object.item'):
             #something playable
-            data['youtube'] = True
+            data['network'] = True
             playlist.addVideo(data)
     except:
         settings.logger.printException()

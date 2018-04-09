@@ -1,6 +1,9 @@
 import socket
+import platform
 import re
 import requests
+import struct
+import array
 from xml.etree import ElementTree
 from urllib import parse
 import settings
@@ -13,9 +16,48 @@ DISCOVERY_MSG = ('M-SEARCH * HTTP/1.1\r\n' +
 
 def interface_addresses(family=socket.AF_INET):
     """Get all ip address of client"""
-    for fam, _, _, _, sockaddr in socket.getaddrinfo('', None):
-        if family == fam:
-            yield sockaddr[0]
+
+    if platform.system() == 'Windows':
+        for fam, _, _, _, sockaddr in socket.getaddrinfo('', None):
+            if family == fam:
+                yield sockaddr[0]
+
+    else:
+        # Linux
+        import fcntl
+        SIOCGIFCONF = 0x8912
+        SIOCGIFFLAGS = 0x8913
+        IFF_UP = 0x1
+        IFF_LOOPBACK = 0x8
+        IFF_MULTICAST = 0x1000
+
+        # An ugly hack to account for different ifreq sizes on
+        # different architectures
+        arch = platform.architecture()[0]
+        if arch == "32bit":
+            offsets = (32, 32)
+        elif arch == "64bit":
+            offsets = (16, 40)
+        else:
+            raise OSError("Unsupported architecture: %s" % (arch))
+
+        # Get the list of all network interfaces
+        _socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        buffer = array.array('B', b'\0' * 128 * offsets[1])
+        reply_length = struct.unpack('iL', fcntl.ioctl(_socket.fileno(), SIOCGIFCONF, struct.pack('iL', 4096, buffer.buffer_info()[0])))[0]
+        if_list = buffer.tostring()
+        if_list = filter(lambda x: len(x[0]) > 0,
+                         [(if_list[i:i + offsets[0]].split(b'\0', 1)[0], socket.inet_ntoa(if_list[i + 20:i + 24]))
+                          for i in range(0, 4096, offsets[1])])
+
+        # Get ip addresses for each interface
+        for (ifname, addr) in if_list:
+            flags, = struct.unpack('H', fcntl.ioctl(_socket.fileno(), SIOCGIFFLAGS, ifname + b'\0' * 256)[16:18])
+            if not(flags & IFF_LOOPBACK) and (flags & IFF_UP) and (flags & IFF_MULTICAST):
+                yield(addr)
+
+        _socket.close()
+
 
 def get_attribute(xml, xml_name):
     """Tries to get an element extracted from the XML."""
@@ -60,6 +102,10 @@ def discoverDLNA():
                 continue;
 
             location["name"] = get_attribute(xmlRoot,"./{urn:schemas-upnp-org:device-1-0}device/{urn:schemas-upnp-org:device-1-0}friendlyName")
+
+            iconurl = xmlRoot.find(".//*{urn:schemas-upnp-org:device-1-0}icon/{urn:schemas-upnp-org:device-1-0}url")
+            if iconurl is not None:
+                location['image'] = parse.urljoin(location['location'], iconurl.text)
 
             # service = xmlRoot.find('.//*{urn:schemas-upnp-org:device-1-0}service[{urn:schemas-upnp-org:device-1-0}serviceType="urn:schemas-upnp-org:service:ContentDirectory:1"]')
             # location["controlURL"] = parse.urljoin(location['location'], service.find('./{urn:schemas-upnp-org:device-1-0}controlURL').text)
@@ -163,7 +209,7 @@ def find_directories(server, parentobject=0):
                 except:
                     pass
                 try:
-                    child['albumArt'] = item.find("./{urn:schemas-upnp-org:metadata-1-0/upnp/}albumArtURI").text
+                    child['image'] = item.find("./{urn:schemas-upnp-org:metadata-1-0/upnp/}albumArtURI").text
                 except:
                     pass
 
@@ -182,5 +228,3 @@ if __name__ == "__main__":
     for s in servers:
         print(find_directories(s))
         # print(find_directories(s,26))
-        print(find_directories(s,'26$33798'))
-        print(find_directories(s, '1085$9255L1$9255L0'))

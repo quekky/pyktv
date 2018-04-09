@@ -21,6 +21,7 @@ executables = [Executable("pyktv.py", base=base)]
 options = {
     'build_exe': {
         'include_files': include_files,
+        'packages': ['multiprocessing', 'idna', 'certifi', 'chardet', 'urllib3']
     },
 
 }

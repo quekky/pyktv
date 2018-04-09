@@ -10,7 +10,6 @@ import sys
 import traceback
 import sqlite3
 import gettext
-import playlist
 
 
 mpvMediaPlayer = None
@@ -38,7 +37,6 @@ def __init__():
     mpvMediaPlayer.video_aspect = config.get('video.aspect_ratio', '-1')
     mpvMediaPlayer.ytdl_format=config.get('youtube.format','best')
     mpvMediaPlayer.slang = config.get('youtube.subtitleslangs', '')
-    playlist.current_channel=config.getboolean('video.startup_channel',False)
 
     themeDir = os.path.join(config.get('theme.dir'), '')
 

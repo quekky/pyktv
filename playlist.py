@@ -8,8 +8,6 @@ import time
 from PyQt5.QtCore import QTimer
 import settings
 import screen
-import youtube_dl
-from pprint import pprint
 
 #Song structure is a dict:
 songstructure_enum={
@@ -46,7 +44,7 @@ video_playlist = deque()
 current_playing = None
 #False=voice, True=music
 current_channel = False
-youtube_channel = 0
+network_channel = 0
 playlist_uuid = 0
 videostatushasbeenset = False
 channelhasbeenset = False
@@ -68,6 +66,7 @@ def __post_init__():
     timer = QTimer()
     timer.timeout.connect(checkMediaPlayback)
     timer.start(100)
+    current_channel=settings.config.getboolean('video.startup_channel',False)
 
 
 def addVideo(video):
@@ -105,18 +104,9 @@ def deleteSong(video):
     except:
         pass
 
-class youtubeLogger(object):
-    def debug(self, msg):
-        pass
-
-    def warning(self, msg):
-        pass
-
-    def error(self, msg):
-        settings.logger.error(msg)
 
 def playNextSong():
-    global video_playlist, current_playing, timer, videostarttime, videostatushasbeenset, channelhasbeenset, youtube_channel, audiopitch
+    global video_playlist, current_playing, timer, videostarttime, videostatushasbeenset, channelhasbeenset, network_channel, audiopitch
     # print(current_playing)
     # print(video_playlist)
     try:
@@ -132,7 +122,7 @@ def playNextSong():
                 mediafile=mediafile.lstrip(os.path.sep)
                 videopath=os.path.join(library,mediafile)
         else:
-            #youtube
+            #network/youtube
             videopath=current_playing['url']
             if not (videopath.startswith('http://') or videopath.startswith('https://')):
                 videopath='http://youtu.be/'+videopath
@@ -144,7 +134,7 @@ def playNextSong():
             videostatushasbeenset=False
             channelhasbeenset=False
             videostarttime=time.time()
-            youtube_channel = 0
+            network_channel = 0
             audiopitch = 0
             setChannel()
 
@@ -233,13 +223,13 @@ def setPlayerChannel(channel):
     setPlayerFilter()
 
 def setChannel():
-    global current_playing, current_channel, youtube_channel
+    global current_playing, current_channel, network_channel
     # print("setchannel", current_channel)
 
     if current_playing is None: return
 
-    if 'youtube' in current_playing.keys():
-        channel=['','L','R'][youtube_channel]
+    if 'network' in current_playing.keys():
+        channel=['','L','R'][network_channel]
     else:
         channel = current_playing['channel']
         try:
@@ -263,12 +253,12 @@ def setChannel():
 
 def switchChannel():
     """Toggle voice/music"""
-    global current_channel, youtube_channel
+    global current_channel, network_channel
     if current_playing is not None:
-        if 'youtube' in current_playing.keys():
-            youtube_channel = (youtube_channel+1)%3
-            if False: text='YouTube - '+[_('Stereo'),_('Left'),_('Right')][youtube_channel]
-            text='YouTube - '+_(['Stereo','Left','Right'][youtube_channel])
+        if 'network' in current_playing.keys():
+            network_channel = (network_channel + 1) % 3
+            if False: text='Network - '+[_('Stereo'),_('Left'),_('Right')][network_channel]
+            text='Network - '+_(['Stereo','Left','Right'][network_channel])
             setChannel()
         elif 'channel' not in current_playing.keys() or current_playing['channel']=='':
             text=_("Video does not support vocal")

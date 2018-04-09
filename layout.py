@@ -1,8 +1,10 @@
 import sys
-from PyQt5.QtCore import QTimer, pyqtSignal, pyqtSlot, Qt
+from PyQt5.QtCore import QTimer, pyqtSignal, pyqtSlot, Qt, QUrl
 from PyQt5.QtGui import QPixmap, QFont, QTextDocument, QFontMetrics, QPainter
 from PyQt5.QtWidgets import QWidget, QLabel, QSizePolicy, QHBoxLayout, qApp, QVBoxLayout, QMenu, QStackedLayout, QGridLayout, QStyle
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest
 import time
+import re
 
 import playlist
 import settings
@@ -147,6 +149,7 @@ class VideoWindow(CommonWindow):
 
         self.videoframe = self.bglabel
 
+        print(self.videoframe.winId(),"0x%08X" % int(self.videoframe.winId()))
         settings.mpvMediaPlayer.wid = int(self.videoframe.winId())
 
         self.globalfont = QFont()
@@ -634,20 +637,16 @@ class SelectorWindow(CommonWindow):
                         if callable(options[i]['func']):
                             option.clicked.connect(options[i]['func'])
                             option.connect=options[i]['func']
-                        if isinstance(option, QLabeImageButton):
-                            try:
-                                qp=QPixmap(options[i]['image'])
-                                if qp.isNull():
-                                    option.setPixmap(self.nosingerimage)
-                                else:
-                                    option.setPixmap(qp)
-                            except:
-                                option.setPixmap(self.nosingerimage)
+                        altimage = self.nosingerimage if type(option) == 'QLabeImageButton' else None
+                        try:
+                            option.setImage(options[i]['image'], altimage)
+                        except:
+                            option.setPixmap(altimage)
                     except:
                         settings.logger.printException()
                 else:
                     option.setText('')
-                    if isinstance(option, QLabeImageButton):
+                    if callable(option.clearPixmap):
                         option.clearPixmap()
 
 
@@ -795,17 +794,46 @@ class QLabelListButton(QLabelButton):
         self.globalfont = QFont()
         self.havesub = havesub
 
+        self.text = QLabel(self)
+        self.text.setStyleSheet(self.fontstylesheet+'border-radius: 8px; background-color: qlineargradient(spread:pad, x1:0, x2:1, stop:0 rgba(0, 0, 0, 200), stop:1 rgba(120, 120, 120, 50));padding:2px 0px;')
+        self.image = QLabel(self)
+        self.image.setScaledContents(True)
+        self.image.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.label = QLabel(self)
         self.label.move(0, 0)
         self.label.setAlignment(Qt.AlignCenter)
-        self.text = QLabel(self)
-        self.text.setStyleSheet(self.fontstylesheet+'border-radius: 8px; background-color: qlineargradient(spread:pad, x1:0, x2:1, stop:0 rgba(0, 0, 0, 200), stop:1 rgba(120, 120, 120, 50));padding:2px 0px;')
 
     def setText(self, p_str):
         self.text.setText(p_str)
 
     def setLabelText(self, p_str):
         self.label.setText(p_str)
+
+    def setPixmap(self, QPixmap):
+        if QPixmap is None:
+            self.image.clear()
+        else:
+            self.image.setPixmap(QPixmap)
+
+    def setImageResponse(self, reply):
+        qp = QPixmap()
+        qp.loadFromData(reply.readAll())
+        self.setPixmap(qp)
+
+    def setImage(self, image, altimage):
+        if re.match("(ftp|http|https):\/\/", image):
+            self.setPixmap(QPixmap(altimage))
+            self.nam = QNetworkAccessManager()
+            self.nam.finished.connect(self.setImageResponse)
+            self.nam.get(QNetworkRequest(QUrl(image)))
+        else:
+            try:
+                self.setPixmap(QPixmap(image))
+            except:
+                self.setPixmap(QPixmap(altimage))
+
+    def clearPixmap(self):
+        self.image.clear()
 
     def setTextSize(self):
         labelwidth=int(self.height()*0.9);
@@ -818,43 +846,22 @@ class QLabelListButton(QLabelButton):
         self.globalfont.setPixelSize(self.height() * 0.7)
         self.text.setFont(self.globalfont)
 
+        self.image.move(self.width()-self.height(), 0)
+        self.image.resize(self.height(), self.height())
+
     def resizeEvent(self, *args, **kwargs):
         super().resizeEvent(*args, **kwargs)
         self.setTextSize()
 
 
-class QLabeImageButton(QLabelButton):
+class QLabeImageButton(QLabelListButton):
     """Image and text"""
 
     def __init__(self, parent=None, havesub=False):
         super().__init__(parent)
-        self.fontcolor = settings.config['font.color']
-        self.fontstylesheet = 'color: ' + self.fontcolor + ';'
-        self.globalfont = QFont()
-        self.havesub = havesub
-
-        self.text = QLabel(self)
         self.text.setStyleSheet(self.fontstylesheet+'border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; background-color: qlineargradient(spread:pad, y1:0, y2:1, stop:0 rgba(0, 0, 0, 230), stop:1 rgba(120, 120, 120, 120));padding: 0px;')
         self.text.setAlignment(Qt.AlignCenter)
-        self.text.setText('testing')
-        self.image = QLabel(self)
-        self.image.setScaledContents(True)
-        self.image.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.image.setStyleSheet('background-color: qlineargradient(spread:pad, x1:1, y1:0.8, x2:0, y2:0.1, stop:0.00564972 rgba(186, 225, 255, 255), stop:0.4 rgba(255, 255, 255, 230), stop:0.6 rgba(255, 255, 255, 180), stop:1 rgba(134, 203, 255, 120));')
-        self.label = QLabel(self)
-        self.label.setAlignment(Qt.AlignCenter)
-
-    def setText(self, p_str):
-        self.text.setText(p_str)
-
-    def setLabelText(self, p_str):
-        self.label.setText(p_str)
-
-    def setPixmap(self, QPixmap):
-        self.image.setPixmap(QPixmap)
-
-    def clearPixmap(self):
-        self.image.clear()
 
     def setTextSize(self):
         labelwidth=int(self.height()*0.2);
@@ -872,8 +879,4 @@ class QLabeImageButton(QLabelButton):
         self.text.resize(self.width(), self.height()-imagey-imageheight)
         self.globalfont.setPixelSize(self.text.height()*0.8)
         self.text.setFont(self.globalfont)
-
-    def resizeEvent(self, *args, **kwargs):
-        super().resizeEvent(*args, **kwargs)
-        self.setTextSize()
 
