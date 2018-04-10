@@ -149,7 +149,6 @@ class VideoWindow(CommonWindow):
 
         self.videoframe = self.bglabel
 
-        print(self.videoframe.winId(),"0x%08X" % int(self.videoframe.winId()))
         settings.mpvMediaPlayer.wid = int(self.videoframe.winId())
 
         self.globalfont = QFont()
@@ -244,24 +243,25 @@ class SelectorWindow(CommonWindow):
         # create the content area, with 2 stacks
         self.contentoption = [[], []]
         self.contentlayout = []
-        self.vcontentlayout = setZeroMargins(QHBoxLayout())
         self.stackedlayout = QStackedLayout()
         for i in range(2):
             self.stackedlayout.addWidget(QLabel())
-        self.vcontentlayout.addStretch(1)
-        self.vcontentlayout.addLayout(self.stackedlayout, 10)
-        self.vcontentlayout.addStretch(1)
 
         # create 1st page of content (10 options vertically align)
-        self.contentlayout.append(setZeroMargins(QVBoxLayout(self.stackedlayout.widget(0))))
+        self.vcontentlayout1 = setZeroMargins(QHBoxLayout(self.stackedlayout.widget(0)))
+        self.contentlayout.append(setZeroMargins(QVBoxLayout()))
         for i in range(10):
             btn=QLabelListButton()
             self.contentoption[0].append(btn)
             btn.setLabelText(str((i+1) % 10))
             btn.index=i
             self.contentlayout[0].addWidget(btn)
+        self.vcontentlayout1.addStretch(1)
+        self.vcontentlayout1.addLayout(self.contentlayout[0], 10)
+        self.vcontentlayout1.addStretch(1)
 
         # create 2nd page of content (10 image options in 5x2)
+        self.vcontentlayout2 = setZeroMargins(QHBoxLayout(self.stackedlayout.widget(1)))
         self.contentlayout.append(setZeroMargins(QGridLayout(self.stackedlayout.widget(1))))
         for i in range(10):
             btn=QLabeImageButton()
@@ -269,6 +269,9 @@ class SelectorWindow(CommonWindow):
             btn.setLabelText(str((i+1) % 10))
             btn.index=i
             self.contentlayout[1].addWidget(btn, i / 5, i % 5)
+        self.vcontentlayout2.addStretch(1)
+        self.vcontentlayout2.addLayout(self.contentlayout[1], 15)
+        self.vcontentlayout2.addStretch(1)
 
         self.stackedlayout.setCurrentIndex(1)
 
@@ -286,7 +289,7 @@ class SelectorWindow(CommonWindow):
         self.vlayout.addStretch(20)
         self.vlayout.addLayout(self.functionlayout, 15)
         self.vlayout.addStretch(5)
-        self.vlayout.addLayout(self.vcontentlayout, 200)
+        self.vlayout.addLayout(self.stackedlayout, 200)
         self.vlayout.addStretch(5)
         self.vlayout.addWidget(self.pageroption, 15)
         self.vlayout.addStretch(10)
@@ -637,7 +640,7 @@ class SelectorWindow(CommonWindow):
                         if callable(options[i]['func']):
                             option.clicked.connect(options[i]['func'])
                             option.connect=options[i]['func']
-                        altimage = self.nosingerimage if type(option) == 'QLabeImageButton' else None
+                        altimage = self.nosingerimage if type(option) == QLabeImageButton else None
                         try:
                             option.setImage(options[i]['image'], altimage)
                         except:
@@ -828,7 +831,10 @@ class QLabelListButton(QLabelButton):
             self.nam.get(QNetworkRequest(QUrl(image)))
         else:
             try:
-                self.setPixmap(QPixmap(image))
+                if image=='':
+                    self.setPixmap(QPixmap(altimage))
+                else:
+                    self.setPixmap(QPixmap(image))
             except:
                 self.setPixmap(QPixmap(altimage))
 
