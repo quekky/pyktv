@@ -22,11 +22,13 @@ Current pyktv features:
 * Select by song category
 * Select by number of characters
 * Youtube playlist
+* DLNA support, pyktv will automatically find DLNA servers on your network
+* Web server
 
 
 # USAGE
 
-Keyboard:
+## Keyboard
 
  key       | description
  ----------|------------------------------------------------
@@ -45,6 +47,13 @@ Keyboard:
 
 
 Mouse/touchscreen works as well
+
+
+## Web server
+
+pyktv have a very simple web server. Use your smartphone/tablet to browse to your computer port 5000.
+
+eg, http://{computer_ip}:5000/ _(replace computer_ip with your actual computer IP address)_
 
 
 # CONFIGURATION

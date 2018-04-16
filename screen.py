@@ -1,5 +1,4 @@
 
-import sys
 import os
 import math
 import re
@@ -40,7 +39,7 @@ def getHistoryLastObject():
     if len(browserhistory)>0:
         return browserhistory[len(browserhistory)-1]
     else:
-        return 0
+        return
 
 def backcallback(data):
     global browserhistory
@@ -65,7 +64,7 @@ Home page
 def startHomeScreen(data=None, page=None):
     h_options = {0: {'text': _('F1:Search Songs'), 'func': titleSearch},
                  1: {'text': _('F2:Index Search'), 'func': indexSearch},
-                 2: {'text': _('F3:Playlist'), 'func': playelistSearch},
+                 2: {'text': _('F3:Playlist'), 'func': playlistSearch},
                  3: {'text': _('Artist'), 'func':artistSearch1}
                  }
     # c_options = {0: {'text': 'Index', 'func': indexSearch},
@@ -120,14 +119,14 @@ Functions related to searching songs
 def getCommon1_h_options():
     return {0: {'text': _('F1:Search Songs'), 'func': titleSearch},
             1: {'text': _('F2:Index Search'), 'func': indexSearch},
-            2: {'text': _('F3:Playlist'), 'func': playelistSearch},
+            2: {'text': _('F3:Playlist'), 'func': playlistSearch},
             3: {'text': _('Artist'), 'func': artistSearch1}
             }
 
 def getCommon2_h_options():
     return {0: {'text': _('F1:Search'), 'search': 1}, #if ['search']=1, then calls the builtin pagerContent.searcher
             1: {'text': _('F2:Index Search'), 'func': indexSearch},
-            2: {'text': _('F3:Playlist'), 'func': playelistSearch},
+            2: {'text': _('F3:Playlist'), 'func': playlistSearch},
             3: {'text': _('Artist'), 'func': artistSearch1}
             }
 
@@ -358,11 +357,13 @@ def charSearch2(data, page=0):
 Functions related to playlist
 """
 
+playlistTimer = QTimer()
+
 @pyqtSlot(object, int)
-def playelistSearch(data=None, page=0):
+def playlistSearch(data=None, page=0):
     # print('show playlist')
-    global playlistSelection
-    addHistory(playelistSearch, None)
+    global playlistSelection, playlistTimer
+    addHistory(playlistSearch, None)
 
     playlistSelection=''
     h_options = {0: {'text': _('F1:Priority'), 'func': prioritySongPlaylist},
@@ -371,8 +372,20 @@ def playelistSearch(data=None, page=0):
     try:
         pager = pagerContent(list(playlist.video_playlist), 0, h_options, songPlaylistSelected)
         pager.startDisplay(page)
+        playlistTimer.start(500)
     except:
         settings.logger.printException()
+
+def playlistRefresh():
+    # if the screen on playlist, refresh it
+    browserhistory=getHistoryLastObject()
+    if browserhistory and browserhistory[0]==playlistSearch:
+        browserhistory[0](browserhistory[1],browserhistory[2])
+    else:
+        global playlistTimer
+        playlistTimer.stop()
+
+playlistTimer.timeout.connect(playlistRefresh)
 
 
 @pyqtSlot(object, int)
@@ -399,7 +412,7 @@ def deleteSongPlaylist(data=None, page=0):
 def cancelSongPlaylist(data=None, page=0):
     global playlistSelection
     playlistSelection=''
-    playelistSearch()
+    # playlistSearch()
 
 
 @pyqtSlot(object, int)
@@ -407,10 +420,10 @@ def songPlaylistSelected(data, page=0):
     global playlistSelection
     if playlistSelection=='priority':
         playlist.piroritySong(data)
-        playelistSearch()
+        # playlistSearch()
     elif playlistSelection=='delete':
         playlist.deleteSong(data)
-        playelistSearch(page=getHistoryPage())
+        # playlistSearch(page=getHistoryPage())
 
 
 """
@@ -475,7 +488,7 @@ def youtubeScreen2(data=None, page=0):
             for t in tracks:
                 t['display'] = t['title']
                 t['search'] = pinyin.get_initials(t['title'],'').upper()
-                t['network'] = True
+                t['network'] = 'youtube'
             pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
 
         pager.startDisplay(page)
@@ -551,6 +564,7 @@ def networkSearch2(data=None, page=0):
             child['display'] = child['title']
             child['search'] = pinyin.get_initials(child['title'], '').upper()
             child['server'] = data
+            child['location'] = '//' + data['name'] + '/' + child['title'] + '/'
         pager = pagerContent(children, 0, getCommon2_h_options(), networkSearch3)
         pager.startDisplay(page)
     except:
@@ -570,13 +584,14 @@ def networkSearch3(data=None, page=0):
                 child['display'] = child['title']
                 child['search'] = pinyin.get_initials(child['title'], '').upper()
                 child['server'] = data['server']
+                child['location'] = data['location'] + child['title'] + '/'
                 if 'artist' in child.keys():
                     child['display'] += "<span style='color:"+settings.config['font.secondarycolor']+"'> 《" + child['artist'] + '》</span>'
             pager = pagerContent(children, 0, getCommon2_h_options(), networkSearch3)
             pager.startDisplay(page)
         elif data['class'].startswith('object.item'):
             #something playable
-            data['network'] = True
+            data['network'] = 'dlna'
             playlist.addVideo(data)
     except:
         settings.logger.printException()

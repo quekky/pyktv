@@ -1,0 +1,196 @@
+{% import 'functions.html' as func %}
+{% set uniquename = func.random_var(10) %}
+<ons-navigator id="artistNavigator">
+<ons-page>
+<script>
+var {{uniquename}}_allartists = {{ json_artists|safe }}
+
+var {{uniquename}}_allregion
+var {{uniquename}}_alltype
+
+function get_allregiontype() {
+    {{uniquename}}_allregion = {{uniquename}}_allartists.map( function(i){return i.region} )
+        .filter( function(v,i,self) { return v!='' && self.indexOf(v) === i; })
+        .sort()
+
+    {{uniquename}}_alltype = {{uniquename}}_allartists.reduce( function(total, v) {
+        if(v.region!='' && v.type!='') {
+            if(!total.hasOwnProperty(v.region)) total[v.region]=new Set()
+            total[v.region].add(v.type)
+        }
+        return total
+    }, {})
+
+    // load the dropdown
+    $('#search_text').prop('value', '')
+    options=$('#search_region').prop('options')
+    options.length=1
+    {{uniquename}}_allregion.forEach( function(item) {
+        options.add(new Option(item))
+    })
+    search_region_change()
+}
+
+function search(search='', region='', type='') {
+    if(search==='' && region==='' && type==='') {
+        artists={{uniquename}}_allartists
+    } else {
+        search=search.toUpperCase()
+        artists=[]
+        {{uniquename}}_allartists.forEach( function(item) {
+            if( (search==='' || item['search'].indexOf(search)===0 || item['name'].toUpperCase().indexOf(search)>0) &&
+                (region==='' || region===item.region) && (type==='' || type===item.type) )
+                artists.push(item)
+        })
+    }
+
+    $('#artistlist').html($.render.artistTmpl(artists))
+}
+
+ons.getScriptPage().onInit = function() {
+    if(!Modernizr.cssgrid){
+        // for browsers that do not support css display grid
+        $('#artistlist').addClass('nogridsupport-card')
+    }
+
+    // on 1st load, use lazy load for images
+    tmplstr=$('#artistlist').clone()
+    $.templates('artistTmpl', tmplstr.html());
+    // "search()" will be called inside search_region_change
+    get_allregiontype();
+
+    // after that, load image normally (so that when searching it's faster)
+    tmplstr.find('img[data-src]').each( function(i,e){
+        this.src=this.getAttribute('data-src')
+        this.removeAttribute('data-src')
+    })
+    $.templates('artistTmpl', tmplstr.html());
+
+
+    $(this).find("ons-pull-hook")[0].onAction = function(done) {
+        $.getJSON('/api/artist', function(data) {
+            {{uniquename}}_allartists = data;
+            search();
+            done();
+            get_allregiontype();
+        })
+    }
+}
+ons.getScriptPage().onShow = function() {
+    $("#artistlist img[data-src]").lazyLoadXT({show: true})
+}
+function artist_opensearch() {
+    searchmodal=$('#artistSearchModal').show()
+}
+function search_region_change() {
+    region=$('#search_region').prop('value')
+
+    if(region==='') {
+        type_set=new Set()
+        for(key in {{uniquename}}_alltype) {
+            {{uniquename}}_alltype[key].forEach(type_set.add, type_set)
+        }
+    } else {
+        type_set={{uniquename}}_alltype[region]
+    }
+
+
+    options=$('#search_type').prop('options')
+    options.length=1
+    Array.from(type_set).sort().forEach( function(item) {
+        options.add(new Option(item))
+    })
+
+    search($('#search_text').prop('value'), region);
+}
+function search_input_change() {
+    search($('#search_text').prop('value'), $('#search_region').prop('value'), $('#search_type').prop('value'));
+}
+function reset_search() {
+    $('#search_text').val('')
+    $('#search_region').prop('selectedIndex', 0)
+    search_region_change()
+    return false
+}
+</script>
+
+<style>
+#artistlist {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+#artistlist .card {
+    min-width: 140px;
+    max-width: 180px;
+    height: 240px;
+    display: flex;
+    flex-direction: column;
+}
+#artistlist.nogridsupport-card .card {
+    width: 175px;
+    float:left;
+    display: inline;
+}
+</style>
+
+    <ons-toolbar>
+        <div class="center">Artist</div>
+        <div class="right"><ons-toolbar-button icon="md-search" onclick="artist_opensearch()"></ons-toolbar-button></div>
+    </ons-toolbar>
+
+    <ons-pull-hook>
+        <ons-icon icon="md-spinner" size="28px" spin></ons-icon>
+    </ons-pull-hook>
+
+    <section id="artistlist" class="center">
+        {% raw %}
+        <ons-card onclick="artistNavigator.pushPage('/artist/{{:name}}')">
+            <div style="flex:1">
+                <img src="/image/singer/" data-src="/image/singer/{{:image}}" style="height:100%;width:100%">
+            </div>
+            <div class="title center">
+                {{:name}}
+            </div>
+            </div>
+        </ons-card>
+        {% endraw %}
+    </section>
+
+    <ons-modal id="artistmodal">
+      <ons-icon icon="md-spinner" size="28px" spin></ons-icon> Loading...
+    </ons-modal>
+
+
+
+    <ons-modal animation="fade" animation-options="{ duration: 0.15 }" id="artistSearchModal" onclick="this.hide();" class="search">
+        <ons-page>
+            <div class="content">
+                <form onsubmit="$('#artistSearchModal').hide();return false">
+                    <div class="center" onclick="event.stopPropagation()" style="background-color:white">
+                        <ons-list>
+                            <ons-list-item modifier="nodivider">
+                                <ons-search-input id="search_text" placeholder="Search" oninput="search_input_change()" style="width:100%"></ons-search-input>
+                            </ons-list-item>
+                            <ons-list-item modifier="nodivider">
+                                <ons-select id="search_region" onchange="search_region_change()">
+                                    <option value="">All Artist</option>
+                                </ons-select>
+                            </ons-list-item>
+                            <ons-list-item modifier="nodivider">
+                                <ons-select id="search_type" onchange="search_input_change()">
+                                    <option value="">All Category</option>
+                                </ons-select>
+                            </ons-list-item>
+                            <ons-list-item modifier="nodivider">
+                                <ons-button modifier="large" onclick="reset_search()">Reset</ons-button>
+                            </ons-list-item>
+                        </ons-list>
+                    </div>
+                </form>
+            </div>
+            <div class="background" style="background-color: transparent"></div>
+        </ons-page>
+    </ons-modal>
+
+</ons-page>
+</ons-navigator>

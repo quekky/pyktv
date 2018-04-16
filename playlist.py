@@ -60,22 +60,27 @@ audiopitch=0
 
 
 def __post_init__():
-    global videoendtime, randomplaytimeout, timer
+    global videoendtime, randomplaytimeout, checkMediaTimer, statusTextTimer, current_channel
     videoendtime=time.time()
     randomplaytimeout=settings.config.getint('randomplay', 999999999)
-    timer = QTimer()
-    timer.timeout.connect(checkMediaPlayback)
-    timer.start(100)
+    checkMediaTimer = QTimer()
+    checkMediaTimer.timeout.connect(checkMediaPlayback)
+    checkMediaTimer.start(100)
+    statusTextTimer = QTimer()
+    statusTextTimer.timeout.connect(setStatusText)
+    statusTextTimer.start(200)
     current_channel=settings.config.getboolean('video.startup_channel',False)
 
 
-def addVideo(video):
+def addVideo(video, status=True):
     global video_playlist, current_playing, playlist_uuid
     # print(video)
     song = video.copy()
     video_playlist.append(song)
 
-    settings.selectorWindow.setTempStatusText(_("Add song: ") + song['display'], 1000)
+    if status:
+        settings.selectorWindow.setTempStatusText(_("Add song: ") + song['display'], 1000)
+
     try:
         screen.setDisplaySongText(song)
     except:
@@ -85,14 +90,12 @@ def addVideo(video):
     if len(video_playlist)>=1 and current_playing is None:
         playNextSong()
 
-    setStatusText()
 
 def piroritySong(video):
     global video_playlist
     try:
         video_playlist.remove(video)
         video_playlist.appendleft(video)
-        setStatusText()
     except:
         pass
 
@@ -100,13 +103,12 @@ def deleteSong(video):
     global video_playlist
     try:
         video_playlist.remove(video)
-        setStatusText()
     except:
         pass
 
 
 def playNextSong():
-    global video_playlist, current_playing, timer, videostarttime, videostatushasbeenset, channelhasbeenset, network_channel, audiopitch
+    global video_playlist, current_playing, videostarttime, videostatushasbeenset, channelhasbeenset, network_channel, audiopitch
     # print(current_playing)
     # print(video_playlist)
     try:
@@ -143,18 +145,10 @@ def playNextSong():
             #if error, try next song
             playNextSong()
 
-        #if the screen on playlist, refresh it
-        try:
-            browserhistory=screen.getHistoryLastObject()
-            if browserhistory[0]==screen.playelistSearch:
-                browserhistory[0](browserhistory[1],browserhistory[2])
-        except:
-            pass
 
     except:
         settings.logger.printException()
 
-    setStatusText()
 
 
 def checkMediaPlayback():

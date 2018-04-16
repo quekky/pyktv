@@ -9,6 +9,7 @@ import re
 import playlist
 import settings
 import screen
+import webapp
 
 
 def setZeroMargins(layout):
@@ -46,7 +47,7 @@ class CommonWindow(QWidget):
         menu = QMenu(self)
         menu.addAction(self.style().standardIcon(QStyle.SP_DirHomeIcon), _('Main Menu'), func(self.gohome))
         menu.addAction(self.style().standardIcon(QStyle.SP_ArrowBack), _('Back'), func(settings.selectorWindow.backoption.click))
-        menu.addAction(self.style().standardIcon(QStyle.SP_FileDialogDetailedView), _('F3:Playlist'), func(screen.playelistSearch))
+        menu.addAction(self.style().standardIcon(QStyle.SP_FileDialogDetailedView), _('F3:Playlist'), func(screen.playlistSearch))
         menu.addSeparator()
         menu.addAction(_('Index'), func(screen.indexSearch))
         menu.addAction(_('Title'), func(screen.titleSearch))
@@ -120,6 +121,7 @@ class CommonWindow(QWidget):
 
     def closeEvent(self, QCloseEvent):
         settings.mpvMediaPlayer.terminate()
+        webapp.__shutdown__()
         qApp.quit()
 
     def gohome(self):

@@ -1,0 +1,42 @@
+@keyframes movetoplaylist {
+  100% {
+    transform: translate(60vw,100vh) scale(-0.2,0);
+  }
+}
+.movetoplaylist {
+    animation: movetoplaylist 1s ease-in-out forwards;
+}
+.ui-sortable-helper {
+    position: fixed;
+    border: 1px solid grey;
+}
+.list-placeholder {
+    background-color: #e6e6e6;
+}
+
+.sort-handle {
+    cursor: move;
+}
+
+.search-bar ons-search-input, .search-bar ons-input, .search-bar input {
+    width: 100%;
+}
+ons-toolbar.search-bar ons-search-input, ons-toolbar.search-bar .search-input {
+    height: 100%
+}
+
+.icon-button {
+    padding:4px 10px;
+    font-size: 26px;
+    font-color: grey;
+}
+
+ons-modal.search {
+    background-color: rgba(0, 0, 0, .4);
+}
+
+ons-list-item .center, ons-list-item .center span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

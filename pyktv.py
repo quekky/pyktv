@@ -13,10 +13,12 @@ from layout import VideoWindow, SelectorWindow
 import settings
 import screen
 import playlist
+import webapp
 
 
 if __name__ == '__main__':
     settings.__init__()
+    webapp.__init__()
     app = QApplication(sys.argv)
     settings.videoWindow = VideoWindow()
     settings.selectorWindow = SelectorWindow()
@@ -39,5 +41,6 @@ if __name__ == '__main__':
     # playlist.addVideo({'url': 'pWvPXTWUexk', 'display': '王力宏 Leehom Wang《奇遇的起點 Singularity》官方 Official MV', 'youtube': True})
     # playlist.addVideo({'url': 'W5LzxmZUwhs', 'display': '68 鄭君綿 + 許艷秋 中馬票 1970', 'youtube': True})
     # playlist.addVideo({'url': 'JQGRg8XBnB4', 'display': '[MV] MOMOLAND (모모랜드) _ BBoom BBoom (뿜뿜)', 'youtube': True})
+    # screen.networkSearch1()
 
     sys.exit(app.exec_())

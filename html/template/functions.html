@@ -1,0 +1,7 @@
+<!-- Jinja Unique ID Generator -->
+
+{% macro random_var(len=10) -%}
+    {% for n in range(len) -%}
+        {{ "abcdefghijklmnopqrstuvwxyz"|random }}
+    {%- endfor %}
+{%- endmacro %}

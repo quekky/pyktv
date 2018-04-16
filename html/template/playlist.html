@@ -1,0 +1,82 @@
+<ons-page>
+
+<script>
+var playlist_titles
+var playlistTimer
+function getPlaylist() {
+    $.getJSON(
+        "/api/playlist",
+        function(data){
+            playlist_titles=data
+            $("#playlist_list").html($.render.playlistTmpl(playlist_titles))
+            $("#playlisttab").attr('badge', playlist_titles.length)
+            $("#playlist_list").sortable('refresh');
+            playlistTimer=window.setTimeout(getPlaylist, 5000)
+        }
+    )
+}
+ons.getScriptPage().onInit =  function() {
+    $.templates('playlistTmpl', '#playlist_list');
+    $("#playlist_list").sortable({
+        axis: "y",
+        cursor: "move",
+        handle: ".sort-handle",
+        placeholder: "list-placeholder",
+        forcePlaceholderSize: true,
+        update : function (evt,ui) {
+            uuid = $('#playlist_list').sortable('serialize', {attribute:'uuid'});
+            $.get('/api/playlistsort', uuid)
+        },
+        start : function (evt, ui) {
+            clearTimeout(playlistTimer)
+        },
+        stop : function (evt, ui) {
+            playlistTimer=window.setTimeout(getPlaylist, 0)
+        },
+    });
+
+    playlistTimer=window.setTimeout(getPlaylist, 0)
+}
+ons.getScriptPage().onShow =  function() {
+    clearTimeout(playlistTimer)
+    playlistTimer=window.setTimeout(getPlaylist, 0)
+}
+function postandrefresh(url, uuid) {
+    clearTimeout(playlistTimer)
+    $.get(url, {uuid: uuid})
+    playlistTimer=window.setTimeout(getPlaylist, 0)
+}
+</script>
+
+    <ons-toolbar>
+        <div class="center">Playlist</div>
+    </ons-toolbar>
+
+    <ons-list id="playlist_list">
+        {% raw %}
+        <ons-list-item uuid="uuid_{{:playlist_uuid}}">
+            <div class="left sort-handle icon-button">
+                <ons-icon icon="ion-arrow-move"></ons-icon>
+            </div>
+            <div class="center">
+                <span class="list-item__title">{{:title}}</span>
+                <span class="list-item__subtitle">{{if network}}{{:subtitle}}{{else}}《{{:singers_str}}》  （{{:language}}）{{/if}}</span>
+            </div>
+            <div class="right">
+                <div class="icon-button" onclick="postandrefresh('/api/playlistmovetotop',{{:playlist_uuid}})">
+                    <ons-icon icon="ion-ios-skipforward" rotate="270"></ons-icon>
+                </div>
+                <div class="icon-button" onclick="postandrefresh('/api/playlistdelete',{{:playlist_uuid}})">
+                    <ons-icon icon="ion-trash-a"></ons-icon>
+                </div>
+            </div>
+        </ons-list-item>
+        {% endraw %}
+    </ons-list>
+
+    <ons-modal id="playlistmodal">
+        <ons-icon icon="md-spinner" size="28px" spin></ons-icon> Loading...
+    </ons-modal>
+
+
+</ons-page>

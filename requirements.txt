@@ -1,0 +1,7 @@
+PyQt5>=5
+python-mpv==0.3.8
+requests>=2
+youtube-dl>=2018
+Flask>=0.12
+Flask-Compress>=1.4
+gevent>=1.2

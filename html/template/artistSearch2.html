@@ -1,0 +1,40 @@
+{% import 'functions.html' as func %}
+{% set uniquename = func.random_var(10) -%}
+<ons-page>
+
+<script>
+var {{uniquename}}_titles = {{ tracks|tojson }}
+ons.getScriptPage().onInit =  function() {
+    $(this).find("ons-lazy-repeat")[0].delegate = {
+        countItems: function(){return {{uniquename}}_titles.length},
+        createItemContent: function(index, template) {
+            return ons.createElement($.templates(template.outerHTML).render({{uniquename}}_titles[index]))
+        }
+    }
+}
+</script>
+
+
+    <ons-toolbar>
+        <div class="left"><ons-back-button></ons-back-button></div>
+        <div class="center">Artist - {{artist}}</div>
+    </ons-toolbar>
+
+    <ons-list>
+        <ons-lazy-repeat>
+            {% raw %}
+            <ons-list-item index="{{:index}}">
+                <div class="center">
+                    <span class="list-item__title">{{:title}}</span>
+                    <span class="list-item__subtitle">《{{:singers_str}}》  （{{:language}}）</span>
+                </div>
+                <div class="right icon-button" onclick="addvideo(this)">
+                    <ons-icon icon="ion-plus"></ons-icon>
+                </div>
+            </ons-list-item>
+            {% endraw %}
+        </ons-lazy-repeat>
+    </ons-list>
+
+
+</ons-page>

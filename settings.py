@@ -12,6 +12,7 @@ import sqlite3
 import gettext
 
 
+programDir = os.path.dirname(sys.argv[0])
 mpvMediaPlayer = None
 config = None
 themeDir = None

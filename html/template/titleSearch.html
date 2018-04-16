@@ -1,0 +1,89 @@
+{% import 'functions.html' as func %}
+{% set uniquename = func.random_var(10) -%}
+<ons-page>
+
+<script>
+var {{uniquename}}_alltitles = {{ json_tracks|safe }}
+var {{uniquename}}_titles = {{uniquename}}_alltitles
+
+ons.getScriptPage().onInit =  function() {
+    {{uniquename}}_lazy_repeat=$(this).find("ons-lazy-repeat")[0]
+    $(this).find("ons-lazy-repeat")[0].delegate = {
+        countItems: function(){
+            return {{uniquename}}_titles.length
+        },
+        createItemContent: function(index, template) {
+            return ons.createElement($.templates(template.outerHTML).render({{uniquename}}_titles[index]))
+        }
+    }
+
+    $(this).find("ons-pull-hook")[0].onAction = function(done) {
+        $.getJSON('/api/title', function(data) {
+            {{uniquename}}_alltitles = {{uniquename}}_titles = data;
+            {{uniquename}}_lazy_repeat.refresh();
+            done();
+        })
+    }
+}
+function title_opensearch() {
+    searchmodal=$('#titleSearchModal').show()
+    searchmodal.find('input').val('').focus()
+    {{uniquename}}_titles = {{uniquename}}_alltitles
+    {{uniquename}}_lazy_repeat.refresh()
+}
+function title_searchtext(inputbox) {
+    search=inputbox.value.toUpperCase()
+    {{uniquename}}_titles = {{uniquename}}_alltitles.filter( function(title) {
+        return title['search'].indexOf(search)==0 || title['title'].toUpperCase().indexOf(search)>0
+    })
+    {{uniquename}}_lazy_repeat.refresh()
+}
+</script>
+
+
+    <ons-toolbar>
+        <div class="center">Title</div>
+        <div class="right"><ons-toolbar-button icon="md-search" onclick="title_opensearch()"></ons-toolbar-button></div>
+    </ons-toolbar>
+
+    <ons-pull-hook>
+        <ons-icon icon="md-spinner" size="28px" spin></ons-icon>
+    </ons-pull-hook>
+
+    <ons-list>
+        <ons-lazy-repeat>
+            {% raw %}
+            <ons-list-item index="{{:index}}">
+                <div class="center">
+                    <span class="list-item__title">{{:title}}</span>
+                    <span class="list-item__subtitle">《{{:singers_str}}》  （{{:language}}）</span>
+                </div>
+                <div class="right icon-button" onclick="addvideo(this)">
+                    <ons-icon icon="ion-plus"></ons-icon>
+                </div>
+            </ons-list-item>
+            {% endraw %}
+        </ons-lazy-repeat>
+    </ons-list>
+
+    <ons-modal>
+        <ons-icon icon="md-spinner" size="28px" spin></ons-icon> Loading...
+    </ons-modal>
+
+
+    <ons-modal animation="fade" animation-options="{ duration: 0.15 }" id="titleSearchModal" onclick="this.hide();" class="search">
+        <ons-page>
+            <form onsubmit="$(this).find('input').blur();return false">
+                <ons-toolbar class="search-bar">
+                    <div class="center" onclick="event.stopPropagation()">
+                        <ons-search-input placeholder="Search" oninput="title_searchtext(this)" onblur="$('#titleSearchModal').hide()"></ons-search-input>
+                    </div>
+                </ons-toolbar>
+            </form>
+            <div class="content"></div>
+            <div class="background" style="background-color: transparent"></div>
+        </ons-page>
+    </ons-modal>
+
+
+</ons-page>
