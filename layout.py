@@ -55,6 +55,7 @@ class CommonWindow(QWidget):
         menu.addAction(_('Language'), func(screen.langSearch1))
         menu.addAction(_('Category'), func(screen.categorySearch1))
         menu.addAction(_('Char number'), func(screen.charSearch1))
+        menu.addAction(_('Local Network'), func(screen.networkSearch1))
         menu.addAction(_('Youtube'), func(screen.youtubeScreen1))
         menu.addSeparator()
         menu.addAction(self.style().standardIcon(QStyle.SP_DialogCloseButton), _("Quit"), qApp.quit)

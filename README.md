@@ -135,12 +135,9 @@ And of course Internet connection is required for YouTube to work.
 
 # DEVELOPER
 
-To run from sourcecode, the following python packages is required:
+To run from sourcecode, install the python packages according to requirements.txt
 
-* PyQt5 (supports only Python 3.5 and above)
-* youtube_dl
-* python-mpv
-* requests
+$ pip install -r requirements.txt
 
 Download MPV library from https://mpv.io/ and put it in the path (For Windows, download **mpv-1.dll**)
 If there's no library for the OS you're using, you'll need to compile it from MPV source and drop the library file
