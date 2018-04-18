@@ -12,7 +12,7 @@ import sqlite3
 import gettext
 
 
-programDir = os.path.dirname(sys.argv[0])
+programDir = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 mpvMediaPlayer = None
 config = None
 themeDir = None
@@ -29,10 +29,8 @@ def __init__():
 
     mpvMediaPlayer = mpv.MPV(hwdec=True, log_handler=logger.warning, loglevel='warn', ytdl=True)
 
-    scriptpath=os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
-
     config = configparser.ConfigParser()
-    config.read(os.path.join(scriptpath,"config.ini"))
+    config.read(os.path.join(programDir,"config.ini"))
     config = config['DEFAULT']
 
     mpvMediaPlayer.video_aspect = config.get('video.aspect_ratio', '-1')
@@ -45,7 +43,7 @@ def __init__():
     dbconn.row_factory = sqlite3.Row
 
 
-    localedir = os.path.join(scriptpath, 'locale')
+    localedir = os.path.join(programDir, 'locale')
     translate = gettext.translation('messages', localedir, languages=[config['language']])
     translate.install()
 

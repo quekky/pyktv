@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2018-04-08 21:02+0800\n"
-"PO-Revision-Date: 2018-04-08 21:05+0800\n"
+"POT-Creation-Date: 2018-04-18 15:20+0800\n"
+"PO-Revision-Date: 2018-04-18 15:23+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -17,179 +17,188 @@ msgstr ""
 "X-Generator: Poedit 2.0.6\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: layout.py:45
-msgid "Main Menu"
-msgstr "主菜单"
-
-#: layout.py:46
-msgid "Back"
-msgstr "返回"
-
-#: layout.py:47 screen.py:66 screen.py:121 screen.py:128
-msgid "F3:Playlist"
-msgstr "已选歌曲"
-
-#: layout.py:49 screen.py:80
-msgid "Index"
-msgstr "序号"
-
-#: layout.py:50 screen.py:81
-msgid "Title"
-msgstr "标题"
-
-#: layout.py:51 screen.py:67 screen.py:82 screen.py:122 screen.py:129
+#: html\template\artistSearch1.html:137 html\template\artistSearch2.html:20
+#: layout.py:54 screen.py:68 screen.py:83 screen.py:123 screen.py:130
 msgid "Artist"
 msgstr "歌手点歌"
 
-#: layout.py:52 screen.py:83
-msgid "Language"
-msgstr "语言"
-
-#: layout.py:53 screen.py:84
-msgid "Category"
-msgstr "种类"
-
-#: layout.py:54 screen.py:85
-msgid "Char number"
-msgstr "字数点歌"
-
-#: layout.py:55 screen.py:88
-msgid "Youtube"
-msgstr ""
-
-#: layout.py:57
-msgid "Quit"
-msgstr "退出"
-
-#: layout.py:384
-msgid "Search character:"
-msgstr "字符搜索:"
-
-#: layout.py:388
-msgid "F1: Ok"
-msgstr "F1: 确认"
-
-#: layout.py:388
-msgid "F2: Del"
-msgstr "F2: 刪除"
-
-#: layout.py:388
-msgid "F3: Cancel"
-msgstr "F3: 取消"
-
-#: layout.py:388
-msgid "F4:"
-msgstr ""
-
-#: playlist.py:79
-msgid "Add song: "
-msgstr "添加: "
-
-#: playlist.py:182 playlist.py:313
-msgid "Now playing: "
-msgstr "正在播放: "
-
-#: playlist.py:184
-msgid "Prepare for: "
-msgstr "正在準備: "
-
-#: playlist.py:270
-msgid "Left"
-msgstr "左声"
-
-#: playlist.py:270
-msgid "Right"
-msgstr "右声"
-
-#: playlist.py:270
-msgid "Stereo"
-msgstr "立体声"
-
-#: playlist.py:274
-msgid "Video does not support vocal"
-msgstr "视频不支援伴奏"
-
-#: playlist.py:277
-msgid "Vocal off"
-msgstr "歌声消除"
-
-#: playlist.py:277
-msgid "Vocal on"
-msgstr "歌声打开"
-
-#: playlist.py:285
-msgid "Key reset"
-msgstr "声调复原"
-
-#: playlist.py:285
-msgid "Key {0:+d}"
-msgstr "声调 {0:+d}"
-
-#: playlist.py:315
-msgid "Coming up: "
-msgstr "即将上映: "
-
-#: screen.py:64 screen.py:119
-msgid "F1:Search Songs"
-msgstr "快速查询"
-
-#: screen.py:65 screen.py:120 screen.py:127
-msgid "F2:Index Search"
-msgstr "代码点歌"
-
-#: screen.py:87
-msgid "Local Network"
-msgstr "本地网路 (DLNA)"
-
-#: screen.py:126
-msgid "F1:Search"
-msgstr "搜索"
-
-#: screen.py:172
+#: html\template\artistSearch1.html:176 screen.py:173
 msgid "All Artist"
 msgstr "所有歌手"
 
-#: screen.py:191
+#: html\template\artistSearch1.html:181 screen.py:192
 msgid "All Category"
 msgstr "所有种类"
 
-#: screen.py:327 screen.py:328
+#: html\template\artistSearch1.html:185
+msgid "Reset"
+msgstr "重置选项"
+
+#: html\template\indexSearch.html:45 layout.py:52 screen.py:81
+msgid "Index"
+msgstr "序号"
+
+#: html\template\playlist.html:52
+msgid "Playlist"
+msgstr "已选歌曲"
+
+#: html\template\titleSearch.html:45 layout.py:53 screen.py:82
+msgid "Title"
+msgstr "标题"
+
+#: layout.py:48
+msgid "Main Menu"
+msgstr "主菜单"
+
+#: layout.py:49
+msgid "Back"
+msgstr "返回"
+
+#: layout.py:50 screen.py:67 screen.py:122 screen.py:129
+msgid "F3:Playlist"
+msgstr "已选歌曲"
+
+#: layout.py:55 screen.py:84
+msgid "Language"
+msgstr "语言"
+
+#: layout.py:56 screen.py:85
+msgid "Category"
+msgstr "种类"
+
+#: layout.py:57 screen.py:86
+msgid "Char number"
+msgstr "字数点歌"
+
+#: layout.py:58 screen.py:88
+msgid "Local Network"
+msgstr "本地网路 (DLNA)"
+
+#: layout.py:59 screen.py:89
+msgid "Youtube"
+msgstr ""
+
+#: layout.py:61
+msgid "Quit"
+msgstr "退出"
+
+#: layout.py:393
+msgid "Search character:"
+msgstr "字符搜索:"
+
+#: layout.py:397
+msgid "F1: Ok"
+msgstr "F1: 确认"
+
+#: layout.py:397
+msgid "F2: Del"
+msgstr "F2: 刪除"
+
+#: layout.py:397
+msgid "F3: Cancel"
+msgstr "F3: 取消"
+
+#: layout.py:397
+msgid "F4:"
+msgstr ""
+
+#: playlist.py:82
+msgid "Add song: "
+msgstr "添加: "
+
+#: playlist.py:166 playlist.py:297
+msgid "Now playing: "
+msgstr "正在播放: "
+
+#: playlist.py:168
+msgid "Prepare for: "
+msgstr "正在準備: "
+
+#: playlist.py:254
+msgid "Left"
+msgstr "左声"
+
+#: playlist.py:254
+msgid "Right"
+msgstr "右声"
+
+#: playlist.py:254
+msgid "Stereo"
+msgstr "立体声"
+
+#: playlist.py:258
+msgid "Video does not support vocal"
+msgstr "视频不支援伴奏"
+
+#: playlist.py:261
+msgid "Vocal off"
+msgstr "歌声消除"
+
+#: playlist.py:261
+msgid "Vocal on"
+msgstr "歌声打开"
+
+#: playlist.py:269
+msgid "Key reset"
+msgstr "声调复原"
+
+#: playlist.py:269
+msgid "Key {0:+d}"
+msgstr "声调 {0:+d}"
+
+#: playlist.py:299
+msgid "Coming up: "
+msgstr "即将上映: "
+
+#: screen.py:65 screen.py:120
+msgid "F1:Search Songs"
+msgstr "快速查询"
+
+#: screen.py:66 screen.py:121 screen.py:128
+msgid "F2:Index Search"
+msgstr "代码点歌"
+
+#: screen.py:127
+msgid "F1:Search"
+msgstr "搜索"
+
+#: screen.py:328 screen.py:329
 msgid "{} character"
 msgstr "{}个字符"
 
-#: screen.py:328
+#: screen.py:329
 msgid "s and above"
 msgstr "以上"
 
-#: screen.py:366
+#: screen.py:369
 msgid "F1:Priority"
 msgstr "上移"
 
-#: screen.py:367
+#: screen.py:370
 msgid "F3:Delete"
 msgstr "刪除"
 
-#: screen.py:380
+#: screen.py:395
 msgid "[Priority]"
 msgstr "[上移]"
 
-#: screen.py:381 screen.py:391
+#: screen.py:396 screen.py:406
 msgid "Choose song"
 msgstr "选择歌 ⯆"
 
-#: screen.py:382 screen.py:392
+#: screen.py:397 screen.py:407
 msgid "F4:Cancel"
 msgstr "取消"
 
-#: screen.py:390
+#: screen.py:405
 msgid "[Delete]"
 msgstr "[刪除]"
 
-#: screen.py:636
+#: screen.py:661
 msgid "F5:Page up"
 msgstr "上一页"
 
-#: screen.py:637
+#: screen.py:662
 msgid "F6:Page down"
 msgstr "下一页"
 

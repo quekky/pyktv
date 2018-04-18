@@ -21,14 +21,51 @@ function get_allregiontype() {
         return total
     }, {})
 
-    // load the dropdown
+    // load the region dropdown
     $('#search_text').prop('value', '')
-    options=$('#search_region').prop('options')
-    options.length=1
-    {{uniquename}}_allregion.forEach( function(item) {
-        options.add(new Option(item))
+    search_region_list=$('#search_region_list')
+    search_region_list.empty()
+    temp=[''].concat({{uniquename}}_allregion)
+    temp.forEach( function(item) {
+        list_item = $(
+            '<ons-list-item tappable value="' + item + '">' +
+                '<div class="left">' +
+                    '<ons-radio name="search_region" input-id="r-' + item + '" value="' + item + '"></ons-radio>' +
+                '</div>' +
+                '<label class="center" for="r-' + item + '">' +
+                    (item || '{{_('All Artist')}}') +
+                '</label>' +
+            '</ons-list-item>'
+        )
+        list_item.bind('change', search_region_change)
+        search_region_list.append(list_item)
     })
-    search_region_change()
+    $('ons-radio[input-id="r-"]').prop('checked', true)
+
+    // load the type dropdown
+    search_type_list=$('#search_type_list')
+    search_type_list.empty()
+    type_set=new Set([''])
+    for(key in {{uniquename}}_alltype) {
+        {{uniquename}}_alltype[key].forEach(type_set.add, type_set)
+    }
+    Array.from(type_set).sort().forEach( function(item) {
+        list_item = $(
+            '<ons-list-item tappable value="' + item + '">' +
+                '<div class="left">' +
+                    '<ons-radio name="search_type" input-id="t-' + item + '" value="' + item + '"></ons-radio>' +
+                '</div>' +
+                '<label class="center" for="t-' + item + '">' +
+                (item || '{{_('All Category')}}') +
+                '</label>' +
+            '</ons-list-item>'
+        )
+        list_item.bind('change', search_input_change)
+        search_type_list.append(list_item)
+    })
+    $('ons-radio[input-id="t-"]').prop('checked', true)
+
+    search()
 }
 
 function search(search='', region='', type='') {
@@ -56,7 +93,6 @@ ons.getScriptPage().onInit = function() {
     // on 1st load, use lazy load for images
     tmplstr=$('#artistlist').clone()
     $.templates('artistTmpl', tmplstr.html());
-    // "search()" will be called inside search_region_change
     get_allregiontype();
 
     // after that, load image normally (so that when searching it's faster)
@@ -83,32 +119,28 @@ function artist_opensearch() {
     searchmodal=$('#artistSearchModal').show()
 }
 function search_region_change() {
-    region=$('#search_region').prop('value')
+    region=$('input[name="search_region"]:checked').prop('value')
 
     if(region==='') {
-        type_set=new Set()
-        for(key in {{uniquename}}_alltype) {
-            {{uniquename}}_alltype[key].forEach(type_set.add, type_set)
-        }
+        $('#search_type_list ons-list-item').show()
     } else {
-        type_set={{uniquename}}_alltype[region]
+        $('#search_type_list ons-list-item[value!=""]').hide()
+        {{uniquename}}_alltype[region].forEach( function(item) {
+            $('#search_type_list ons-list-item[value="'+item+'"]').show()
+        })
+        if( !$('input[name="search_type"]:checked').is(':visible') )
+            $('ons-radio[input-id="t-"]').prop('checked', true)
     }
 
-
-    options=$('#search_type').prop('options')
-    options.length=1
-    Array.from(type_set).sort().forEach( function(item) {
-        options.add(new Option(item))
-    })
-
-    search($('#search_text').prop('value'), region);
+    search_input_change()
 }
 function search_input_change() {
-    search($('#search_text').prop('value'), $('#search_region').prop('value'), $('#search_type').prop('value'));
+    search($('#search_text').prop('value'), $('input[name="search_region"]:checked').prop('value'), $('input[name="search_type"]:checked').prop('value'));
 }
 function reset_search() {
     $('#search_text').val('')
-    $('#search_region').prop('selectedIndex', 0)
+    $('ons-radio[input-id="r-"]').prop('checked', true)
+    $('ons-radio[input-id="t-"]').prop('checked', true)
     search_region_change()
     return false
 }
@@ -134,7 +166,7 @@ function reset_search() {
 </style>
 
     <ons-toolbar>
-        <div class="center">Artist</div>
+        <div class="center">{{ _('Artist')}}</div>
         <div class="right"><ons-toolbar-button icon="md-search" onclick="artist_opensearch()"></ons-toolbar-button></div>
     </ons-toolbar>
 
@@ -168,23 +200,22 @@ function reset_search() {
                 <form onsubmit="$('#artistSearchModal').hide();return false">
                     <div class="center" onclick="event.stopPropagation()" style="background-color:white">
                         <ons-list>
-                            <ons-list-item modifier="nodivider">
+                            <ons-list-item>
                                 <ons-search-input id="search_text" placeholder="Search" oninput="search_input_change()" style="width:100%"></ons-search-input>
                             </ons-list-item>
-                            <ons-list-item modifier="nodivider">
-                                <ons-select id="search_region" onchange="search_region_change()">
-                                    <option value="">All Artist</option>
-                                </ons-select>
-                            </ons-list-item>
-                            <ons-list-item modifier="nodivider">
-                                <ons-select id="search_type" onchange="search_input_change()">
-                                    <option value="">All Category</option>
-                                </ons-select>
-                            </ons-list-item>
-                            <ons-list-item modifier="nodivider">
-                                <ons-button modifier="large" onclick="reset_search()">Reset</ons-button>
-                            </ons-list-item>
                         </ons-list>
+                        <ons-list id="search_region_list">
+                        </ons-list>
+                        <ons-list id="search_type_list">
+                        </ons-list>
+                        <ons-row>
+                            <ons-col style="padding: 10px">
+                                <ons-button modifier="large" onclick="reset_search()">{{_('Reset')}}</ons-button>
+                            </ons-col>
+                            <ons-col style="padding: 10px">
+                                <ons-button modifier="large" icon="fa-check" onclick="$('#artistSearchModal').hide();return false">OK</ons-button>
+                            </ons-col>
+                        </ons-row>
                     </div>
                 </form>
             </div>

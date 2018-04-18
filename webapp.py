@@ -6,6 +6,7 @@ import sqlite3
 import os
 import json
 from queue import deque
+import gettext
 from pprint import pprint
 
 import settings
@@ -51,6 +52,7 @@ def extractSingersFromPlaylist(song):
 
 fapp = flask.Flask(__name__, static_folder=os.path.join(settings.programDir, 'html/static'), template_folder=os.path.join(settings.programDir, 'html/template'))
 flask_compress.Compress(fapp)
+
 
 @fapp.route("/")
 def homePage():
@@ -199,6 +201,12 @@ def startServer():
     http_server.serve_forever()
 
 def __init__():
+    # translate based on program language (not browser language)
+    translate = gettext.translation('messages', os.path.join(settings.programDir, 'locale'), languages=[settings.config['language']])
+    @fapp.context_processor
+    def inject_gettext():
+        return dict(_=translate.gettext, gettext=translate.gettext)
+
     thread=threading.Thread(target=startServer)
     thread.daemon=True
     thread.start()
