@@ -4,6 +4,7 @@ from gevent.pywsgi import WSGIServer
 import threading
 import sqlite3
 import os
+import sys
 import json
 from queue import deque
 import gettext
@@ -174,6 +175,36 @@ def addVideo():
     return ""
 
 
+@fapp.route("/api/switchchannel")
+def switchchannel():
+    playlist.switchChannel()
+    return ""
+
+@fapp.route("/api/playnextsong")
+def playnextsong():
+    playlist.playNextSong()
+    return ""
+
+@fapp.route("/api/pitchdown")
+def pitchdown():
+    playlist.setPitchDown()
+    return ""
+
+@fapp.route("/api/pitchflat")
+def pitchflat():
+    try:
+        playlist.setPitchFlat()
+    except:
+        settings.logger.printException()
+    return ""
+
+@fapp.route("/api/pitchup")
+def pitchup():
+    playlist.setPitchUp()
+    return ""
+
+
+
 
 # singer image
 
@@ -191,14 +222,17 @@ def image_singer(artist):
 
 
 # start/stop server
+http_server = None
 
 def startServer():
     global dbconn, http_server
     dbconn = sqlite3.connect(settings.config['sqlitefile'])
     dbconn.row_factory = sqlite3.Row
-    # fapp.run(host='0.0.0.0', debug=True, use_reloader=False)
-    http_server = WSGIServer(('0.0.0.0', 5000), fapp)
-    http_server.serve_forever()
+    if getattr(sys, "frozen", False): #if debug, allow refresh page
+        http_server = WSGIServer(('0.0.0.0', 5000), fapp)
+        http_server.serve_forever()
+    else:
+        fapp.run(host='0.0.0.0', debug=True, use_reloader=False)
 
 def __init__():
     # translate based on program language (not browser language)
@@ -214,7 +248,7 @@ def __init__():
 
 def __shutdown__():
     global http_server
-    http_server.stop()
+    if http_server: http_server.stop()
     pass
 
 

@@ -40,3 +40,21 @@ ons-list-item .center, ons-list-item .center span {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+
+
+// fix for iphone X
+@media (orientation: portrait) {
+    html[onsflag-iphonex-portrait] .modal .page {
+        margin-top: 44px;
+    }
+}
+@media (orientation: landscape) {
+    html[onsflag-iphonex-portrait] .modal .page {
+        margin-left: 44px;
+        margin-right: 44px;
+    }
+    html[onsflag-iphonex-landscape] .tabbar:not(.tabbar--top) {
+        padding-bottom: 0px;
+    }
+}

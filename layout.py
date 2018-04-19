@@ -1,4 +1,3 @@
-import sys
 from PyQt5.QtCore import QTimer, pyqtSignal, pyqtSlot, Qt, QUrl
 from PyQt5.QtGui import QPixmap, QFont, QTextDocument, QFontMetrics, QPainter
 from PyQt5.QtWidgets import QWidget, QLabel, QSizePolicy, QHBoxLayout, qApp, QVBoxLayout, QMenu, QStackedLayout, QGridLayout, QStyle
@@ -672,7 +671,7 @@ class SelectorWindow(CommonWindow):
         if not self.timer.isActive():
             self.statusframe.setText(p_str)
 
-    def setTempStatusText(self, p_str, msec):
+    def setStatusTempText(self, p_str, msec):
         if self.timer.isActive():
             self.timer.stop()
         self.timer.setSingleShot(True)

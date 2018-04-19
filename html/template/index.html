@@ -28,6 +28,7 @@
 
 </head>
 <body>
+
     <ons-tabbar id="tabbar" position="auto">
         <ons-tab name="title" page="/title" icon="md-sort-by-alpha" label="{{_('Title')}}" active></ons-tab>
         <ons-tab name="artist" page="/artist" icon="md-face" label="{{_('Artist')}}" ></ons-tab>
@@ -35,6 +36,36 @@
         <!-- <ons-tab name="network" page="/dlna" icon="md-cast" label="DLNA"></ons-tab>
         <ons-tab name="youtube" page="/youtube" icon="fa-youtube" label="Youtube"></ons-tab> -->
         <ons-tab name="playlist" page="/playlist" icon="list-alt" label="{{_('Playlist')}}" id="playlisttab" badge="0" ></ons-tab>
+        <label class="tabbar__item" onclick="$('#quick-functions')[0].show(this)"><button class="tabbar__button"><ons-icon icon="ion-navicon" class="tabbar__icon"></ons-icon></button></label>
     </ons-tabbar>
+
+    <ons-popover cancelable id="quick-functions" class="quick-functions">
+        <ons-list>
+            <ons-list-item>
+                <ons-row>
+                    <ons-col>
+                        <ons-button modifier="large outline" icon="ion-ios-musical-notes" onclick="$.get('/api/switchchannel')"></ons-button>
+                    </ons-col>
+                    <ons-col>
+                        <ons-button modifier="large outline" icon="ion-ios-skipforward" onclick="$.get('/api/playnextsong')"></ons-button>
+                    </ons-col>
+                </ons-row>
+                <ons-row>
+                    <ons-col>
+                        <ons-button class="left" modifier="large outline" onclick="$.get('/api/pitchdown')">♭
+                        </ons-button>
+                    </ons-col>
+                    <ons-col>
+                        <ons-button modifier="large outline" onclick="$.get('/api/pitchflat')">♮</ons-button>
+                    </ons-col>
+                    <ons-col>
+                        <ons-button class="right" modifier="large outline" onclick="$.get('/api/pitchup')">♯
+                        </ons-button>
+                    </ons-col>
+                </ons-row>
+            </ons-list-item>
+        </ons-list>
+    </ons-popover>
+
 </body>
 </html>

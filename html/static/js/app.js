@@ -27,7 +27,7 @@ function addvideo(item, index) {
     console.log(item.offset())
     clone=item.clone()
     clone.insertBefore(item)
-        .addClass('list-helper')
+        .addClass('ui-sortable-helper')
         .offset(item.offset())
         .width(item.width())
         .addClass('movetoplaylist')

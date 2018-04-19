@@ -432,7 +432,7 @@ Functions related to youtube below
 
 class youtubeLogger(object):
     def debug(self, msg):
-        settings.selectorWindow.setTempStatusText(msg, 500)
+        settings.selectorWindow.setStatusTempText(msg, 500)
         #refresh the app, if not the video will appear hang while processing
         QApplication.processEvents(QEventLoop.AllEvents)
 
@@ -440,7 +440,7 @@ class youtubeLogger(object):
         pass
 
     def error(self, msg):
-        print("Error:",msg)
+        settings.logger.error("Youtube error:",msg)
 
 @pyqtSlot(object, int)
 def youtubeScreen1(data=None, page=0):
@@ -467,7 +467,7 @@ def youtubeScreen2(data=None, page=0):
 
     try:
         settings.ignoreInputKey=True
-        settings.selectorWindow.setTempStatusText("Youtube: downloading list...", 1000)
+        settings.selectorWindow.setStatusTempText("Youtube: downloading list...", 1000)
         ydl = YoutubeDL({'quiet':False,'extract_flat':True,'dump_single_json':True,'logger':youtubeLogger()})
 
         res = ydl.extract_info(data['url'])

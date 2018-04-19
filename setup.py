@@ -9,12 +9,13 @@ include_files=['config.ini','db.sqlite3','locale','themes','html']
 # GUI applications require a different base on Windows (the default is for a console application).
 base = None
 if sys.platform == "win32":
-    base = "Win32GUI"
+    # base = "Win32GUI"
     import ctypes.util
-    lib=ctypes.util.find_library('mpv-1.dll')
-    if lib: include_files.append(lib)
-    lib=ctypes.util.find_library('youtube-dl.exe')
-    if lib: include_files.append(lib)
+    # msvcr100.dll - Microsoft Visual C++ 2010
+    # vcruntime140.dll - Microsoft Visual C++ 2015
+    for n in ('mpv-1.dll', 'youtube-dl.exe', 'msvcr100.dll', 'vcruntime140.dll', ):
+        lib=ctypes.util.find_library(n)
+        if lib: include_files.append(lib)
 
     PYTHON_INSTALL_DIR = os.path.dirname(os.path.dirname(os.__file__))
     os.environ['TCL_LIBRARY'] = os.path.join(PYTHON_INSTALL_DIR, 'tcl', 'tcl8.6')

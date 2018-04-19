@@ -5,7 +5,7 @@
 from collections import deque
 import os
 import time
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, pyqtSlot
 import settings
 import screen
 
@@ -53,14 +53,16 @@ videoendtime = 0
 #wait for x seconds for video to start (sometime youtube is slower to start)
 videowaittimeout = 10
 randomplaytimeout = 0
+statusTempText = None
 
 maxpitchvariance = 5
 audiopanstr= ''
 audiopitch=0
 
 
+
 def __post_init__():
-    global videoendtime, randomplaytimeout, checkMediaTimer, statusTextTimer, current_channel
+    global videoendtime, randomplaytimeout, checkMediaTimer, statusTextTimer, statusTempTextTimer, current_channel
     videoendtime=time.time()
     randomplaytimeout=settings.config.getint('randomplay', 999999999)
     checkMediaTimer = QTimer()
@@ -69,17 +71,19 @@ def __post_init__():
     statusTextTimer = QTimer()
     statusTextTimer.timeout.connect(setStatusText)
     statusTextTimer.start(200)
+    statusTempTextTimer = QTimer()
+    statusTempTextTimer.timeout.connect(setStatusTempText)
+    statusTempTextTimer.start(100)
     current_channel=settings.config.getboolean('video.startup_channel',False)
 
 
 def addVideo(video, status=True):
-    global video_playlist, current_playing, playlist_uuid
+    global statusTempText, video_playlist, current_playing, playlist_uuid
     # print(video)
     song = video.copy()
     video_playlist.append(song)
 
-    if status:
-        settings.selectorWindow.setTempStatusText(_("Add song: ") + song['display'], 1000)
+    statusTempText = (_("Add song: ") + song['display'], 1000)
 
     try:
         screen.setDisplaySongText(song)
@@ -247,7 +251,7 @@ def setChannel():
 
 def switchChannel():
     """Toggle voice/music"""
-    global current_channel, network_channel
+    global current_channel, network_channel, statusTempText
     if current_playing is not None:
         if 'network' in current_playing.keys():
             network_channel = (network_channel + 1) % 3
@@ -260,34 +264,41 @@ def switchChannel():
             current_channel = not current_channel
             text = _("Vocal off") if current_channel else _("Vocal on")
             setChannel()
-        settings.selectorWindow.setTempStatusText(text, 2000)
-        settings.videoWindow.setStatusTempText(text, 2000)
+        statusTempText = (text, 2000)
 
 def setPitch():
-    global audiopitch
+    global audiopitch, statusTempText
     setPlayerFilter()
     text=_("Key {0:+d}").format(audiopitch) if audiopitch else _("Key reset")
-    settings.selectorWindow.setTempStatusText(text, 2000)
-    settings.videoWindow.setStatusTempText(text, 2000)
+    statusTempText=(text, 2000)
 
 def setPitchUp():
-    global audiopitch
-    audiopitch+=1
-    if audiopitch>maxpitchvariance: audiopitch=maxpitchvariance
-    setPitch()
+    global current_playing, audiopitch
+    if current_playing is not None:
+        audiopitch+=1
+        if audiopitch>maxpitchvariance: audiopitch=maxpitchvariance
+        setPitch()
 
 def setPitchDown():
-    global audiopitch
-    audiopitch-=1
-    if audiopitch<-maxpitchvariance: audiopitch=-maxpitchvariance
-    setPitch()
+    global current_playing, audiopitch
+    if current_playing is not None:
+        audiopitch-=1
+        if audiopitch<-maxpitchvariance: audiopitch=-maxpitchvariance
+        setPitch()
 
 def setPitchFlat():
-    global audiopitch
-    audiopitch=0
-    setPitch()
+    global current_playing, audiopitch
+    if current_playing is not None:
+        audiopitch=0
+        setPitch()
 
 
+"""
+Use different QTimer to set the status text
+
+This fix the issue of having the another thread (eg web server) crashing the app when trying to set the text 
+"""
+@pyqtSlot()
 def setStatusText():
     global video_playlist, current_playing
 
@@ -298,6 +309,15 @@ def setStatusText():
     if len(video_playlist):
         text +=" &nbsp;&nbsp;&nbsp;&nbsp; "+_("Coming up: ")+video_playlist[0]['display']
     settings.selectorWindow.setStatusText(text)
+
+@pyqtSlot()
+def setStatusTempText():
+    global statusTempText
+    if statusTempText is not None:
+        settings.selectorWindow.setStatusTempText(*statusTempText)
+        settings.videoWindow.setStatusTempText(*statusTempText)
+        statusTempText=None
+
 
 def randomPlay():
     global audiopitch
