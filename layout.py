@@ -201,6 +201,8 @@ class SelectorWindow(CommonWindow):
         self.setWindowTitle("Selector")
 
         self.globalfont=QFont()
+        #self.globalfont = QFont('Arial Unicode MS')
+        print(self.globalfont.family())
         self.fontcolor=settings.config['font.color']
         self.fontstylesheet = 'color: ' + self.fontcolor + ';'
         self.nosingerimage = QPixmap(settings.themeDir + 'default_singer.jpg')
@@ -229,6 +231,63 @@ class SelectorWindow(CommonWindow):
         # create the vertical frame
         self.vlayout = setZeroMargins(QVBoxLayout(self.bglabel))
 
+        # create the header toolbar
+        self.headerlayout = setZeroMargins(QHBoxLayout())
+        self.headeroption = []
+
+        self.homeoption = QLabelButton()
+        self.homeoption.clicked.connect(screen.startHomeScreen)
+        self.homeoption.setText('🏠')
+        self.headeroption.append(self.homeoption)
+        self.backoption = QLabelButton()
+        self.backoption.setText('◀')
+        self.headeroption.append(self.backoption)
+
+        self.switchchannel = QLabelButton()
+        self.switchchannel.clicked.connect(playlist.switchChannel)
+        self.switchchannel.setText('🎜')
+        self.headeroption.append(self.switchchannel)
+        self.playnextsong = QLabelButton()
+        self.playnextsong.clicked.connect(playlist.playNextSong)
+        self.playnextsong.setText('🞂🞂|')
+        self.headeroption.append(self.playnextsong)
+        self.pitchup = QLabelButton()
+        self.pitchup.clicked.connect(playlist.setPitchUp)
+        self.pitchup.setText('♭')
+        self.headeroption.append(self.pitchup)
+        self.pitchflat = QLabelButton()
+        self.pitchflat.clicked.connect(playlist.setPitchFlat)
+        self.pitchflat.setText('♮')
+        self.headeroption.append(self.pitchflat)
+        self.pitchdown = QLabelButton()
+        self.pitchdown.clicked.connect(playlist.setPitchDown)
+        self.pitchdown.setText('♯')
+        self.headeroption.append(self.pitchdown)
+
+        for opt in self.headeroption:
+            opt.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+            opt.setAlignment(Qt.AlignCenter)
+            opt.setStyleSheet('color: #CCCCCC; font-weight: 600; border-radius: 3px; background-color: rgba(120, 120, 120, 40);')
+        self.playnextsong.setStyleSheet('color: #CCCCCC; font-weight: 100; border-radius: 3px; background-color: rgba(120, 120, 120, 40);')
+
+        self.headerlayout.addStretch(2)
+        self.headerlayout.addWidget(self.homeoption, 4)
+        self.headerlayout.addStretch(2)
+        self.headerlayout.addWidget(self.backoption, 4)
+        self.headerlayout.addStretch(100)
+        self.headerlayout.addWidget(self.playnextsong, 4)
+        self.headerlayout.addStretch(2)
+        self.headerlayout.addWidget(self.switchchannel, 4)
+        self.headerlayout.addStretch(5)
+        self.headerlayout.addWidget(self.pitchup, 4)
+        self.headerlayout.addStretch(2)
+        self.headerlayout.addWidget(self.pitchflat, 4)
+        self.headerlayout.addStretch(2)
+        self.headerlayout.addWidget(self.pitchdown, 4)
+        self.headerlayout.addStretch(2)
+
+
+
         # create the function buttons
         self.functionlayout = setZeroMargins(QHBoxLayout())
         self.functionoption = []
@@ -241,6 +300,7 @@ class SelectorWindow(CommonWindow):
             self.functionlayout.addWidget(self.functionoption[i], 100)
             self.functionlayout.addStretch(20)
         self.functionlayout.addStretch(10)
+
 
         # create the content area, with 2 stacks
         self.contentoption = [[], []]
@@ -277,44 +337,47 @@ class SelectorWindow(CommonWindow):
 
         self.stackedlayout.setCurrentIndex(1)
 
+
         # create footer
+        self.footerlayout = setZeroMargins(QHBoxLayout())
+
         self.pageroption = QLabel()
         self.pageroption.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.pageroption.setStyleSheet(self.fontstylesheet)
         self.pageroption.setAlignment(Qt.AlignCenter)
 
+        #pageup/pagedown
+        self.footeroption = [QLabelButton(), QLabelButton()]
+        for opt in self.footeroption:
+            opt.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+            opt.setAlignment(Qt.AlignCenter)
+            opt.setStyleSheet(self.fontstylesheet)
+
+        self.footerlayout.addStretch(50)
+        self.footerlayout.addWidget(self.footeroption[0], 10)
+        self.footerlayout.addStretch(10)
+        self.footerlayout.addWidget(self.pageroption, 20)
+        self.footerlayout.addStretch(10)
+        self.footerlayout.addWidget(self.footeroption[1], 10)
+        self.footerlayout.addStretch(50)
+
+
+        # status bar
         self.statusframe = QMarquee()
         self.statusframe.setFontColor(self.fontcolor)
 
 
         # add contents to vlayout
-        self.vlayout.addStretch(20)
+        self.vlayout.addStretch(3)
+        self.vlayout.addLayout(self.headerlayout, 12)
+        self.vlayout.addStretch(10)
         self.vlayout.addLayout(self.functionlayout, 15)
         self.vlayout.addStretch(5)
         self.vlayout.addLayout(self.stackedlayout, 200)
         self.vlayout.addStretch(5)
-        self.vlayout.addWidget(self.pageroption, 15)
+        self.vlayout.addLayout(self.footerlayout, 15)
         self.vlayout.addStretch(10)
         self.vlayout.addWidget(self.statusframe, 20)
-
-
-        # create hidden buttons for keypress
-        self.homeoption = QLabelButton()
-        self.homeoption.clicked.connect(screen.startHomeScreen)
-        self.backoption = QLabelButton()
-        #pageup/pagedown
-        self.footeroption = [QLabelButton(), QLabelButton()]
-
-        self.switchchannel = QLabelButton()
-        self.switchchannel.clicked.connect(playlist.switchChannel)
-        self.playnextsong = QLabelButton()
-        self.playnextsong.clicked.connect(playlist.playNextSong)
-        self.pitchup = QLabelButton()
-        self.pitchup.clicked.connect(playlist.setPitchUp)
-        self.pitchdown = QLabelButton()
-        self.pitchdown.clicked.connect(playlist.setPitchDown)
-        self.pitchflat = QLabelButton()
-        self.pitchflat.clicked.connect(playlist.setPitchFlat)
 
 
         # done
@@ -323,8 +386,11 @@ class SelectorWindow(CommonWindow):
 
     def setTextSize(self):
         """resize text size to label height"""
+        self.globalfont.setPixelSize(self.headeroption[0].size().height() * 0.9)
+        for option in self.headeroption:
+            option.setFont(self.globalfont)
         self.globalfont.setPixelSize(self.functionoption[0].size().height() * 0.7)
-        for option in self.functionoption + [self.pageroption]:
+        for option in self.functionoption:
             option.setFont(self.globalfont)
         self.contentlayout[0].setSpacing(self.size().height()*0.01)
         self.contentlayout[1].setSpacing(self.size().height()*0.03)
@@ -333,6 +399,8 @@ class SelectorWindow(CommonWindow):
             option.setFont(self.globalfont)
         self.globalfont.setPixelSize(self.pageroption.size().height() * 0.7)
         self.pageroption.setFont(self.globalfont)
+        for option in self.footeroption:
+            option.setFont(self.globalfont)
         self.statusframe.setPixelSize(self.statusframe.size().height()*0.7)
 
         if self.searchbg.isVisible():

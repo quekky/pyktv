@@ -658,8 +658,8 @@ class pagerContent:
         f_options = {}
         if self.maxpage>1:
             f_options['pagertext'] = "%d / %d" % (page+1, self.maxpage)
-            f_options[0] = {'text': _('F5:Page up'), 'func': self.pageUp}
-            f_options[1] ={'text': _('F6:Page down'), 'func': self.pageDown}
+            f_options[0] = {'text': _('F5:Page up') if page>0 else '', 'func': self.pageUp}
+            f_options[1] = {'text': _('F6:Page down') if page<self.maxpage else '', 'func': self.pageDown}
         self.page=page
         setHistoryPage(page)
 
