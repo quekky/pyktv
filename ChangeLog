@@ -1,8 +1,17 @@
+version 2018.04.20-beta
+
+- Web server support (browse on your smartphone/tablet port 5000)
+- Allow change of keyboard mapping
+- Common functions can now be clicked (for touch screen)
+- Bugfix
+
+
 version 2018.04.17-beta
 
 - Web server support (browse on your smartphone/tablet port 5000)
 - update to youtube_dl 2018.4.16
 - Bugfix
+
 
 version 2018.04.10-beta
 

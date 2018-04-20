@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QTimer, pyqtSignal, pyqtSlot, Qt, QUrl
-from PyQt5.QtGui import QPixmap, QFont, QTextDocument, QFontMetrics, QPainter
-from PyQt5.QtWidgets import QWidget, QLabel, QSizePolicy, QHBoxLayout, qApp, QVBoxLayout, QMenu, QStackedLayout, QGridLayout, QStyle
+from PyQt5.QtGui import QPixmap, QFont, QTextDocument, QFontMetrics, QPainter, QKeySequence
+from PyQt5.QtWidgets import QWidget, QLabel, QSizePolicy, QHBoxLayout, qApp, QVBoxLayout, QMenu, QStackedLayout, QGridLayout, QStyle, QShortcut
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest
 import time
 import re
@@ -40,12 +40,46 @@ def raiseVideoWindow():
 class CommonWindow(QWidget):
     """Common window for both windows"""
 
+    def __init__(self):
+        super().__init__()
+        # map keyboard shortcuts
+        for key in settings.keyboardshortcut.get('Home','').split('|'):
+            QShortcut(QKeySequence(key), self, self.key_home)
+        for key in settings.keyboardshortcut.get('Backspace','').split('|'):
+            QShortcut(QKeySequence(key), self, self.key_backspace)
+        for key in settings.keyboardshortcut.get('Enter','').split('|'):
+            QShortcut(QKeySequence(key), self, self.key_enter)
+        for key in settings.keyboardshortcut.get('PageUp','').split('|'):
+            QShortcut(QKeySequence(key), self, self.key_pageup)
+        for key in settings.keyboardshortcut.get('PageDown','').split('|'):
+            QShortcut(QKeySequence(key), self, self.key_pagedown)
+        for key in settings.keyboardshortcut.get('F1','').split('|'):
+            QShortcut(QKeySequence(key), self, self.key_F1)
+        for key in settings.keyboardshortcut.get('F2','').split('|'):
+            QShortcut(QKeySequence(key), self, self.key_F2)
+        for key in settings.keyboardshortcut.get('F3','').split('|'):
+            QShortcut(QKeySequence(key), self, self.key_F3)
+        for key in settings.keyboardshortcut.get('F4','').split('|'):
+            QShortcut(QKeySequence(key), self, self.key_F4)
+
+        for key in settings.keyboardshortcut.get('switchchannel','').split('|'):
+            QShortcut(QKeySequence(key), self, playlist.switchChannel)
+        for key in settings.keyboardshortcut.get('playnextsong','').split('|'):
+            QShortcut(QKeySequence(key), self, playlist.playNextSong)
+        for key in settings.keyboardshortcut.get('pitchup','').split('|'):
+            QShortcut(QKeySequence(key), self, playlist.setPitchUp)
+        for key in settings.keyboardshortcut.get('pitchflat','').split('|'):
+            QShortcut(QKeySequence(key), self, playlist.setPitchFlat)
+        for key in settings.keyboardshortcut.get('pitchdown','').split('|'):
+            QShortcut(QKeySequence(key), self, playlist.setPitchDown)
+
+
     def contextMenuEvent(self, QContextMenuEvent):
         func=lambda f: (lambda: settings.ignoreInputKey or f())
         """Right click"""
         menu = QMenu(self)
-        menu.addAction(self.style().standardIcon(QStyle.SP_DirHomeIcon), _('Main Menu'), func(self.gohome))
-        menu.addAction(self.style().standardIcon(QStyle.SP_ArrowBack), _('Back'), func(settings.selectorWindow.backoption.click))
+        menu.addAction(self.style().standardIcon(QStyle.SP_DirHomeIcon), _('Main Menu'), func(self.key_home))
+        menu.addAction(self.style().standardIcon(QStyle.SP_ArrowBack), _('Back'), func(self.key_backspace))
         menu.addAction(self.style().standardIcon(QStyle.SP_FileDialogDetailedView), _('F3:Playlist'), func(screen.playlistSearch))
         menu.addSeparator()
         menu.addAction(_('Index'), func(screen.indexSearch))
@@ -75,58 +109,83 @@ class CommonWindow(QWidget):
                     raiseSelectorWindow()
                     index = key
                     settings.selectorWindow.searchKeyPressedAlpha(chr(index))
-                elif Qt.Key_F1 <= key <= Qt.Key_F4:
-                    raiseSelectorWindow()
-                    index = key - Qt.Key_F1
-                    settings.selectorWindow.searchfunctionoption[index].click()
-                elif key == Qt.Key_Backspace:
-                    raiseSelectorWindow()
-                    settings.selectorWindow.searchbackspaceoption.click()
-                elif key == Qt.Key_Enter or key==Qt.Key_Return:
-                    raiseSelectorWindow()
-                    settings.selectorWindow.searchenteroption.click()
             else:
                 if Qt.Key_0 <= key <= Qt.Key_9:
                     raiseSelectorWindow()
                     index=key-Qt.Key_0-1
                     if index==-1: index=9
                     settings.selectorWindow.contentoption[settings.selectorWindow.stackedlayout.currentIndex()][index].click()
-                elif Qt.Key_F1 <= key <= Qt.Key_F4:
-                    raiseSelectorWindow()
-                    index=key-Qt.Key_F1
-                    settings.selectorWindow.functionoption[index].click()
-                elif key == Qt.Key_PageUp or key == Qt.Key_F5:
-                    raiseSelectorWindow()
-                    settings.selectorWindow.footeroption[0].click()
-                elif key == Qt.Key_PageDown or key == Qt.Key_F6:
-                    raiseSelectorWindow()
-                    settings.selectorWindow.footeroption[1].click()
-                elif key == Qt.Key_Backspace:
-                    raiseSelectorWindow()
-                    settings.selectorWindow.backoption.click()
-            if key == Qt.Key_F12:
+
+
+    def key_home(self):
+        if not settings.ignoreInputKey:
+            raiseSelectorWindow()
+            settings.selectorWindow.stopSearch()
+            settings.selectorWindow.homeoption.click()
+
+    def key_backspace(self):
+        if not settings.ignoreInputKey:
+            raiseSelectorWindow()
+            if settings.selectorWindow.insearch:
+                settings.selectorWindow.searchbackspaceoption.click()
+            else:
+                settings.selectorWindow.backoption.click()
+
+    def key_enter(self):
+        if not settings.ignoreInputKey:
+            if settings.selectorWindow.insearch:
                 raiseSelectorWindow()
-                self.gohome()
-        #keys affecting video
-        if key == Qt.Key_Space:
-            settings.selectorWindow.switchchannel.click()
-        elif key == Qt.Key_F10:
-            settings.selectorWindow.playnextsong.click()
-        elif key == Qt.Key_Plus:
-            settings.selectorWindow.pitchup.click()
-        elif key == Qt.Key_Minus:
-            settings.selectorWindow.pitchdown.click()
-        elif key == Qt.Key_Equal:
-            settings.selectorWindow.pitchflat.click()
+                settings.selectorWindow.searchenteroption.click()
+
+    def key_pageup(self):
+        if not settings.ignoreInputKey:
+            if not settings.selectorWindow.insearch:
+                raiseSelectorWindow()
+                settings.selectorWindow.footeroption[0].click()
+
+    def key_pagedown(self):
+        if not settings.ignoreInputKey:
+            if not settings.selectorWindow.insearch:
+                raiseSelectorWindow()
+                settings.selectorWindow.footeroption[1].click()
+
+    def key_F1(self):
+        if not settings.ignoreInputKey:
+            raiseSelectorWindow()
+            if settings.selectorWindow.insearch:
+                settings.selectorWindow.searchfunctionoption[0].click()
+            else:
+                settings.selectorWindow.functionoption[0].click()
+
+    def key_F2(self):
+        if not settings.ignoreInputKey:
+            raiseSelectorWindow()
+            if settings.selectorWindow.insearch:
+                settings.selectorWindow.searchfunctionoption[1].click()
+            else:
+                settings.selectorWindow.functionoption[1].click()
+
+    def key_F3(self):
+        if not settings.ignoreInputKey:
+            raiseSelectorWindow()
+            if settings.selectorWindow.insearch:
+                settings.selectorWindow.searchfunctionoption[2].click()
+            else:
+                settings.selectorWindow.functionoption[2].click()
+
+    def key_F4(self):
+        if not settings.ignoreInputKey:
+            raiseSelectorWindow()
+            if settings.selectorWindow.insearch:
+                settings.selectorWindow.searchfunctionoption[3].click()
+            else:
+                settings.selectorWindow.functionoption[3].click()
+
 
     def closeEvent(self, QCloseEvent):
         settings.mpvMediaPlayer.terminate()
         webapp.__shutdown__()
         qApp.quit()
-
-    def gohome(self):
-        settings.selectorWindow.stopSearch()
-        settings.selectorWindow.homeoption.click()
 
 
 class VideoWindow(CommonWindow):
@@ -201,8 +260,6 @@ class SelectorWindow(CommonWindow):
         self.setWindowTitle("Selector")
 
         self.globalfont=QFont()
-        #self.globalfont = QFont('Arial Unicode MS')
-        print(self.globalfont.family())
         self.fontcolor=settings.config['font.color']
         self.fontstylesheet = 'color: ' + self.fontcolor + ';'
         self.nosingerimage = QPixmap(settings.themeDir + 'default_singer.jpg')
@@ -267,8 +324,8 @@ class SelectorWindow(CommonWindow):
         for opt in self.headeroption:
             opt.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
             opt.setAlignment(Qt.AlignCenter)
-            opt.setStyleSheet('color: #CCCCCC; font-weight: 600; border-radius: 3px; background-color: rgba(120, 120, 120, 40);')
-        self.playnextsong.setStyleSheet('color: #CCCCCC; font-weight: 100; border-radius: 3px; background-color: rgba(120, 120, 120, 40);')
+            opt.setStyleSheet('color: '+settings.config['font.secondarycolor']+'; font-weight: 600; border-radius: 3px; background-color: rgba(120, 120, 120, 40);')
+        self.playnextsong.setStyleSheet('color: '+settings.config['font.secondarycolor']+'; font-weight: 100; border-radius: 3px; background-color: rgba(120, 120, 120, 40);')
 
         self.headerlayout.addStretch(2)
         self.headerlayout.addWidget(self.homeoption, 4)

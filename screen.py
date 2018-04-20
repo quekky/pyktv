@@ -358,29 +358,35 @@ Functions related to playlist
 """
 
 playlistTimer = QTimer()
+playlist_h_options = {}
+
 
 @pyqtSlot(object, int)
 def playlistSearch(data=None, page=0):
     # print('show playlist')
-    global playlistSelection, playlistTimer
+    global playlistSelection, playlistTimer, playlist_h_options
     addHistory(playlistSearch, None)
 
     playlistSelection=''
-    h_options = {0: {'text': _('F1:Priority'), 'func': prioritySongPlaylist},
-                 1: {'text': _('F3:Delete'), 'func': deleteSongPlaylist}}
+    playlist_h_options = {0: {'text': _('F1:Priority'), 'func': prioritySongPlaylist},
+                          1: {'text': _('F3:Delete'), 'func': deleteSongPlaylist}}
 
+    playlistTimer.start(200)
+
+
+def playlistDisplay(data=None, page=0):
     try:
-        pager = pagerContent(list(playlist.video_playlist), 0, h_options, songPlaylistSelected)
+        pager = pagerContent(list(playlist.video_playlist), 0, playlist_h_options, songPlaylistSelected)
         pager.startDisplay(page)
-        playlistTimer.start(500)
     except:
         settings.logger.printException()
 
+@pyqtSlot()
 def playlistRefresh():
     # if the screen on playlist, refresh it
     browserhistory=getHistoryLastObject()
     if browserhistory and browserhistory[0]==playlistSearch:
-        browserhistory[0](browserhistory[1],browserhistory[2])
+        playlistDisplay(browserhistory[1], browserhistory[2])
     else:
         global playlistTimer
         playlistTimer.stop()
@@ -390,29 +396,29 @@ playlistTimer.timeout.connect(playlistRefresh)
 
 @pyqtSlot(object, int)
 def prioritySongPlaylist(data=None, page=0):
-    global playlistSelection
+    global playlistSelection, playlist_h_options
     playlistSelection='priority'
-    h_options = {0: {'text': _('[Priority]')},
-                 1: {'text': _('Choose song')},
-                 3: {'text': _('F4:Cancel'), 'func': cancelSongPlaylist}}
-    settings.selectorWindow.setHeaders(h_options)
+    playlist_h_options = {0: {'text': _('[Priority]'), 'func': None},
+                          1: {'text': _('Choose song'), 'func': None},
+                          3: {'text': _('F4:Cancel'), 'func': cancelSongPlaylist}}
 
 
 @pyqtSlot(object, int)
 def deleteSongPlaylist(data=None, page=0):
-    global playlistSelection
+    global playlistSelection, playlist_h_options
     playlistSelection='delete'
-    h_options = {0: {'text': _('[Delete]')},
-                 1: {'text': _('Choose song')},
-                 3: {'text': _('F4:Cancel'), 'func': cancelSongPlaylist}}
-    settings.selectorWindow.setHeaders(h_options)
+    playlist_h_options = {0: {'text': _('[Delete]'), 'func': None},
+                          1: {'text': _('Choose song'), 'func': None},
+                          3: {'text': _('F4:Cancel'), 'func': cancelSongPlaylist}}
 
 
 @pyqtSlot(object, int)
 def cancelSongPlaylist(data=None, page=0):
-    global playlistSelection
+    global playlistSelection, playlist_h_options
     playlistSelection=''
-    # playlistSearch()
+    playlist_h_options = {0: {'text': _('F1:Priority'), 'func': prioritySongPlaylist},
+                          1: {'text': _('F3:Delete'), 'func': deleteSongPlaylist}}
+
 
 
 @pyqtSlot(object, int)
@@ -420,10 +426,8 @@ def songPlaylistSelected(data, page=0):
     global playlistSelection
     if playlistSelection=='priority':
         playlist.piroritySong(data)
-        # playlistSearch()
     elif playlistSelection=='delete':
         playlist.deleteSong(data)
-        # playlistSearch(page=getHistoryPage())
 
 
 """

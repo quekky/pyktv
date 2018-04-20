@@ -15,6 +15,7 @@ import gettext
 programDir = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 mpvMediaPlayer = None
 config = None
+keyboardshortcut = None
 themeDir = None
 
 videoWindow = None
@@ -25,13 +26,14 @@ dbconn = None
 
 
 def __init__():
-    global mpvMediaPlayer, config, themeDir, dbconn
+    global mpvMediaPlayer, config, keyboardshortcut, themeDir, dbconn
 
     mpvMediaPlayer = mpv.MPV(hwdec=True, log_handler=logger.warning, loglevel='warn', ytdl=True)
 
-    config = configparser.ConfigParser()
-    config.read(os.path.join(programDir,"config.ini"))
-    config = config['DEFAULT']
+    configfile = configparser.ConfigParser()
+    configfile.read(os.path.join(programDir,"config.ini"))
+    config = configfile['program']
+    keyboardshortcut = configfile['keyboard']
 
     mpvMediaPlayer.video_aspect = config.get('video.aspect_ratio', '-1')
     mpvMediaPlayer.ytdl_format=config.get('youtube.format','best')

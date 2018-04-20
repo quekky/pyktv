@@ -9,7 +9,7 @@ include_files=['config.ini','db.sqlite3','locale','themes','html']
 # GUI applications require a different base on Windows (the default is for a console application).
 base = None
 if sys.platform == "win32":
-    # base = "Win32GUI"
+    base = "Win32GUI"
     import ctypes.util
     # msvcr100.dll - Microsoft Visual C++ 2010
     # vcruntime140.dll - Microsoft Visual C++ 2015

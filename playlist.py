@@ -163,7 +163,7 @@ def checkMediaPlayback():
     player_time_pos=player.time_pos
     if player_time_pos is None: player_time_pos=0
     player_duration=player.duration
-    if player_duration is None: player_duration=10000000
+    if player_duration is None: player_duration=0xffffffff
     if not player.idle_active:
         if player_time_pos > 0 and not videostatushasbeenset:
             videostatushasbeenset = True
