@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QMenu, QStackedLayout, QGridLayout, QStyle, QShortcut
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QMenu, QStackedLayout, QGridLayout, QStyle, QShortcut, qApp
 import time
 
 import playlist
@@ -110,13 +110,15 @@ class CommonWindow(QWidget):
                     settings.selectorWindow.contentoption[settings.selectorWindow.stackedlayout.currentIndex()][index].click()
 
 
-    def key_home(self):
+    @staticmethod
+    def key_home():
         if not settings.ignoreInputKey:
             raiseSelectorWindow()
             settings.selectorWindow.stopSearch()
             settings.selectorWindow.homeoption.click()
 
-    def key_backspace(self):
+    @staticmethod
+    def key_backspace():
         if not settings.ignoreInputKey:
             raiseSelectorWindow()
             if settings.selectorWindow.insearch:
@@ -124,25 +126,29 @@ class CommonWindow(QWidget):
             else:
                 settings.selectorWindow.backoption.click()
 
-    def key_enter(self):
+    @staticmethod
+    def key_enter():
         if not settings.ignoreInputKey:
             if settings.selectorWindow.insearch:
                 raiseSelectorWindow()
                 settings.selectorWindow.searchenteroption.click()
 
-    def key_pageup(self):
+    @staticmethod
+    def key_pageup():
         if not settings.ignoreInputKey:
             if not settings.selectorWindow.insearch:
                 raiseSelectorWindow()
                 settings.selectorWindow.footeroption[0].click()
 
-    def key_pagedown(self):
+    @staticmethod
+    def key_pagedown():
         if not settings.ignoreInputKey:
             if not settings.selectorWindow.insearch:
                 raiseSelectorWindow()
                 settings.selectorWindow.footeroption[1].click()
 
-    def key_F1(self):
+    @staticmethod
+    def key_F1():
         if not settings.ignoreInputKey:
             raiseSelectorWindow()
             if settings.selectorWindow.insearch:
@@ -150,7 +156,8 @@ class CommonWindow(QWidget):
             else:
                 settings.selectorWindow.functionoption[0].click()
 
-    def key_F2(self):
+    @staticmethod
+    def key_F2():
         if not settings.ignoreInputKey:
             raiseSelectorWindow()
             if settings.selectorWindow.insearch:
@@ -158,7 +165,8 @@ class CommonWindow(QWidget):
             else:
                 settings.selectorWindow.functionoption[1].click()
 
-    def key_F3(self):
+    @staticmethod
+    def key_F3():
         if not settings.ignoreInputKey:
             raiseSelectorWindow()
             if settings.selectorWindow.insearch:
@@ -166,7 +174,8 @@ class CommonWindow(QWidget):
             else:
                 settings.selectorWindow.functionoption[2].click()
 
-    def key_F4(self):
+    @staticmethod
+    def key_F4():
         if not settings.ignoreInputKey:
             raiseSelectorWindow()
             if settings.selectorWindow.insearch:

@@ -16,5 +16,4 @@ if __name__ == '__main__':
     settings.__init__()
     app = QApplication(sys.argv)
     editor = EditorWindow()
-    # a = SearchMedia()
     sys.exit(app.exec_())

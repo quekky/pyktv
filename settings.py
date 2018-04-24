@@ -16,7 +16,8 @@ programDir = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 mpvMediaPlayer = None
 config = None
 keyboardshortcut = None
-themeDir = None
+themeDir = ''
+singerdir = ''
 
 videoWindow = None
 selectorWindow = None
@@ -26,7 +27,7 @@ dbconn = None
 
 
 def __init__():
-    global mpvMediaPlayer, config, keyboardshortcut, themeDir, dbconn
+    global mpvMediaPlayer, config, keyboardshortcut, themeDir, singerdir, dbconn
 
     mpvMediaPlayer = mpv.MPV(hwdec=True, log_handler=logger.warning, loglevel='warn', ytdl=True)
 
@@ -40,6 +41,7 @@ def __init__():
     mpvMediaPlayer.slang = config.get('youtube.subtitleslangs', '')
 
     themeDir = os.path.join(config.get('theme.dir'), '')
+    singerdir = os.path.join(programDir, config.get('singer.picture', ''))
 
     dbconn = sqlite3.connect(os.path.join(programDir, config['sqlitefile']))
     dbconn.row_factory = sqlite3.Row

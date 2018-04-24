@@ -99,7 +99,7 @@ def discoverDLNA():
                 xmlRoot = ElementTree.fromstring(resp.text)
             except:
                 #Failed XML parsing
-                continue;
+                continue
 
             location["name"] = get_attribute(xmlRoot,"./{urn:schemas-upnp-org:device-1-0}device/{urn:schemas-upnp-org:device-1-0}friendlyName")
 
@@ -195,7 +195,7 @@ def find_directories(server, parentobject=0):
                 child = {'type':'item'}
                 child['id'] = item.get('id')
                 child['parentID'] = item.get('parentID')
-                child['class'] = p_class = item.find("./{urn:schemas-upnp-org:metadata-1-0/upnp/}class").text
+                child['class'] = item.find("./{urn:schemas-upnp-org:metadata-1-0/upnp/}class").text
                 child['title'] = item.find("./{http://purl.org/dc/elements/1.1/}title").text
                 try:
                     res = item.find("./{urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/}res")

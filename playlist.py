@@ -77,7 +77,7 @@ def __post_init__():
     current_channel=settings.config.getboolean('video.startup_channel',False)
 
 
-def addVideo(video, status=True):
+def addVideo(video):
     global statusTempText, video_playlist, current_playing, playlist_uuid
     # print(video)
     song = video.copy()
@@ -157,7 +157,7 @@ def playNextSong():
 
 def checkMediaPlayback():
     global video_playlist, current_playing, videostarttime, videowaittimeout, videoendtime
-    global videostatushasbeenset, channelhasbeenset, randomtimer
+    global videostatushasbeenset, channelhasbeenset
     player = settings.mpvMediaPlayer
     timenow=time.time()
     player_time_pos=player.time_pos
@@ -343,7 +343,7 @@ def randomPlay():
         elif channel=='R':
             setPlayerChannel('L')
         elif channel is int:
-            setPlayerChannel(not(channel))
+            setPlayerChannel(not channel)
         else:
             setPlayerChannel('')
     except:

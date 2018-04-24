@@ -10,6 +10,11 @@
     <height>706</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>10</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Song Editor</string>
   </property>
@@ -88,7 +93,7 @@
             </property>
             <item>
              <widget class="QWidget" name="widSong2" native="true">
-              <layout class="QHBoxLayout" name="hLayoutSong3" stretch="1000,1000,1000,1,1">
+              <layout class="QHBoxLayout" name="hLayoutSong3" stretch="0,1000,1000,1000,1,1">
                <property name="leftMargin">
                 <number>0</number>
                </property>
@@ -101,6 +106,13 @@
                <property name="bottomMargin">
                 <number>0</number>
                </property>
+               <item>
+                <widget class="QLineEdit" name="txtSongSearchTitle">
+                 <property name="placeholderText">
+                  <string>Search Title</string>
+                 </property>
+                </widget>
+               </item>
                <item>
                 <widget class="QComboBox" name="cmbSongSearchSinger">
                  <property name="editable">
@@ -181,7 +193,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>461</width>
-                  <height>411</height>
+                  <height>406</height>
                  </rect>
                 </property>
                 <layout class="QGridLayout" name="gLayoutSong5">
@@ -417,6 +429,11 @@
                  <height>20</height>
                 </size>
                </property>
+               <property name="font">
+                <font>
+                 <pointsize>8</pointsize>
+                </font>
+               </property>
                <property name="text">
                 <string>🞂||</string>
                </property>
@@ -506,7 +523,7 @@
             </property>
             <item>
              <widget class="QWidget" name="widSinger2" native="true">
-              <layout class="QHBoxLayout" name="hLayoutSinger3" stretch="100,100,1,1">
+              <layout class="QHBoxLayout" name="hLayoutSinger3" stretch="0,100,100,1,1">
                <property name="leftMargin">
                 <number>0</number>
                </property>
@@ -519,6 +536,13 @@
                <property name="bottomMargin">
                 <number>0</number>
                </property>
+               <item>
+                <widget class="QLineEdit" name="txtSingerSearchName">
+                 <property name="placeholderText">
+                  <string>Search Name</string>
+                 </property>
+                </widget>
+               </item>
                <item>
                 <widget class="QComboBox" name="cmbSingerSearchRegion"/>
                </item>
@@ -1225,7 +1249,7 @@
      <x>0</x>
      <y>0</y>
      <width>1070</width>
-     <height>21</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Mange">

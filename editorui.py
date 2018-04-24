@@ -1,10 +1,7 @@
-import functools
-import operator
-
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QWidget, QMessageBox, QInputDialog, QFileDialog, QCheckBox, QMenu, QDialog, \
-    qApp, QPushButton, QHeaderView, QErrorMessage, QGridLayout, QLabel, QTextEdit, QStyle, QPlainTextEdit
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIntValidator, QPixmap, QIcon
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QInputDialog, QFileDialog, QCheckBox, QMenu, QDialog, \
+    qApp, QPushButton, QHeaderView, QGridLayout, QLabel, QStyle, QPlainTextEdit
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIntValidator, QPixmap
 from PyQt5.QtSql import *
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QRegExp, QPoint
 import os
@@ -23,6 +20,7 @@ class EditorWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi(os.path.join(settings.programDir, 'editor/EditorWindow.ui'), self)
+        qApp.setFont(self.font())
 
         db = QSqlDatabase.addDatabase('QSQLITE')
         db.setDatabaseName(os.path.join(settings.programDir, settings.config['sqlitefile']))
@@ -60,14 +58,16 @@ class EditorWindow(QMainWindow):
 
     """common functions"""
 
-    def selectRows(self, tblview, ids):
+    @staticmethod
+    def selectRows(tblview, ids):
         tblview.selectionModel().clearSelection()
         for id in ids:
             for idx in tblview.model().match(tblview.model().index(0, 1), Qt.UserRole, id):
                 tblview.selectionModel().select(idx, QItemSelectionModel.Select | QItemSelectionModel.Rows)
                 tblview.scrollTo(idx)
 
-    def refreshFromDB(self, table, columns, model, columnfunc=None):
+    @staticmethod
+    def refreshFromDB(table, columns, model, columnfunc=None):
         rows = settings.dbconn.execute("select * from "+ table)
         model.clear()
         for r in rows:
@@ -95,7 +95,6 @@ class EditorWindow(QMainWindow):
         obj=getattr(self, 'page_'+table)
         if obj:
             obj.setStatusTip(status)
-        self.statusBar.showMessage(status)
         wname = table.capitalize()
 
         for i, k in enumerate(columns):
@@ -138,7 +137,8 @@ class EditorWindow(QMainWindow):
                             funcplaceholder('')
 
 
-    def addItem(self, tblview, columns, model):
+    @staticmethod
+    def addItem(tblview, columns, model):
         newrow = [QStandardItem('') for _ in range(len(columns))]
         model.appendRow(newrow)
 
@@ -152,7 +152,8 @@ class EditorWindow(QMainWindow):
         tblview.scrollTo(idx)
 
 
-    def deleteItems(self, table, tblview, refreshfunc=None):
+    @staticmethod
+    def deleteItems(table, tblview, refreshfunc=None):
         rows = [r.data(Qt.UserRole) for r in tblview.selectionModel().selectedRows()]
         rows = list(filter(None, rows))
         if len(rows)>0:
@@ -168,7 +169,8 @@ class EditorWindow(QMainWindow):
                 if callable(refreshfunc):
                     refreshfunc()
 
-    def saveItem(self, item):
+    @staticmethod
+    def saveItem(item):
         data=item.data(Qt.DisplayRole)
         id=item.data(Qt.UserRole)
         table=item.data(Qt.UserRole+1)
@@ -254,7 +256,7 @@ class EditorWindow(QMainWindow):
             for id in filter(None, rows):
                 try:
                     title=tblview.model().match(tblview.model().index(0, pos_title), Qt.UserRole, id)[0].data()
-                    search = functions.get_initials((title))
+                    search = functions.get_initials(title)
                     settings.dbconn.execute("update "+table+" set [search]=? where [id]=?", (search, id,))
                 except:
                     settings.logger.printException()
@@ -285,13 +287,16 @@ class EditorWindow(QMainWindow):
         self.songModelProxy2 = QSortFilterProxyModel()
         self.songModelProxy2.setSourceModel(self.songModelProxy1)
         self.songModelProxy3 = QSortFilterProxyModel()
-        self.songModelProxy3.setSortRole(Qt.UserRole+4)
-        self.songModelProxy3.setSortCaseSensitivity(Qt.CaseInsensitive)
         self.songModelProxy3.setSourceModel(self.songModelProxy2)
+        self.songModelProxy4 = QSortFilterProxyModel()
+        self.songModelProxy4.setSortRole(Qt.UserRole+4)
+        self.songModelProxy4.setSortCaseSensitivity(Qt.CaseInsensitive)
+        self.songModelProxy4.setSourceModel(self.songModelProxy1)
 
-        self.tblSong.setModel(self.songModelProxy3)
+        self.tblSong.setModel(self.songModelProxy4)
         self.tblSong.selectionModel().selectionChanged.connect(self.songSelectionChanged)
 
+        self.txtSongSearchTitle.textChanged.connect(self.songSearch)
         self.cmbSongSearchSinger.editTextChanged.connect(self.songSearch)
         self.cmbSongSearchSinger.setCompleter(None)
         self.cmbSongSearchLanguage.currentIndexChanged.connect(self.songSearch)
@@ -376,15 +381,18 @@ class EditorWindow(QMainWindow):
 
 
     def songSearch(self):
-        self.songModelProxy1.setFilterWildcard(self.cmbSongSearchSinger.currentText())
-        self.songModelProxy1.setFilterKeyColumn(list(self.songColumns).index('func_singers'))
-        self.songModelProxy2.setFilterFixedString(self.cmbSongSearchLanguage.currentText())
-        self.songModelProxy2.setFilterKeyColumn(list(self.songColumns).index('language'))
-        self.songModelProxy3.setFilterFixedString(self.cmbSongSearchStyle.currentText())
-        self.songModelProxy3.setFilterKeyColumn(list(self.songColumns).index('style'))
+        self.songModelProxy1.setFilterWildcard(self.txtSongSearchTitle.text())
+        self.songModelProxy1.setFilterKeyColumn(list(self.songColumns).index('title'))
+        self.songModelProxy2.setFilterWildcard(self.cmbSongSearchSinger.currentText())
+        self.songModelProxy2.setFilterKeyColumn(list(self.songColumns).index('func_singers'))
+        self.songModelProxy3.setFilterFixedString(self.cmbSongSearchLanguage.currentText())
+        self.songModelProxy3.setFilterKeyColumn(list(self.songColumns).index('language'))
+        self.songModelProxy4.setFilterFixedString(self.cmbSongSearchStyle.currentText())
+        self.songModelProxy4.setFilterKeyColumn(list(self.songColumns).index('style'))
 
 
     def songAdd(self):
+        self.txtSongSearchTitle.setText('')
         self.cmbSongSearchSinger.setCurrentText('')
         self.cmbSongSearchLanguage.setCurrentText('')
         self.cmbSongSearchStyle.setCurrentText('')
@@ -572,10 +580,15 @@ class EditorWindow(QMainWindow):
         self.singerModelProxy1.setSourceModel(self.singerModel)
         self.singerModelProxy2 = QSortFilterProxyModel()
         self.singerModelProxy2.setSourceModel(self.singerModelProxy1)
+        self.singerModelProxy3 = QSortFilterProxyModel()
+        self.singerModelProxy3.setSortRole(Qt.UserRole+4)
+        self.singerModelProxy3.setSortCaseSensitivity(Qt.CaseInsensitive)
+        self.singerModelProxy3.setSourceModel(self.singerModelProxy2)
 
-        self.tblSinger.setModel(self.singerModelProxy2)
+        self.tblSinger.setModel(self.singerModelProxy3)
         self.tblSinger.selectionModel().selectionChanged.connect(self.singerSelectionChanged)
 
+        self.txtSingerSearchName.textChanged.connect(self.singerSearch)
         self.cmbSingerSearchRegion.currentIndexChanged.connect(self.singerSearch)
         self.cmbSingerSearchCategory.currentIndexChanged.connect(self.singerSearch)
         self.btnSingerAdd.clicked.connect(self.singerAdd)
@@ -631,13 +644,16 @@ class EditorWindow(QMainWindow):
 
 
     def singerSearch(self):
-        self.singerModelProxy1.setFilterWildcard(self.cmbSingerSearchRegion.currentText())
-        self.singerModelProxy1.setFilterKeyColumn(list(self.singerColumns).index('region'))
-        self.singerModelProxy2.setFilterFixedString(self.cmbSingerSearchCategory.currentText())
-        self.singerModelProxy2.setFilterKeyColumn(list(self.singerColumns).index('type'))
+        self.singerModelProxy1.setFilterWildcard(self.txtSingerSearchName.text())
+        self.singerModelProxy1.setFilterKeyColumn(list(self.singerColumns).index('name'))
+        self.singerModelProxy2.setFilterWildcard(self.cmbSingerSearchRegion.currentText())
+        self.singerModelProxy2.setFilterKeyColumn(list(self.singerColumns).index('region'))
+        self.singerModelProxy3.setFilterFixedString(self.cmbSingerSearchCategory.currentText())
+        self.singerModelProxy3.setFilterKeyColumn(list(self.singerColumns).index('type'))
 
 
     def singerAdd(self):
+        self.txtSingerSearchName.setText('')
         self.cmbSingerSearchRegion.setCurrentText('')
         self.cmbSingerSearchCategory.setCurrentText('')
 
@@ -668,8 +684,9 @@ class EditorWindow(QMainWindow):
 
     def __library__init__(self):
         self.libraryModel = QStandardItemModel()
-        # self.libraryModel.itemChanged.connect(self.saveItem)
         self.libraryModelProxy1 = QSortFilterProxyModel()
+        self.libraryModelProxy1.setSortRole(Qt.UserRole+4)
+        self.libraryModelProxy1.setSortCaseSensitivity(Qt.CaseInsensitive)
         self.libraryModelProxy1.setSourceModel(self.libraryModel)
 
         self.tblLibrary.setModel(self.libraryModelProxy1)
@@ -731,6 +748,8 @@ class EditorWindow(QMainWindow):
         self.youtubeModel = QStandardItemModel()
         self.youtubeModel.itemChanged.connect(self.saveItem)
         self.youtubeModelProxy1 = QSortFilterProxyModel()
+        self.youtubeModelProxy1.setSortRole(Qt.UserRole+4)
+        self.youtubeModelProxy1.setSortCaseSensitivity(Qt.CaseInsensitive)
         self.youtubeModelProxy1.setSourceModel(self.youtubeModel)
 
         self.tblYoutube.setModel(self.youtubeModelProxy1)
@@ -789,7 +808,6 @@ class EditorWindow(QMainWindow):
             newsingers.append((r[0], functions.get_initials(r[0]),))
 
         if len(newsingers)>0:
-            print(newsingers)
             settings.dbconn.executemany('insert into singer (name,search) values (?,?)', newsingers)
             settings.dbconn.commit()
             self.singerRefresh()
@@ -809,7 +827,6 @@ class EditorWindow(QMainWindow):
             # self.dupmediadialog.setWindowFlags()
             layout=QGridLayout(self.dupmediadialog)
             label=QLabel()
-            print(self.style().standardIcon(QStyle.SP_MessageBoxWarning))
             label.setPixmap(self.style().standardIcon(QStyle.SP_MessageBoxWarning).pixmap(100,100))
             layout.addWidget(label, 0, 0)
             layout.addWidget(QLabel(str(len(medias)) + " media(s) are found in duplicates:"), 0, 1)
@@ -823,9 +840,15 @@ class EditorWindow(QMainWindow):
 
 
     def searchDuplicateSong(self):
-        rows = settings.dbconn.execute("select count(id), title from song where title<>'' group by title having count(id)>1")
-        songs=['('+str(r[0])+' dups)\t'+r[1] for r in rows]
+        rows = settings.dbconn.execute("select count(id), trim(title) title from song where title<>'' group by title having count(id)>1")
+        songs = rows.fetchall()
         if songs:
+            titles=[r[1] for r in songs]
+            rows = settings.dbconn.execute("select singer, trim(title) from song where trim(title) in (%s)" % ','.join('?'*len(titles)), titles)
+            singers = rows.fetchall()
+            message=['('+str(r[0])+' dups)\t'+r[1]+'\t' + ','.join([s[0] for s in singers if s[1]==r[1]])
+                     for r in songs]
+
             self.dupmediadialog = QDialog(self, Qt.Tool)
             self.dupmediadialog.setWindowTitle("Search duplicate song")
             self.dupmediadialog.setMinimumWidth(600)
@@ -833,12 +856,11 @@ class EditorWindow(QMainWindow):
             # self.dupmediadialog.setWindowFlags()
             layout=QGridLayout(self.dupmediadialog)
             label=QLabel()
-            print(self.style().standardIcon(QStyle.SP_MessageBoxWarning))
             label.setPixmap(self.style().standardIcon(QStyle.SP_MessageBoxWarning).pixmap(100,100))
             layout.addWidget(label, 0, 0)
             layout.addWidget(QLabel(str(len(songs)) + " song(s) are found in duplicates:"), 0, 1)
             layout.setColumnStretch(1,100)
-            textedit=QPlainTextEdit("\n".join(songs))
+            textedit=QPlainTextEdit("\n".join(message))
             textedit.setReadOnly(True)
             layout.addWidget(textedit, 1, 0, 1, 2)
             self.dupmediadialog.show()
@@ -851,10 +873,6 @@ class SearchMedia(QDialog):
     def __init__(self):
         super().__init__()
         uic.loadUi(os.path.join(settings.programDir, 'editor/SearchMedia.ui'), self)
-
-        db = QSqlDatabase.addDatabase('QSQLITE')
-        db.setDatabaseName(os.path.join(settings.programDir, settings.config['sqlitefile']))
-        db.open()
 
         self.mediaModel = QStandardItemModel()
         self.mediaModelProxy1 = QSortFilterProxyModel()
@@ -913,7 +931,7 @@ class SearchMedia(QDialog):
             return
 
         # remove lib
-        files = map(lambda f: os.sep+f[len(lib):], files)
+        files = map(lambda f: os.path.sep+f[len(lib):], files)
         # remove files that's already in db
         files = list(filter(lambda f: f not in dbfiles, files ))
 
@@ -1003,9 +1021,9 @@ class SearchMedia(QDialog):
                 search=functions.get_initials(title)
                 media=self.mediaModel.item(j, 4).data(Qt.DisplayRole)
 
-                settings.dbconn.execute("insert into song ([index],title,chars,search,library,media_file,language,style,channel,"\
-                                    "singer,singer2,singer3,singer4,singer5,singer6,singer7,singer8,singer9,singer10) "\
-                                    "values (0,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?)",
+                settings.dbconn.execute("insert into song ([index],title,chars,search,library,media_file,language,style,channel,"
+                                        "singer,singer2,singer3,singer4,singer5,singer6,singer7,singer8,singer9,singer10) "
+                                        "values (0,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?)",
                                     [title,chars,search,library,media,language,style,channel]+singers)
                 saved=True
 

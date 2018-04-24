@@ -6,7 +6,7 @@ import sqlite3
 import os
 import sys
 import json
-from queue import deque
+from collections import deque
 import gettext
 from pprint import pprint
 
@@ -29,7 +29,7 @@ def extractSingers(song):
 
 
 def extractSingersFromPlaylist(song):
-    if('media_file' in song.keys()):
+    if 'media_file' in song.keys():
         # normal files
         song2=extractSingers(song)
     else:
@@ -170,7 +170,7 @@ def addVideo():
     if songindex and songindex.isdigit():
         row = dbconn.execute("select * from song where [index]!=0 and [index]=? order by title COLLATE NOCASE", [songindex]).fetchone()
         if row:
-            playlist.addVideo(screen.extractSingersAndSetDisplay(dict(row)), False)
+            playlist.addVideo(screen.extractSingersAndSetDisplay(dict(row)))
     return ""
 
 

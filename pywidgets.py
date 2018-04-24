@@ -1,7 +1,8 @@
 from PyQt5.QtCore import Qt, QUrl, pyqtSignal, pyqtSlot, QTimer
 from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager
-from PyQt5.QtWidgets import QLabel, QSizePolicy, qApp
+from PyQt5.QtWidgets import QLabel, QSizePolicy
 from PyQt5.QtGui import QRegExpValidator, QTextDocument, QPixmap, QFont, QPainter, QFontMetrics
+import re
 
 import settings
 
@@ -120,26 +121,31 @@ class QLabelButton(QLabel):
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button()==Qt.LeftButton:
-            try:
-                self.clicked.emit(self.index)
-            except:
-                settings.logger.printException()
+            self.click()
         elif QMouseEvent.button()==Qt.RightButton:
-            try:
-                self.rightclicked.emit(self.index)
-            except:
-                settings.logger.printException()
+            self.rightclick()
+
+    def click(self):
+        try:
+            self.clicked.emit(self.index)
+        except:
+            settings.logger.printException()
+
+    def rightclick(self):
+        try:
+            self.rightclicked.emit(self.index)
+        except:
+            settings.logger.printException()
 
 
 class QLabelListButton(QLabelButton):
     """Label with a numbering in front"""
 
-    def __init__(self, parent=None, havesub=False):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.fontcolor = settings.config['font.color']
         self.fontstylesheet = 'color: ' + self.fontcolor + ';'
         self.globalfont = QFont()
-        self.havesub = havesub
 
         self.text = QLabel(self)
         self.text.setStyleSheet(self.fontstylesheet+'border-radius: 8px; background-color: qlineargradient(spread:pad, x1:0, x2:1, stop:0 rgba(0, 0, 0, 200), stop:1 rgba(120, 120, 120, 50));padding:2px 0px;')
@@ -168,7 +174,7 @@ class QLabelListButton(QLabelButton):
         self.setPixmap(qp)
 
     def setImage(self, image, altimage):
-        if re.match("(ftp|http|https):\/\/", image):
+        if re.match("(ftp|http|https)://", image):
             self.setPixmap(QPixmap(altimage))
             self.nam = QNetworkAccessManager()
             self.nam.finished.connect(self.setImageResponse)
@@ -178,7 +184,11 @@ class QLabelListButton(QLabelButton):
                 if image=='':
                     self.setPixmap(QPixmap(altimage))
                 else:
-                    self.setPixmap(QPixmap(image))
+                    pixmap = QPixmap(image)
+                    if pixmap.isNull():
+                        self.setPixmap(QPixmap(altimage))
+                    else:
+                        self.setPixmap(QPixmap(image))
             except:
                 self.setPixmap(QPixmap(altimage))
 
@@ -186,7 +196,7 @@ class QLabelListButton(QLabelButton):
         self.image.clear()
 
     def setTextSize(self):
-        labelwidth=int(self.height()*0.9);
+        labelwidth=int(self.height()*0.9)
         self.label.resize(labelwidth, labelwidth)
         self.label.setStyleSheet('color: white; border-radius: '+str(labelwidth/2-0.5)+'px; font: bold '+str(int(self.height()*0.7))+'px;padding:0px 4px 4px 0px;'
                                  'background-color: qradialgradient(spread:pad, cx:0.272, cy:0.354515, radius:0.848, fx:0.186, fy:0.256117, stop:0 rgba(220, 220, 220, 255), stop:0.2 rgba(200, 20, 20, 255), stop:1 rgba(20, 0, 0, 220));')
@@ -207,14 +217,14 @@ class QLabelListButton(QLabelButton):
 class QLabeImageButton(QLabelListButton):
     """Image and text"""
 
-    def __init__(self, parent=None, havesub=False):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.text.setStyleSheet(self.fontstylesheet+'border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; background-color: qlineargradient(spread:pad, y1:0, y2:1, stop:0 rgba(0, 0, 0, 230), stop:1 rgba(120, 120, 120, 120));padding: 0px;')
         self.text.setAlignment(Qt.AlignCenter)
         self.image.setStyleSheet('background-color: qlineargradient(spread:pad, x1:1, y1:0.8, x2:0, y2:0.1, stop:0.00564972 rgba(186, 225, 255, 255), stop:0.4 rgba(255, 255, 255, 230), stop:0.6 rgba(255, 255, 255, 180), stop:1 rgba(134, 203, 255, 120));')
 
     def setTextSize(self):
-        labelwidth=int(self.height()*0.2);
+        labelwidth=int(self.height()*0.2)
         self.label.move((self.width()-labelwidth)/2, 0)
         self.label.resize(labelwidth, labelwidth)
         self.label.setStyleSheet('color: white; border-radius: '+str(labelwidth/2-0.5)+'px; font: bold '+str(int(labelwidth*0.9))+'px;padding:0px 3px 3px 0px;'

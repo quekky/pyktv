@@ -215,21 +215,15 @@ def artistSearch3(data, page=0):
 
     try:
         rows = settings.dbconn.execute("select * from singer where " + query + " and name!='' order by name COLLATE NOCASE", (region, type1,))
-        singerdir = settings.config['singer.picture']
 
         artists = []
         for r in rows:
             d = dict(r)
             d['display'] = d['name']
-            image = os.path.join(singerdir, r['name']+'.jpg')
-            if os.path.isfile(image):
-                d['image']=image
+            image = os.path.join(settings.singerdir, r['name']+'.jpg')
+            d['image']=image
             artists.append(d)
 
-    except:
-        settings.logger.printException()
-
-    try:
         pager = pagerContent(artists, 1, getCommon2_h_options(), artistSearch4)
         pager.startDisplay(page)
     except:
@@ -434,15 +428,18 @@ Functions related to youtube below
 """
 
 class youtubeLogger(object):
-    def debug(self, msg):
+    @staticmethod
+    def debug(msg):
         settings.selectorWindow.setStatusTempText(msg, 500)
         #refresh the app, if not the video will appear hang while processing
         QApplication.processEvents(QEventLoop.AllEvents)
 
-    def warning(self, msg):
+    @staticmethod
+    def warning(msg):
         pass
 
-    def error(self, msg):
+    @staticmethod
+    def error(msg):
         settings.logger.error("Youtube error:",msg)
 
 @pyqtSlot(object, int)
@@ -473,14 +470,14 @@ def youtubeScreen2(data=None, page=0):
         ydl = YoutubeDL({'quiet':False,'extract_flat':True,'dump_single_json':True,'logger':youtubeLogger()})
 
         res = ydl.extract_info(data['url'])
-        if(res['_type']=='url'):
+        if res['_type']== 'url':
             res = ydl.extract_info(res['url'])
 
         if res['entries'][0]['ie_key']=='YoutubePlaylist':
             tracks=res['entries']
             for t in tracks:
                 t['display'] = t['title']+" (Playlist)"
-                t['search'] = functions.get_initials(t['title'],'').upper()
+                t['search'] = functions.get_initials(t['title'])
             pager = pagerContent(tracks, 0, getCommon2_h_options(), youtubeScreen2)
 
         else:
@@ -488,7 +485,7 @@ def youtubeScreen2(data=None, page=0):
             tracks=list(filter(lambda t:not re.match('\[.* video\]',t['title']),res['entries']))
             for t in tracks:
                 t['display'] = t['title']
-                t['search'] = functions.get_initials(t['title'],'')
+                t['search'] = functions.get_initials(t['title'])
                 t['network'] = 'youtube'
             pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
 
@@ -562,7 +559,7 @@ def networkSearch2(data=None, page=0):
         children = upnp_dlna.find_directories(data)
         for child in children:
             child['display'] = child['title']
-            child['search'] = functions.get_initials(child['title'], '').upper()
+            child['search'] = functions.get_initials(child['title'])
             child['server'] = data
             child['location'] = '//' + data['name'] + '/' + child['title'] + '/'
         pager = pagerContent(children, 0, getCommon2_h_options(), networkSearch3)
@@ -581,7 +578,7 @@ def networkSearch3(data=None, page=0):
             children = upnp_dlna.find_directories(data['server'], data['id'])
             for child in children:
                 child['display'] = child['title']
-                child['search'] = functions.get_initials(child['title'], '').upper()
+                child['search'] = functions.get_initials(child['title'])
                 child['server'] = data['server']
                 child['location'] = data['location'] + child['title'] + '/'
                 if 'artist' in child.keys():
