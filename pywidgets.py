@@ -1,6 +1,6 @@
-from PyQt5.QtCore import Qt, QUrl, pyqtSignal, pyqtSlot, QTimer
+from PyQt5.QtCore import Qt, QUrl, pyqtSignal, pyqtSlot, QTimer, QSortFilterProxyModel, QRegExp
 from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager
-from PyQt5.QtWidgets import QLabel, QSizePolicy
+from PyQt5.QtWidgets import QLabel, QSizePolicy, QLineEdit
 from PyQt5.QtGui import QRegExpValidator, QTextDocument, QPixmap, QFont, QPainter, QFontMetrics
 import re
 
@@ -245,4 +245,47 @@ class QUpperValidator(QRegExpValidator):
     def validate(self, p_str, p_int):
         ret=super().validate(p_str, p_int)
         return ret[0], ret[1].upper(), ret[2]
+
+
+class QTagCompleterLineEdit(QLineEdit):
+    _completer = None
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.textEdited.connect(self.text_edited)
+
+    def text_edited(self, text):
+        if self._completer:
+            cursor_pos = self.cursorPosition()
+            before_text = self.text()[:cursor_pos]
+            after_text = self.text()[cursor_pos:]
+            prefix = before_text.split(',')[-1].strip()
+
+            # filter away those already typed
+            text_tags = set(before_text.split(',')[:-1]+after_text.split(','))
+            text_tags = [t.strip().replace('|','\\|') for t in text_tags]
+            if text_tags:
+                model=self._completer.model()
+                if not isinstance(model, QSortFilterProxyModel):
+                    proxy1 = QSortFilterProxyModel()
+                    proxy1.setSourceModel(model)
+                    self._completer.setModel(proxy1)
+                    model=proxy1
+                model.setFilterRegExp('(?!('+'|'.join(text_tags)+')$)(^.*$)')
+
+            self._completer.setCompletionPrefix(prefix)
+            self._completer.complete()
+
+    def complete_text(self, text):
+        cursor_pos = self.cursorPosition()
+        before_text = self.text()[:cursor_pos]
+        after_text = self.text()[cursor_pos:]
+        prefix_len = len(before_text.split(',')[-1].strip())
+        self.setText('%s%s, %s' % (before_text[:cursor_pos - prefix_len], text, after_text))
+        self.setCursorPosition(cursor_pos - prefix_len + len(text) + 2)
+
+    def setCompleter(self, completer):
+        self._completer = completer
+        self._completer.setWidget(self)
+        self._completer.activated.connect(self.complete_text)
 

@@ -192,8 +192,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>461</width>
-                  <height>406</height>
+                  <width>392</width>
+                  <height>410</height>
                  </rect>
                 </property>
                 <layout class="QGridLayout" name="gLayoutSong5">
@@ -313,7 +313,7 @@
                   </widget>
                  </item>
                  <item row="4" column="1">
-                  <widget class="QLineEdit" name="txtSongFunc_Singers"/>
+                  <widget class="QTagCompleterLineEdit" name="txtSongFunc_Singers"/>
                  </item>
                  <item row="7" column="1">
                   <widget class="QComboBox" name="cmbSongChannel">
@@ -571,6 +571,9 @@
               <property name="selectionBehavior">
                <enum>QAbstractItemView::SelectRows</enum>
               </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
               <attribute name="verticalHeaderVisible">
                <bool>false</bool>
               </attribute>
@@ -606,8 +609,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>518</width>
-                  <height>411</height>
+                  <width>431</width>
+                  <height>410</height>
                  </rect>
                 </property>
                 <layout class="QGridLayout" name="hLayoutSinger5">
@@ -756,6 +759,9 @@
            <property name="selectionBehavior">
             <enum>QAbstractItemView::SelectRows</enum>
            </property>
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
            <attribute name="verticalHeaderVisible">
             <bool>false</bool>
            </attribute>
@@ -772,8 +778,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>207</width>
-                 <height>350</height>
+                 <width>967</width>
+                 <height>418</height>
                 </rect>
                </property>
                <layout class="QGridLayout" name="gLayoutLibrary3">
@@ -1100,6 +1106,9 @@
            <property name="selectionBehavior">
             <enum>QAbstractItemView::SelectRows</enum>
            </property>
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
            <attribute name="verticalHeaderVisible">
             <bool>false</bool>
            </attribute>
@@ -1116,8 +1125,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>110</width>
-                 <height>109</height>
+                 <width>967</width>
+                 <height>258</height>
                 </rect>
                </property>
                <layout class="QGridLayout" name="gLayoutYotube3">
@@ -1249,7 +1258,7 @@
      <x>0</x>
      <y>0</y>
      <width>1070</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Mange">
@@ -1327,6 +1336,11 @@
   <customwidget>
    <class>QLabelButton</class>
    <extends>QLabel</extends>
+   <header location="global">pywidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QTagCompleterLineEdit</class>
+   <extends>QLineEdit</extends>
    <header location="global">pywidgets.h</header>
   </customwidget>
  </customwidgets>

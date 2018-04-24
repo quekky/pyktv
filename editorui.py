@@ -1,9 +1,8 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QMessageBox, QInputDialog, QFileDialog, QCheckBox, QMenu, QDialog, \
-    qApp, QPushButton, QHeaderView, QGridLayout, QLabel, QStyle, QPlainTextEdit
+    qApp, QPushButton, QHeaderView, QGridLayout, QLabel, QStyle, QPlainTextEdit, QCompleter
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIntValidator, QPixmap
-from PyQt5.QtSql import *
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QRegExp, QPoint
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QRegExp, QPoint, QStringListModel
 import os
 import fnmatch
 from collections import OrderedDict
@@ -21,10 +20,6 @@ class EditorWindow(QMainWindow):
         super().__init__()
         uic.loadUi(os.path.join(settings.programDir, 'editor/EditorWindow.ui'), self)
         qApp.setFont(self.font())
-
-        db = QSqlDatabase.addDatabase('QSQLITE')
-        db.setDatabaseName(os.path.join(settings.programDir, settings.config['sqlitefile']))
-        db.open()
 
         self.action_Song.triggered.connect(lambda : self.stackedWidget.setCurrentIndex(0))
         self.actionS_inger.triggered.connect(lambda : self.stackedWidget.setCurrentIndex(1))
@@ -95,6 +90,7 @@ class EditorWindow(QMainWindow):
         obj=getattr(self, 'page_'+table)
         if obj:
             obj.setStatusTip(status)
+            self.statusBar.showMessage(status)
         wname = table.capitalize()
 
         for i, k in enumerate(columns):
@@ -237,9 +233,13 @@ class EditorWindow(QMainWindow):
                             settings.logger.printException()
 
                 settings.dbconn.commit()
+                valueV = tblview.verticalScrollBar().value()
+                valueH = tblview.horizontalScrollBar().value()
                 if callable(refreshfunc):
                     refreshfunc()
                 tblview.repaint()
+                tblview.verticalScrollBar().setValue(valueV)
+                tblview.horizontalScrollBar().setValue(valueH)
                 #after refresh, select back the rows
                 self.selectRows(tblview, id_to_update+id_newly_added)
 
@@ -261,8 +261,13 @@ class EditorWindow(QMainWindow):
                 except:
                     settings.logger.printException()
             settings.dbconn.commit()
+            valueV = tblview.verticalScrollBar().value()
+            valueH = tblview.horizontalScrollBar().value()
             if callable(refreshfunc):
                 refreshfunc()
+            tblview.repaint()
+            tblview.verticalScrollBar().setValue(valueV)
+            tblview.horizontalScrollBar().setValue(valueH)
             # after refresh, select back the rows
             self.selectRows(tblview, rows)
 
@@ -282,7 +287,6 @@ class EditorWindow(QMainWindow):
         self.songModel = QStandardItemModel()
         self.songModel.itemChanged.connect(self.saveItem)
         self.songModelProxy1 = QSortFilterProxyModel()
-        self.songModelProxy1.setFilterCaseSensitivity(Qt.CaseInsensitive)
         self.songModelProxy1.setSourceModel(self.songModel)
         self.songModelProxy2 = QSortFilterProxyModel()
         self.songModelProxy2.setSourceModel(self.songModelProxy1)
@@ -291,7 +295,7 @@ class EditorWindow(QMainWindow):
         self.songModelProxy4 = QSortFilterProxyModel()
         self.songModelProxy4.setSortRole(Qt.UserRole+4)
         self.songModelProxy4.setSortCaseSensitivity(Qt.CaseInsensitive)
-        self.songModelProxy4.setSourceModel(self.songModelProxy1)
+        self.songModelProxy4.setSourceModel(self.songModelProxy3)
 
         self.tblSong.setModel(self.songModelProxy4)
         self.tblSong.selectionModel().selectionChanged.connect(self.songSelectionChanged)
@@ -316,6 +320,9 @@ class EditorWindow(QMainWindow):
         self.txtSongSearch.setValidator(QUpperValidator(QRegExp('[0-9a-zA-Z]+')))
         self.cmbSongChannel.setValidator(QUpperValidator(QRegExp('[lrLR]|[0-9]')))
 
+        self.songCompleter = QCompleter()
+        self.songCompleter.setCaseSensitivity(Qt.CaseInsensitive)
+        self.txtSongFunc_Singers.setCompleter(self.songCompleter)
 
         self.btnSongPlayPause.clicked.connect(self.songPlayPause)
         self.lblSongVideoFrame.clicked.connect(self.songPlayPause)
@@ -350,30 +357,31 @@ class EditorWindow(QMainWindow):
 
     def updateSongCombobox(self):
         txt = self.cmbSongSearchSinger.currentText()
-        query = QSqlQueryModel()
-        query.setQuery('select "" union select distinct name from singer order by name')
-        self.cmbSongSearchSinger.setModel(query)
+        rows = settings.dbconn.execute('select "" union select distinct name from singer order by name')
+        model = QStringListModel([r[0] for r in rows])
+        self.cmbSongSearchSinger.setModel(model)
         self.cmbSongSearchSinger.setCurrentText(txt)
+        self.songCompleter.setModel(model)
 
         txt = self.cmbSongSearchLanguage.currentText()
-        query = QSqlQueryModel()
-        query.setQuery('select "" union select distinct language from song order by language')
-        self.cmbSongSearchLanguage.setModel(query)
+        rows = settings.dbconn.execute('select "" union select distinct language from song order by language')
+        model = QStringListModel([r[0] for r in rows])
+        self.cmbSongSearchLanguage.setModel(model)
         self.cmbSongSearchLanguage.setCurrentText(txt)
-        self.cmbSongLanguage.setModel(query)
+        self.cmbSongLanguage.setModel(model)
 
         txt = self.cmbSongSearchStyle.currentText()
-        query = QSqlQueryModel()
-        query.setQuery('select "" union select distinct style from song order by style')
-        self.cmbSongSearchStyle.setModel(query)
+        rows = settings.dbconn.execute('select "" union select distinct style from song order by style')
+        model = QStringListModel([r[0] for r in rows])
+        self.cmbSongSearchStyle.setModel(model)
         self.cmbSongSearchStyle.setCurrentText(txt)
-        self.cmbSongStyle.setModel(query)
+        self.cmbSongStyle.setModel(model)
 
         self.cmbSongChannel.insertItems(0, ['','L','R','0','1','2','3','4','5','6','7','8','9'])
 
-        query = QSqlQueryModel()
-        query.setQuery('select "" union select distinct root_path from library where enabled=1 order by root_path')
-        self.cmbSongLibrary.setModel(query)
+        rows = settings.dbconn.execute('select "" union select distinct root_path from library where enabled=1 order by root_path')
+        model = QStringListModel([r[0] for r in rows])
+        self.cmbSongLibrary.setModel(model)
 
 
     def songSelectionChanged(self, selected, deselected):
@@ -441,7 +449,11 @@ class EditorWindow(QMainWindow):
                             settings.logger.printException()
                         ids.append(id)
                 settings.dbconn.commit()
+                valueV = self.tblSong.verticalScrollBar().value()
+                valueH = self.tblSong.horizontalScrollBar().value()
                 self.songRefresh()
+                self.tblSong.verticalScrollBar().setValue(valueV)
+                self.tblSong.horizontalScrollBar().setValue(valueH)
                 #after refresh, select back the rows
                 self.selectRows(self.tblSong, ids)
 
@@ -490,10 +502,10 @@ class EditorWindow(QMainWindow):
             player.command('af', 'clr', '')
             self.channel=''
             self.previousplaying=rows[0].data()
+            self.statusBar.showMessage(videopath)
         else:
             if player.duration:
                 player.cycle('pause')
-
 
     sliderpressed=False
     def songVideoPositionChanged(self, prop, pos):
@@ -536,7 +548,7 @@ class EditorWindow(QMainWindow):
             menu.addSeparator()
             for i in range(tracks):
                 action=menu.addAction('Track '+str(i))
-                if self.channel==i or (self.channel=='' and i==0):
+                if self.channel==i or (not self.channel.isdigit() and i==0):
                     action.setCheckable(True)
                     action.setChecked(True)
 
@@ -615,18 +627,18 @@ class EditorWindow(QMainWindow):
 
     def updateSingerCombobox(self):
         txt = self.cmbSingerSearchRegion.currentText()
-        query = QSqlQueryModel()
-        query.setQuery('select "" union select distinct region from singer order by region')
-        self.cmbSingerSearchRegion.setModel(query)
+        rows = settings.dbconn.execute('select "" union select distinct region from singer order by region')
+        model = QStringListModel([r[0] for r in rows])
+        self.cmbSingerSearchRegion.setModel(model)
         self.cmbSingerSearchRegion.setCurrentText(txt)
-        self.cmbSingerRegion.setModel(query)
+        self.cmbSingerRegion.setModel(model)
 
         txt = self.cmbSingerSearchCategory.currentText()
-        query = QSqlQueryModel()
-        query.setQuery('select "" union select distinct type from singer order by type')
-        self.cmbSingerSearchCategory.setModel(query)
+        rows = settings.dbconn.execute('select "" union select type region from singer order by type')
+        model = QStringListModel([r[0] for r in rows])
+        self.cmbSingerSearchCategory.setModel(model)
         self.cmbSingerSearchCategory.setCurrentText(txt)
-        self.cmbSingerType.setModel(query)
+        self.cmbSingerType.setModel(model)
 
 
     def singerSelectionChanged(self, selected, deselected):
@@ -887,21 +899,17 @@ class SearchMedia(QDialog):
 
 
     def updateCombobox(self):
-        query = QSqlQueryModel()
-        query.setQuery('select distinct root_path from library where enabled=1 order by root_path')
-        self.cmbLibrary.setModel(query)
+        rows = settings.dbconn.execute('select distinct root_path from library where enabled=1 order by root_path')
+        model = QStringListModel([r[0] for r in rows])
+        self.cmbLibrary.setModel(model)
 
-        # query = QSqlQueryModel()
-        # query.setQuery('select "" union select distinct name from singer order by name')
-        # self.cmbSongSearchSinger.setModel(query)
+        rows = settings.dbconn.execute('select "" union select distinct language from song order by language')
+        model = QStringListModel([r[0] for r in rows])
+        self.cmbSongLanguage.setModel(model)
 
-        query = QSqlQueryModel()
-        query.setQuery('select "" union select distinct language from song order by language')
-        self.cmbSongLanguage.setModel(query)
-
-        query = QSqlQueryModel()
-        query.setQuery('select "" union select distinct style from song order by style')
-        self.cmbSongStyle.setModel(query)
+        rows = settings.dbconn.execute('select "" union select distinct style from song order by style')
+        model = QStringListModel([r[0] for r in rows])
+        self.cmbSongStyle.setModel(model)
 
         self.cmbSongChannel.insertItems(0, ['','L','R','0','1','2','3','4','5','6','7','8','9'])
 
