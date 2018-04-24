@@ -82,7 +82,6 @@ def artistSearchApi():
     artists = []
     for r in rows:
         d = {'id':r['id'], 'name':r['name'], 'search':r['search'], 'region':r['region'], 'type':r['type']}
-        d['display'] = d['name']
         image = os.path.join(singerdir, r['name'] + '.jpg')
         if os.path.isfile(image):
             d['image'] = r['name'] + '.jpg'
@@ -250,8 +249,3 @@ def __shutdown__():
     global http_server
     if http_server: http_server.stop()
     pass
-
-
-
-if __name__ == "__main__":
-    playlistSort()

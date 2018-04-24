@@ -1,0 +1,1385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>EditorWindow</class>
+ <widget class="QMainWindow" name="EditorWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1070</width>
+    <height>706</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Song Editor</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="lineWidth">
+       <number>10</number>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="page_song">
+       <layout class="QVBoxLayout" name="vLayoutSong1">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>9</number>
+        </property>
+        <property name="topMargin">
+         <number>9</number>
+        </property>
+        <property name="rightMargin">
+         <number>9</number>
+        </property>
+        <property name="bottomMargin">
+         <number>9</number>
+        </property>
+        <item>
+         <widget class="QSplitter" name="splSong1">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="childrenCollapsible">
+           <bool>false</bool>
+          </property>
+          <widget class="QWidget" name="widSong1" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <layout class="QVBoxLayout" name="vLayoutSong2">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QWidget" name="widSong2" native="true">
+              <layout class="QHBoxLayout" name="hLayoutSong3" stretch="1000,1000,1000,1,1">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QComboBox" name="cmbSongSearchSinger">
+                 <property name="editable">
+                  <bool>true</bool>
+                 </property>
+                 <property name="maxVisibleItems">
+                  <number>100</number>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="cmbSongSearchLanguage"/>
+               </item>
+               <item>
+                <widget class="QComboBox" name="cmbSongSearchStyle"/>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnSongAdd">
+                 <property name="text">
+                  <string>Add</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnSongDelete">
+                 <property name="text">
+                  <string>Delete</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableView" name="tblSong">
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QSplitter" name="splSong2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="childrenCollapsible">
+            <bool>false</bool>
+           </property>
+           <widget class="QWidget" name="widSong3" native="true">
+            <layout class="QVBoxLayout" name="vLayoutSong4">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QScrollArea" name="scrollArea_Song">
+               <property name="widgetResizable">
+                <bool>true</bool>
+               </property>
+               <widget class="QWidget" name="scrollAreaWidgetContents_song">
+                <property name="geometry">
+                 <rect>
+                  <x>0</x>
+                  <y>0</y>
+                  <width>461</width>
+                  <height>411</height>
+                 </rect>
+                </property>
+                <layout class="QGridLayout" name="gLayoutSong5">
+                 <item row="0" column="2">
+                  <widget class="QPushButton" name="btnSongIndex">
+                   <property name="text">
+                    <string>Index ...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="lblSong4">
+                   <property name="text">
+                    <string>Search letter</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSongSearch</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="txtSongTitle"/>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="lblSong2">
+                   <property name="text">
+                    <string>Title</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSongTitle</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="lblSong3">
+                   <property name="text">
+                    <string>Chars</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSongChars</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QLineEdit" name="txtSongChars">
+                   <property name="inputMethodHints">
+                    <set>Qt::ImhDigitsOnly</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="2">
+                  <widget class="QPushButton" name="btnSongSearch">
+                   <property name="text">
+                    <string>Auto</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="txtSongIndex">
+                   <property name="inputMethodHints">
+                    <set>Qt::ImhDigitsOnly</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QLineEdit" name="txtSongSearch">
+                   <property name="inputMethodHints">
+                    <set>Qt::ImhLatinOnly|Qt::ImhUppercaseOnly</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QLabel" name="lblSong5">
+                   <property name="text">
+                    <string>Singers</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSongFunc_Singers</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="lblSong1">
+                   <property name="text">
+                    <string>Index</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSongIndex</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="0">
+                  <widget class="QLabel" name="lblSong7">
+                   <property name="text">
+                    <string>Category</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>cmbSongStyle</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="1">
+                  <widget class="QComboBox" name="cmbSongLanguage">
+                   <property name="editable">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="0">
+                  <widget class="QLabel" name="lblSong6">
+                   <property name="text">
+                    <string>Language</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>cmbSongLanguage</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QLineEdit" name="txtSongFunc_Singers"/>
+                 </item>
+                 <item row="7" column="1">
+                  <widget class="QComboBox" name="cmbSongChannel">
+                   <property name="editable">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="1">
+                  <widget class="QComboBox" name="cmbSongStyle">
+                   <property name="editable">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="0">
+                  <widget class="QLabel" name="lblSong8">
+                   <property name="text">
+                    <string>Channel</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>cmbSongChannel</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="10" column="0">
+                  <widget class="QLabel" name="lblSong11">
+                   <property name="text">
+                    <string>Remark</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSongRemark</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="9" column="2">
+                  <widget class="QPushButton" name="btnSongMedia">
+                   <property name="text">
+                    <string>Browse ...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="8" column="0">
+                  <widget class="QLabel" name="lblSong9">
+                   <property name="text">
+                    <string>Librarry</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>cmbSongLibrary</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="10" column="1">
+                  <widget class="QLineEdit" name="txtSongRemark"/>
+                 </item>
+                 <item row="9" column="1">
+                  <widget class="QLineEdit" name="txtSongMedia_File"/>
+                 </item>
+                 <item row="9" column="0">
+                  <widget class="QLabel" name="lblSong10">
+                   <property name="text">
+                    <string>Media file</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSongMedia_File</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="8" column="1">
+                  <widget class="QComboBox" name="cmbSongLibrary"/>
+                 </item>
+                </layout>
+               </widget>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnSongSave">
+               <property name="text">
+                <string>Save</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="widSongVideo" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>250</width>
+              <height>200</height>
+             </size>
+            </property>
+            <layout class="QGridLayout" name="gLayoutSong6" rowstretch="1000,1" columnstretch="1,1000,1">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <item row="1" column="0">
+              <widget class="QPushButton" name="btnSongPlayPause">
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>🞂||</string>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSlider" name="slideSongVideo">
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>15</height>
+                </size>
+               </property>
+               <property name="maximum">
+                <number>999</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QPushButton" name="btnSongAudio">
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>A</string>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0" colspan="3">
+              <widget class="QLabelButton" name="lblSongVideoFrame">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_singer">
+       <layout class="QVBoxLayout" name="vLayoutSinger1">
+        <item>
+         <widget class="QSplitter" name="splSinger1">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="childrenCollapsible">
+           <bool>false</bool>
+          </property>
+          <widget class="QWidget" name="widSinger1" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <layout class="QVBoxLayout" name="vLayoutSinger2">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QWidget" name="widSinger2" native="true">
+              <layout class="QHBoxLayout" name="hLayoutSinger3" stretch="100,100,1,1">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QComboBox" name="cmbSingerSearchRegion"/>
+               </item>
+               <item>
+                <widget class="QComboBox" name="cmbSingerSearchCategory"/>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnSingerAdd">
+                 <property name="text">
+                  <string>Add</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnSingerDelete">
+                 <property name="text">
+                  <string>Delete</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableView" name="tblSinger">
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QSplitter" name="splSinger2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <widget class="QWidget" name="widSinger3" native="true">
+            <layout class="QVBoxLayout" name="vLayoutSinger4">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QScrollArea" name="scrollArea_Singer">
+               <property name="widgetResizable">
+                <bool>true</bool>
+               </property>
+               <widget class="QWidget" name="scrollAreaWidgetContents_Singer">
+                <property name="geometry">
+                 <rect>
+                  <x>0</x>
+                  <y>0</y>
+                  <width>518</width>
+                  <height>411</height>
+                 </rect>
+                </property>
+                <layout class="QGridLayout" name="hLayoutSinger5">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="lblSinger1">
+                   <property name="text">
+                    <string>Name</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSingerName</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="txtSingerName"/>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="lblSinger2">
+                   <property name="text">
+                    <string>Search letter</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSingerSearch</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="txtSingerSearch">
+                   <property name="inputMethodHints">
+                    <set>Qt::ImhLatinOnly|Qt::ImhUppercaseOnly</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QPushButton" name="btnSingerSearch">
+                   <property name="text">
+                    <string>Auto</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="lblSinger3">
+                   <property name="text">
+                    <string>Region</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>cmbSingerRegion</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QComboBox" name="cmbSingerRegion">
+                   <property name="editable">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="lblSinger4">
+                   <property name="text">
+                    <string>Category</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>cmbSingerType</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QComboBox" name="cmbSingerType">
+                   <property name="editable">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QLabel" name="lblSinger5">
+                   <property name="text">
+                    <string>Remark</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSingerRemark</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QLineEdit" name="txtSingerRemark"/>
+                 </item>
+                </layout>
+               </widget>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnSingerSave">
+               <property name="text">
+                <string>Save</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="widSingerImage" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>200</width>
+              <height>200</height>
+             </size>
+            </property>
+            <layout class="QVBoxLayout" name="vLayoutSinger6">
+             <item>
+              <widget class="QScaledLabel" name="lblSingerImage">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>image</string>
+               </property>
+               <property name="scaledContents">
+                <bool>false</bool>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_library">
+       <layout class="QVBoxLayout" name="vLayoutLibrary1">
+        <item>
+         <widget class="QSplitter" name="splLibrary1">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="QTableView" name="tblLibrary">
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="layoutWidget">
+           <layout class="QHBoxLayout" name="hLayoutLibrary2">
+            <item>
+             <widget class="QScrollArea" name="scrollArea_Library">
+              <property name="widgetResizable">
+               <bool>true</bool>
+              </property>
+              <widget class="QWidget" name="scrollAreaWidgetContents_Library">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>207</width>
+                 <height>350</height>
+                </rect>
+               </property>
+               <layout class="QGridLayout" name="gLayoutLibrary3">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="lblLibrary1">
+                  <property name="text">
+                   <string>Root Path</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtLibraryRoot_Path</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QLineEdit" name="txtLibraryRoot_Path"/>
+                </item>
+                <item row="0" column="2">
+                 <widget class="QPushButton" name="btnLibraryRoot_Path">
+                  <property name="text">
+                   <string>Browse...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="lblLibrary2">
+                  <property name="text">
+                   <string>Enable</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>chkLibraryEnabled</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QCheckBox" name="chkLibraryEnabled">
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="lblLibrary3">
+                  <property name="text">
+                   <string>Mirror 1</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtLibraryMirror1</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QLineEdit" name="txtLibraryMirror1"/>
+                </item>
+                <item row="2" column="2">
+                 <widget class="QPushButton" name="btnLibraryMirror1">
+                  <property name="text">
+                   <string>Browse...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="lblLibrary4">
+                  <property name="text">
+                   <string>Mirror 2</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtLibraryMirror2</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QLineEdit" name="txtLibraryMirror2"/>
+                </item>
+                <item row="3" column="2">
+                 <widget class="QPushButton" name="btnLibraryMirror2">
+                  <property name="text">
+                   <string>Browse...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="lblLibrary5">
+                  <property name="text">
+                   <string>Mirror 3</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtLibraryMirror3</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="QLineEdit" name="txtLibraryMirror3"/>
+                </item>
+                <item row="4" column="2">
+                 <widget class="QPushButton" name="btnLibraryMirror3">
+                  <property name="text">
+                   <string>Browse...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="0">
+                 <widget class="QLabel" name="lblLibrary6">
+                  <property name="text">
+                   <string>Mirror 4</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtLibraryMirror4</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="1">
+                 <widget class="QLineEdit" name="txtLibraryMirror4"/>
+                </item>
+                <item row="5" column="2">
+                 <widget class="QPushButton" name="btnLibraryMirror4">
+                  <property name="text">
+                   <string>Browse...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="0">
+                 <widget class="QLabel" name="lblLibrary7">
+                  <property name="text">
+                   <string>Mirror 5</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtLibraryMirror5</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="1">
+                 <widget class="QLineEdit" name="txtLibraryMirror5"/>
+                </item>
+                <item row="6" column="2">
+                 <widget class="QPushButton" name="btnLibraryMirror5">
+                  <property name="text">
+                   <string>Browse...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="7" column="0">
+                 <widget class="QLabel" name="lblLibrary8">
+                  <property name="text">
+                   <string>Mirror 6</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtLibraryMirror6</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="7" column="1">
+                 <widget class="QLineEdit" name="txtLibraryMirror6"/>
+                </item>
+                <item row="7" column="2">
+                 <widget class="QPushButton" name="btnLibraryMirror6">
+                  <property name="text">
+                   <string>Browse...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="8" column="0">
+                 <widget class="QLabel" name="lblLibrary9">
+                  <property name="text">
+                   <string>Mirror 7</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtLibraryMirror7</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="8" column="1">
+                 <widget class="QLineEdit" name="txtLibraryMirror7"/>
+                </item>
+                <item row="8" column="2">
+                 <widget class="QPushButton" name="btnLibraryMirror7">
+                  <property name="text">
+                   <string>Browse...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="9" column="0">
+                 <widget class="QLabel" name="lblLibrary10">
+                  <property name="text">
+                   <string>Mirror 8</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtLibraryMirror8</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="9" column="1">
+                 <widget class="QLineEdit" name="txtLibraryMirror8"/>
+                </item>
+                <item row="9" column="2">
+                 <widget class="QPushButton" name="btnLibraryMirror8">
+                  <property name="text">
+                   <string>Browse...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="10" column="0">
+                 <widget class="QLabel" name="lblLibrary11">
+                  <property name="text">
+                   <string>Mirror 9</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtLibraryMirror9</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="10" column="1">
+                 <widget class="QLineEdit" name="txtLibraryMirror9"/>
+                </item>
+                <item row="10" column="2">
+                 <widget class="QPushButton" name="btnLibraryMirror9">
+                  <property name="text">
+                   <string>Browse...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="11" column="0">
+                 <widget class="QLabel" name="lblLibrary12">
+                  <property name="text">
+                   <string>Mirror 10</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtLibraryMirror10</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="11" column="1">
+                 <widget class="QLineEdit" name="txtLibraryMirror10"/>
+                </item>
+                <item row="11" column="2">
+                 <widget class="QPushButton" name="btnLibraryMirror10">
+                  <property name="text">
+                   <string>Browse...</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item>
+             <widget class="QWidget" name="widLibrary1" native="true">
+              <layout class="QVBoxLayout" name="vLayoutLibrary4" stretch="1,1,1,100,1">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QPushButton" name="btnLibraryAdd">
+                 <property name="text">
+                  <string>Add</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnLibraryDelete">
+                 <property name="text">
+                  <string>Delete</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnLibrarySave">
+                 <property name="text">
+                  <string>Save</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="vSpacerLibrary1">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnLibraryUpdateSongs">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="visible">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string>Update songs</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_youtube">
+       <layout class="QVBoxLayout" name="vLayoutYotube1">
+        <item>
+         <widget class="QSplitter" name="splYotube1">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="QTableView" name="tblYoutube">
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="layoutWidget_2">
+           <layout class="QHBoxLayout" name="hLayoutYotube2">
+            <item>
+             <widget class="QScrollArea" name="scrollArea_Youtube">
+              <property name="widgetResizable">
+               <bool>true</bool>
+              </property>
+              <widget class="QWidget" name="scrollAreaWidgetContents_Youtube">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>110</width>
+                 <height>109</height>
+                </rect>
+               </property>
+               <layout class="QGridLayout" name="gLayoutYotube3">
+                <item row="0" column="3">
+                 <widget class="QLineEdit" name="txtYoutubeName"/>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="lblYoutube4">
+                  <property name="text">
+                   <string>Enable</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>chkYoutubeEnable</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="lblYoutube1">
+                  <property name="text">
+                   <string>Name</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtYoutubeName</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="lblYoutube2">
+                  <property name="text">
+                   <string>User</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtYoutubeUser</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="lblYoutube3">
+                  <property name="text">
+                   <string>URL</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>txtYoutubeUrl</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="3">
+                 <widget class="QLineEdit" name="txtYoutubeUrl"/>
+                </item>
+                <item row="2" column="3">
+                 <widget class="QLineEdit" name="txtYoutubeUser"/>
+                </item>
+                <item row="4" column="3">
+                 <widget class="QCheckBox" name="chkYoutubeEnable">
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item>
+             <widget class="QWidget" name="widYoutube1" native="true">
+              <layout class="QVBoxLayout" name="vLayoutYotube4" stretch="1,1,1,100">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QPushButton" name="btnYoutubeAdd">
+                 <property name="text">
+                  <string>Add</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnYoutubeDelete">
+                 <property name="text">
+                  <string>Delete</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnYoutubeSave">
+                 <property name="text">
+                  <string>Save</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="vSpacerYoutube1">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1070</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_Mange">
+    <property name="title">
+     <string>&amp;Manage</string>
+    </property>
+    <addaction name="action_Song"/>
+    <addaction name="actionS_inger"/>
+    <addaction name="action_Youtube"/>
+    <addaction name="separator"/>
+    <addaction name="action_Library"/>
+   </widget>
+   <widget class="QMenu" name="menu_Tools">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="actionRebuild_singers"/>
+    <addaction name="separator"/>
+    <addaction name="actionSearch_new_media"/>
+    <addaction name="actionSearch_duplicate_media"/>
+    <addaction name="actionSearch_duplicate_song"/>
+   </widget>
+   <addaction name="menu_Mange"/>
+   <addaction name="menu_Tools"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="action_Song">
+   <property name="text">
+    <string>&amp;Song</string>
+   </property>
+  </action>
+  <action name="actionS_inger">
+   <property name="text">
+    <string>S&amp;inger</string>
+   </property>
+  </action>
+  <action name="action_Library">
+   <property name="text">
+    <string>&amp;Library</string>
+   </property>
+  </action>
+  <action name="actionSearch_new_media">
+   <property name="text">
+    <string>Search new &amp;media</string>
+   </property>
+  </action>
+  <action name="actionRebuild_singers">
+   <property name="text">
+    <string>Rebuild &amp;singers</string>
+   </property>
+  </action>
+  <action name="actionSearch_duplicate_media">
+   <property name="text">
+    <string>Search duplicate media</string>
+   </property>
+  </action>
+  <action name="actionSearch_duplicate_song">
+   <property name="text">
+    <string>Search duplicate song</string>
+   </property>
+  </action>
+  <action name="action_Youtube">
+   <property name="text">
+    <string>&amp;Youtube</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QScaledLabel</class>
+   <extends>QLabel</extends>
+   <header location="global">pywidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QLabelButton</class>
+   <extends>QLabel</extends>
+   <header location="global">pywidgets.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>cmbSongSearchSinger</tabstop>
+  <tabstop>cmbSongSearchLanguage</tabstop>
+  <tabstop>cmbSongSearchStyle</tabstop>
+  <tabstop>btnSongAdd</tabstop>
+  <tabstop>btnSongDelete</tabstop>
+  <tabstop>tblSong</tabstop>
+  <tabstop>scrollArea_Song</tabstop>
+  <tabstop>txtSongIndex</tabstop>
+  <tabstop>btnSongIndex</tabstop>
+  <tabstop>txtSongTitle</tabstop>
+  <tabstop>txtSongChars</tabstop>
+  <tabstop>txtSongSearch</tabstop>
+  <tabstop>btnSongSearch</tabstop>
+  <tabstop>txtSongFunc_Singers</tabstop>
+  <tabstop>cmbSongLanguage</tabstop>
+  <tabstop>cmbSongStyle</tabstop>
+  <tabstop>cmbSongChannel</tabstop>
+  <tabstop>cmbSongLibrary</tabstop>
+  <tabstop>txtSongMedia_File</tabstop>
+  <tabstop>btnSongMedia</tabstop>
+  <tabstop>txtSongRemark</tabstop>
+  <tabstop>btnSongSave</tabstop>
+  <tabstop>cmbSingerSearchRegion</tabstop>
+  <tabstop>cmbSingerSearchCategory</tabstop>
+  <tabstop>btnSingerAdd</tabstop>
+  <tabstop>btnSingerDelete</tabstop>
+  <tabstop>tblSinger</tabstop>
+  <tabstop>scrollArea_Singer</tabstop>
+  <tabstop>txtSingerName</tabstop>
+  <tabstop>txtSingerSearch</tabstop>
+  <tabstop>btnSingerSearch</tabstop>
+  <tabstop>cmbSingerRegion</tabstop>
+  <tabstop>cmbSingerType</tabstop>
+  <tabstop>txtSingerRemark</tabstop>
+  <tabstop>btnSingerSave</tabstop>
+  <tabstop>tblLibrary</tabstop>
+  <tabstop>scrollArea_Library</tabstop>
+  <tabstop>txtLibraryRoot_Path</tabstop>
+  <tabstop>btnLibraryRoot_Path</tabstop>
+  <tabstop>chkLibraryEnabled</tabstop>
+  <tabstop>txtLibraryMirror1</tabstop>
+  <tabstop>btnLibraryMirror1</tabstop>
+  <tabstop>txtLibraryMirror2</tabstop>
+  <tabstop>btnLibraryMirror2</tabstop>
+  <tabstop>txtLibraryMirror3</tabstop>
+  <tabstop>btnLibraryMirror3</tabstop>
+  <tabstop>txtLibraryMirror4</tabstop>
+  <tabstop>btnLibraryMirror4</tabstop>
+  <tabstop>txtLibraryMirror5</tabstop>
+  <tabstop>btnLibraryMirror5</tabstop>
+  <tabstop>txtLibraryMirror6</tabstop>
+  <tabstop>btnLibraryMirror6</tabstop>
+  <tabstop>txtLibraryMirror7</tabstop>
+  <tabstop>btnLibraryMirror7</tabstop>
+  <tabstop>txtLibraryMirror8</tabstop>
+  <tabstop>btnLibraryMirror8</tabstop>
+  <tabstop>txtLibraryMirror9</tabstop>
+  <tabstop>btnLibraryMirror9</tabstop>
+  <tabstop>txtLibraryMirror10</tabstop>
+  <tabstop>btnLibraryMirror10</tabstop>
+  <tabstop>btnLibraryAdd</tabstop>
+  <tabstop>btnLibraryDelete</tabstop>
+  <tabstop>btnLibrarySave</tabstop>
+  <tabstop>btnLibraryUpdateSongs</tabstop>
+  <tabstop>tblYoutube</tabstop>
+  <tabstop>scrollArea_Youtube</tabstop>
+  <tabstop>txtYoutubeName</tabstop>
+  <tabstop>txtYoutubeUser</tabstop>
+  <tabstop>txtYoutubeUrl</tabstop>
+  <tabstop>btnYoutubeAdd</tabstop>
+  <tabstop>btnYoutubeDelete</tabstop>
+  <tabstop>btnYoutubeSave</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

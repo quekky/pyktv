@@ -4,7 +4,7 @@ import version
 import os
 
 
-include_files=['config.ini','db.sqlite3','locale','themes','html']
+include_files=['config.ini','db.sqlite3','locale','themes','html','editor']
 
 # GUI applications require a different base on Windows (the default is for a console application).
 base = None
@@ -22,7 +22,8 @@ if sys.platform == "win32":
     os.environ['TK_LIBRARY'] = os.path.join(PYTHON_INSTALL_DIR, 'tcl', 'tk8.6')
 
 
-executables = [Executable("pyktv.py", base=base, icon='pyktv.ico')]
+executables = [Executable("pyktv.py", base=base, icon='pyktv.ico'),
+               Executable("songeditor.py", base=base, icon='pyktv.ico')]
 
 options = {
     'build_exe': {

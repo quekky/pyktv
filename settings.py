@@ -41,7 +41,7 @@ def __init__():
 
     themeDir = os.path.join(config.get('theme.dir'), '')
 
-    dbconn = sqlite3.connect(config['sqlitefile'])
+    dbconn = sqlite3.connect(os.path.join(programDir, config['sqlitefile']))
     dbconn.row_factory = sqlite3.Row
 
 

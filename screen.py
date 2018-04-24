@@ -1,4 +1,3 @@
-
 import os
 import math
 import re
@@ -11,7 +10,7 @@ from pprint import pprint
 import settings
 import playlist
 import upnp_dlna
-from xpinyin import Pinyin
+import functions
 
 
 
@@ -452,12 +451,11 @@ def youtubeScreen1(data=None, page=0):
     rows = settings.dbconn.execute("select * from youtube where enable!=0 order by name COLLATE NOCASE, user COLLATE NOCASE")
 
     try:
-        pinyin=Pinyin()
         youtubelists = []
         for r in rows:
             d = dict(r)
             d['display'] = d['name']+" 《"+d['user']+'》'
-            d['search'] = pinyin.get_initials(d['name'], '').upper()
+            d['search'] = functions.get_initials(d['name'])
             youtubelists.append(d)
 
         pager = pagerContent(youtubelists, 0, getCommon2_h_options(), youtubeScreen2)
@@ -478,12 +476,11 @@ def youtubeScreen2(data=None, page=0):
         if(res['_type']=='url'):
             res = ydl.extract_info(res['url'])
 
-        pinyin=Pinyin()
         if res['entries'][0]['ie_key']=='YoutubePlaylist':
             tracks=res['entries']
             for t in tracks:
                 t['display'] = t['title']+" (Playlist)"
-                t['search'] = pinyin.get_initials(t['title'],'').upper()
+                t['search'] = functions.get_initials(t['title'],'').upper()
             pager = pagerContent(tracks, 0, getCommon2_h_options(), youtubeScreen2)
 
         else:
@@ -491,7 +488,7 @@ def youtubeScreen2(data=None, page=0):
             tracks=list(filter(lambda t:not re.match('\[.* video\]',t['title']),res['entries']))
             for t in tracks:
                 t['display'] = t['title']
-                t['search'] = pinyin.get_initials(t['title'],'').upper()
+                t['search'] = functions.get_initials(t['title'],'')
                 t['network'] = 'youtube'
             pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
 
@@ -562,11 +559,10 @@ def networkSearch2(data=None, page=0):
     addHistory(networkSearch2, data)
 
     try:
-        pinyin = Pinyin()
         children = upnp_dlna.find_directories(data)
         for child in children:
             child['display'] = child['title']
-            child['search'] = pinyin.get_initials(child['title'], '').upper()
+            child['search'] = functions.get_initials(child['title'], '').upper()
             child['server'] = data
             child['location'] = '//' + data['name'] + '/' + child['title'] + '/'
         pager = pagerContent(children, 0, getCommon2_h_options(), networkSearch3)
@@ -582,11 +578,10 @@ def networkSearch3(data=None, page=0):
         if data['class'].startswith('object.container'):
             # folder
             addHistory(networkSearch3, data, True)
-            pinyin = Pinyin()
             children = upnp_dlna.find_directories(data['server'], data['id'])
             for child in children:
                 child['display'] = child['title']
-                child['search'] = pinyin.get_initials(child['title'], '').upper()
+                child['search'] = functions.get_initials(child['title'], '').upper()
                 child['server'] = data['server']
                 child['location'] = data['location'] + child['title'] + '/'
                 if 'artist' in child.keys():

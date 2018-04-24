@@ -5,7 +5,7 @@ to test it out._
 
 1. Edit the config.ini according to your needs
 2. Find some KTV videos (due to copyright and file size, I'm not able to provide them)
-3. Use any sqlite program to modify the database. See <a href="#database-format">below</a> for more info
+3. Run songeditor.exe to modify the database. If not sure on the fields, see <a href="#database-format">below</a> for more info
 4. Run the program
 
 
@@ -45,6 +45,8 @@ Current pyktv features:
  \+        | Key up
  =         | Key reset
 
+
+Edit config.ini to change the default settings
 
 Mouse/touchscreen works as well
 
@@ -89,7 +91,7 @@ There are 3 tables in the database.
  language     | language of song                                  
  style        | song category                                     
  channel      | which channel is music only (L, R, 0, 1)          
- library      | which library it belongs to, for future expansion 
+ library      | which library it belongs to
  media_file   | media file name within the library                
  remark       | remarks                                           
 
@@ -133,6 +135,27 @@ For some youtube users who have a big list, I'll suggust that you point to their
 And of course Internet connection is required for YouTube to work.
 
 
+## library
+
+ Field        | Description
+--------------|---------------------------------------------------
+ id           | Running number
+ root_path    | The root directory
+ enabled      | 1=enable, 0=disable
+ last_mirror  | for future expansion
+ mirror1      | Alternate dir. Not used at the moment, for future expansion
+ mirror2      |
+ mirror3      |
+ mirror4      |
+ mirror5      |
+ mirror6      |
+ mirror7      |
+ mirror8      |
+ mirror9      |
+ mirror10     |
+ available    | for future expansion
+
+
 # DEVELOPER
 
 To run from sourcecode, install the python packages according to requirements.txt
@@ -150,12 +173,21 @@ After downloading youtube_dl source (or from pip), edit the code https://github.
 
 ### Unable to play xxx file format
 
-As the program using MPV to play file.
+The program use MPV to play file.
 
 Try download MPV from their site and playing the video using MPV. If it not able to play the video file, but other
 players is able to play it, report the bug to MPV.
 
 _(MPV uses ffmpeg to decode almost all videos, so it should be able to play almost any video)_
+
+### Unable to play any Youtube video
+
+Make sure youtube-dl.exe in the same directory as the program, MPV will require youtube-dl.exe to play the video
+
+### Unable to play some Youtube video
+
+Some of the Youtube videos are restricted by country. Make sure that you can play it on your browser on the same
+computer. If it can be play, try playing it in MPV.
 
 ### Unable to show certain YouTube playlist
 

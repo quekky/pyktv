@@ -65,10 +65,10 @@ function get_allregiontype() {
     })
     $('ons-radio[input-id="t-"]').prop('checked', true)
 
-    search()
+    search('', '', '')
 }
 
-function search(search='', region='', type='') {
+function search(search, region, type) {
     if(search==='' && region==='' && type==='') {
         artists={{uniquename}}_allartists
     } else {
@@ -102,13 +102,11 @@ ons.getScriptPage().onInit = function() {
     })
     $.templates('artistTmpl', tmplstr.html());
 
-
     $(this).find("ons-pull-hook")[0].onAction = function(done) {
         $.getJSON('/api/artist', function(data) {
             {{uniquename}}_allartists = data;
-            search();
-            done();
             get_allregiontype();
+            done();
         })
     }
 }

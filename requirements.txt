@@ -5,3 +5,4 @@ youtube-dl>=2018
 Flask>=0.12
 Flask-Compress>=1.4
 gevent>=1.2
+pypinyin
