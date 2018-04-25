@@ -4,7 +4,7 @@ import version
 import os
 
 
-include_files=['config.ini','db.sqlite3','locale','themes','html','editor']
+include_files=['README.md','ChangeLog','LICENSE','config.ini','db.sqlite3','locale','themes','html','editor']
 
 # GUI applications require a different base on Windows (the default is for a console application).
 base = None

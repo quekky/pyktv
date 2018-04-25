@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, QUrl, pyqtSignal, pyqtSlot, QTimer, QSortFilterProxyModel, QRegExp
 from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager
-from PyQt5.QtWidgets import QLabel, QSizePolicy, QLineEdit
+from PyQt5.QtWidgets import QLabel, QSizePolicy, QLineEdit, QStyledItemDelegate, QComboBox, QCompleter
 from PyQt5.QtGui import QRegExpValidator, QTextDocument, QPixmap, QFont, QPainter, QFontMetrics
 import re
 
@@ -253,6 +253,7 @@ class QTagCompleterLineEdit(QLineEdit):
     def __init__(self, parent):
         super().__init__(parent)
         self.textEdited.connect(self.text_edited)
+        self.cursorPositionChanged.connect(self.cursor_changed)
 
     def text_edited(self, text):
         if self._completer:
@@ -276,6 +277,10 @@ class QTagCompleterLineEdit(QLineEdit):
             self._completer.setCompletionPrefix(prefix)
             self._completer.complete()
 
+    def cursor_changed(self, old, new):
+        if self._completer.popup() and self._completer.popup().isVisible():
+            self.text_edited(self.text())
+
     def complete_text(self, text):
         cursor_pos = self.cursorPosition()
         before_text = self.text()[:cursor_pos]
@@ -289,3 +294,61 @@ class QTagCompleterLineEdit(QLineEdit):
         self._completer.setWidget(self)
         self._completer.activated.connect(self.complete_text)
 
+    def completer(self):
+        return self._completer
+
+
+class QCustomDelegate(QStyledItemDelegate):
+    def __init__(self, parent=None, validator=None, model=None):
+        super().__init__(parent)
+        self._validator=validator
+        self._model=model
+
+
+class QLineEditDelegate(QCustomDelegate):
+    def createEditor(self, parent, option, index):
+        lineedit=QLineEdit(parent)
+        lineedit.setValidator(self._validator)
+        if self._model:
+            completer=QCompleter()
+            completer.setModel(self._model)
+            lineedit.setCompleter(completer)
+        return lineedit
+
+    def setEditorData(self, editor, index):
+        editor.setText(index.data(Qt.EditRole))
+
+    def setModelData(self, editor, model, index):
+        model.setData(index, editor.text())
+
+
+class QComboBoxDelegate(QCustomDelegate):
+    def createEditor(self, parent, option, index):
+        combobox=QComboBox(parent)
+        combobox.setValidator(self._validator)
+        combobox.setModel(self._model)
+        try:
+            edit = not self._model.disallowedit
+        except:
+            edit = True
+        combobox.setEditable(edit)
+        return combobox
+
+    def setEditorData(self, editor, index):
+        data=index.data(Qt.EditRole)
+        editor.setCurrentIndex(editor.findText(data))
+        editor.setCurrentText(data)
+
+    def setModelData(self, editor, model, index):
+        model.setData(index, editor.currentText())
+
+
+class QTagCompleterLineEditDelegate(QLineEditDelegate):
+    def createEditor(self, parent, option, index):
+        lineedit=QTagCompleterLineEdit(parent)
+        lineedit.setValidator(self._validator)
+        if self._model:
+            completer=QCompleter()
+            completer.setModel(self._model)
+            lineedit.setCompleter(completer)
+        return lineedit

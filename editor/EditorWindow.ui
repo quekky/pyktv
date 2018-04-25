@@ -114,7 +114,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="cmbSongSearchSinger">
+                <widget class="QComboBox" name="cmbSongSearchFunc_Singers">
                  <property name="editable">
                   <bool>true</bool>
                  </property>
@@ -124,10 +124,18 @@
                 </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="cmbSongSearchLanguage"/>
+                <widget class="QComboBox" name="cmbSongSearchLanguage">
+                 <property name="maxVisibleItems">
+                  <number>20</number>
+                 </property>
+                </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="cmbSongSearchStyle"/>
+                <widget class="QComboBox" name="cmbSongSearchStyle">
+                 <property name="maxVisibleItems">
+                  <number>20</number>
+                 </property>
+                </widget>
                </item>
                <item>
                 <widget class="QPushButton" name="btnSongAdd">
@@ -544,10 +552,18 @@
                 </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="cmbSingerSearchRegion"/>
+                <widget class="QComboBox" name="cmbSingerSearchRegion">
+                 <property name="maxVisibleItems">
+                  <number>20</number>
+                 </property>
+                </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="cmbSingerSearchCategory"/>
+                <widget class="QComboBox" name="cmbSingerSearchType">
+                 <property name="maxVisibleItems">
+                  <number>20</number>
+                 </property>
+                </widget>
                </item>
                <item>
                 <widget class="QPushButton" name="btnSingerAdd">
@@ -778,8 +794,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>967</width>
-                 <height>418</height>
+                 <width>219</width>
+                 <height>364</height>
                 </rect>
                </property>
                <layout class="QGridLayout" name="gLayoutLibrary3">
@@ -1125,8 +1141,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>967</width>
-                 <height>258</height>
+                 <width>121</width>
+                 <height>118</height>
                 </rect>
                </property>
                <layout class="QGridLayout" name="gLayoutYotube3">
@@ -1345,7 +1361,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>cmbSongSearchSinger</tabstop>
+  <tabstop>cmbSongSearchFunc_Singers</tabstop>
   <tabstop>cmbSongSearchLanguage</tabstop>
   <tabstop>cmbSongSearchStyle</tabstop>
   <tabstop>btnSongAdd</tabstop>
@@ -1368,7 +1384,7 @@
   <tabstop>txtSongRemark</tabstop>
   <tabstop>btnSongSave</tabstop>
   <tabstop>cmbSingerSearchRegion</tabstop>
-  <tabstop>cmbSingerSearchCategory</tabstop>
+  <tabstop>cmbSingerSearchType</tabstop>
   <tabstop>btnSingerAdd</tabstop>
   <tabstop>btnSingerDelete</tabstop>
   <tabstop>tblSinger</tabstop>
