@@ -1,6 +1,7 @@
-from PyQt5.QtCore import Qt, QUrl, pyqtSignal, pyqtSlot, QTimer, QSortFilterProxyModel, QRegExp
+from PyQt5.QtCore import Qt, QUrl, pyqtSignal, pyqtSlot, QTimer, QSortFilterProxyModel
 from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager
-from PyQt5.QtWidgets import QLabel, QSizePolicy, QLineEdit, QStyledItemDelegate, QComboBox, QCompleter
+from PyQt5.QtWidgets import QLabel, QSizePolicy, QLineEdit, QStyledItemDelegate, QComboBox, QCompleter, QDialog, \
+    QGridLayout, QStyle, QTextEdit, QProgressDialog
 from PyQt5.QtGui import QRegExpValidator, QTextDocument, QPixmap, QFont, QPainter, QFontMetrics
 import re
 
@@ -352,3 +353,69 @@ class QTagCompleterLineEditDelegate(QLineEditDelegate):
             completer.setModel(self._model)
             lineedit.setCompleter(completer)
         return lineedit
+
+
+class QLargeMessageBox(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent, Qt.Tool)
+
+    @staticmethod
+    def warning(parent, title, text, htmltext):
+        dlg = QLargeMessageBox(parent)
+        dlg.setWindowTitle(title)
+        dlg.setMinimumWidth(600)
+        dlg.setMinimumHeight(400)
+        layout = QGridLayout(dlg)
+        label = QLabel()
+        label.setPixmap(dlg.style().standardIcon(QStyle.SP_MessageBoxWarning).pixmap(100, 100))
+        layout.addWidget(label, 0, 0)
+        layout.addWidget(QLabel(text), 0, 1)
+        layout.setColumnStretch(1, 100)
+        textedit = QTextEdit(htmltext)
+        textedit.setReadOnly(True)
+        layout.addWidget(textedit, 1, 0, 1, 2)
+        dlg.show()
+        return dlg
+
+
+class QStatusDialog(QProgressDialog):
+    class UpdateStream():
+        def __init__(self, parent):
+            self.parent=parent
+
+        def write(self, bar):
+            try:
+                eta = re.search('\[([\d:]+)<([\d:]+).*\]', bar.strip())
+                self.parent.setLabelMainText('%ss elapsed, %ss remaining' % eta.groups())
+            except:
+                pass
+
+        def flush(self):
+            pass
+
+    maintext=''
+    subtext=None
+
+    def __init__(self, title, cancelButtonText, minimum, maximum, parent, WindowFlags):
+        super().__init__('', cancelButtonText, minimum, maximum, parent, WindowFlags)
+        self.setWindowTitle(title)
+        self.setWindowModality(Qt.ApplicationModal)
+        self.setLabelMainText('0s elapsed, ? remaining')
+        self.updateClass = self.UpdateStream(self)
+
+    def getUpdateClass(self):
+        return self.updateClass
+
+    def updateLabelText(self):
+        text=self.maintext
+        if self.subtext:
+            text+='\n\n'+self.subtext
+        self.setLabelText(text)
+
+    def setLabelMainText(self, text):
+        self.maintext=text
+        self.updateLabelText()
+
+    def setLabelSubText(self, text):
+        self.subtext = text
+        self.updateLabelText()

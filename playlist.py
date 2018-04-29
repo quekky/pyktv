@@ -58,6 +58,7 @@ statusTempText = None
 maxpitchvariance = 5
 audiopanstr= ''
 audiopitch=0
+audiovolume=0
 
 
 
@@ -112,7 +113,7 @@ def deleteSong(video):
 
 
 def playNextSong():
-    global video_playlist, current_playing, videostarttime, videostatushasbeenset, channelhasbeenset, network_channel, audiopitch
+    global video_playlist, current_playing, videostarttime, videostatushasbeenset, channelhasbeenset, network_channel, audiopitch, audiovolume
     # print(current_playing)
     # print(video_playlist)
     try:
@@ -142,6 +143,7 @@ def playNextSong():
             videostarttime=time.time()
             network_channel = 0
             audiopitch = 0
+            audiovolume = current_playing['volume'] if 'volume' in current_playing.keys() else 0
             setChannel()
 
         except:
@@ -189,11 +191,12 @@ def checkMediaPlayback():
             randomPlay()
 
 def setPlayerFilter():
-    global audiopanstr, audiopitch
+    global audiopanstr, audiopitch, audiovolume
     try:
         #start with no rubberband (in MPV, for vorbis/opus, if there's rubberband the sound is not playing)
         audiopitchstr = None if audiopitch==0 else 'rubberband=pitch-scale=' + str(1 + audiopitch / 10)
-        str1=','.join(filter(None, (audiopanstr, audiopitchstr)))
+        audiovolumestr = None if audiovolume==0 else 'volume=volume=%sdB' % audiovolume
+        str1=','.join(filter(None, (audiovolumestr, audiopanstr, audiopitchstr)))
         settings.mpvMediaPlayer.command('af', 'clr', '')
         if str1: settings.mpvMediaPlayer.command('af', 'set', str1)
     except:

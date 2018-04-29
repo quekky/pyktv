@@ -156,6 +156,9 @@
             </item>
             <item>
              <widget class="QTableView" name="tblSong">
+              <property name="contextMenuPolicy">
+               <enum>Qt::CustomContextMenu</enum>
+              </property>
               <property name="selectionBehavior">
                <enum>QAbstractItemView::SelectRows</enum>
               </property>
@@ -205,6 +208,136 @@
                  </rect>
                 </property>
                 <layout class="QGridLayout" name="gLayoutSong5">
+                 <item row="6" column="0">
+                  <widget class="QLabel" name="lblSong7">
+                   <property name="text">
+                    <string>Category</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>cmbSongStyle</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="lblSong1">
+                   <property name="text">
+                    <string>Index</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSongIndex</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="1">
+                  <widget class="QComboBox" name="cmbSongLanguage">
+                   <property name="editable">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="0">
+                  <widget class="QLabel" name="lblSong6">
+                   <property name="text">
+                    <string>Language</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>cmbSongLanguage</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="1">
+                  <widget class="QComboBox" name="cmbSongChannel">
+                   <property name="editable">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QTagCompleterLineEdit" name="txtSongFunc_Singers"/>
+                 </item>
+                 <item row="6" column="1">
+                  <widget class="QComboBox" name="cmbSongStyle">
+                   <property name="editable">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="0">
+                  <widget class="QLabel" name="lblSong8">
+                   <property name="text">
+                    <string>Channel</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>cmbSongChannel</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="10" column="2">
+                  <widget class="QPushButton" name="btnSongMedia">
+                   <property name="text">
+                    <string>Browse ...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="9" column="0">
+                  <widget class="QLabel" name="lblSong10">
+                   <property name="text">
+                    <string>Librarry</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>cmbSongLibrary</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="11" column="0">
+                  <widget class="QLabel" name="lblSong12">
+                   <property name="text">
+                    <string>Remark</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSongRemark</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="11" column="1">
+                  <widget class="QLineEdit" name="txtSongRemark"/>
+                 </item>
+                 <item row="9" column="1">
+                  <widget class="QComboBox" name="cmbSongLibrary"/>
+                 </item>
+                 <item row="10" column="0">
+                  <widget class="QLabel" name="lblSong11">
+                   <property name="text">
+                    <string>Media file</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSongMedia_File</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="10" column="1">
+                  <widget class="QLineEdit" name="txtSongMedia_File"/>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QLineEdit" name="txtSongSearch">
+                   <property name="inputMethodHints">
+                    <set>Qt::ImhLatinOnly|Qt::ImhUppercaseOnly</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QLabel" name="lblSong5">
+                   <property name="text">
+                    <string>Singers</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>txtSongFunc_Singers</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="txtSongTitle"/>
+                 </item>
                  <item row="0" column="2">
                   <widget class="QPushButton" name="btnSongIndex">
                    <property name="text">
@@ -222,8 +355,12 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="1">
-                  <widget class="QLineEdit" name="txtSongTitle"/>
+                 <item row="3" column="2">
+                  <widget class="QPushButton" name="btnSongSearch">
+                   <property name="text">
+                    <string>Auto</string>
+                   </property>
+                  </widget>
                  </item>
                  <item row="1" column="0">
                   <widget class="QLabel" name="lblSong2">
@@ -252,13 +389,6 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="2">
-                  <widget class="QPushButton" name="btnSongSearch">
-                   <property name="text">
-                    <string>Auto</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="0" column="1">
                   <widget class="QLineEdit" name="txtSongIndex">
                    <property name="inputMethodHints">
@@ -266,132 +396,18 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="1">
-                  <widget class="QLineEdit" name="txtSongSearch">
-                   <property name="inputMethodHints">
-                    <set>Qt::ImhLatinOnly|Qt::ImhUppercaseOnly</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="0">
-                  <widget class="QLabel" name="lblSong5">
-                   <property name="text">
-                    <string>Singers</string>
-                   </property>
-                   <property name="buddy">
-                    <cstring>txtSongFunc_Singers</cstring>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="lblSong1">
-                   <property name="text">
-                    <string>Index</string>
-                   </property>
-                   <property name="buddy">
-                    <cstring>txtSongIndex</cstring>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="6" column="0">
-                  <widget class="QLabel" name="lblSong7">
-                   <property name="text">
-                    <string>Category</string>
-                   </property>
-                   <property name="buddy">
-                    <cstring>cmbSongStyle</cstring>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="1">
-                  <widget class="QComboBox" name="cmbSongLanguage">
-                   <property name="editable">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="0">
-                  <widget class="QLabel" name="lblSong6">
-                   <property name="text">
-                    <string>Language</string>
-                   </property>
-                   <property name="buddy">
-                    <cstring>cmbSongLanguage</cstring>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
-                  <widget class="QTagCompleterLineEdit" name="txtSongFunc_Singers"/>
-                 </item>
-                 <item row="7" column="1">
-                  <widget class="QComboBox" name="cmbSongChannel">
-                   <property name="editable">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="6" column="1">
-                  <widget class="QComboBox" name="cmbSongStyle">
-                   <property name="editable">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="7" column="0">
-                  <widget class="QLabel" name="lblSong8">
-                   <property name="text">
-                    <string>Channel</string>
-                   </property>
-                   <property name="buddy">
-                    <cstring>cmbSongChannel</cstring>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="10" column="0">
-                  <widget class="QLabel" name="lblSong11">
-                   <property name="text">
-                    <string>Remark</string>
-                   </property>
-                   <property name="buddy">
-                    <cstring>txtSongRemark</cstring>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="9" column="2">
-                  <widget class="QPushButton" name="btnSongMedia">
-                   <property name="text">
-                    <string>Browse ...</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="8" column="0">
                   <widget class="QLabel" name="lblSong9">
                    <property name="text">
-                    <string>Librarry</string>
+                    <string>Volume (±dB)</string>
                    </property>
                    <property name="buddy">
-                    <cstring>cmbSongLibrary</cstring>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="10" column="1">
-                  <widget class="QLineEdit" name="txtSongRemark"/>
-                 </item>
-                 <item row="9" column="1">
-                  <widget class="QLineEdit" name="txtSongMedia_File"/>
-                 </item>
-                 <item row="9" column="0">
-                  <widget class="QLabel" name="lblSong10">
-                   <property name="text">
-                    <string>Media file</string>
-                   </property>
-                   <property name="buddy">
-                    <cstring>txtSongMedia_File</cstring>
+                    <cstring>txtSongVolume</cstring>
                    </property>
                   </widget>
                  </item>
                  <item row="8" column="1">
-                  <widget class="QComboBox" name="cmbSongLibrary"/>
+                  <widget class="QLineEdit" name="txtSongVolume"/>
                  </item>
                 </layout>
                </widget>
@@ -625,8 +641,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>431</width>
-                  <height>410</height>
+                  <width>248</width>
+                  <height>154</height>
                  </rect>
                 </property>
                 <layout class="QGridLayout" name="hLayoutSinger5">
@@ -1297,8 +1313,19 @@
     <addaction name="actionSearch_duplicate_media"/>
     <addaction name="actionSearch_duplicate_song"/>
    </widget>
+   <widget class="QMenu" name="menuSong">
+    <property name="title">
+     <string>Song</string>
+    </property>
+    <addaction name="actionConvert_to_Simplified_Chinese"/>
+    <addaction name="actionConvert_to_Traditional_Chinese"/>
+    <addaction name="separator"/>
+    <addaction name="actionCheck_medias"/>
+    <addaction name="actionAuto_set_volume"/>
+   </widget>
    <addaction name="menu_Mange"/>
    <addaction name="menu_Tools"/>
+   <addaction name="menuSong"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="action_Song">
@@ -1341,6 +1368,29 @@
     <string>&amp;Youtube</string>
    </property>
   </action>
+  <action name="actionConvert_to_Simplified_Chinese">
+   <property name="text">
+    <string>Convert to Simplified Chinese</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionConvert_to_Traditional_Chinese">
+   <property name="text">
+    <string>Convert to Traditional Chinese</string>
+   </property>
+  </action>
+  <action name="actionCheck_medias">
+   <property name="text">
+    <string>Check medias</string>
+   </property>
+  </action>
+  <action name="actionAuto_set_volume">
+   <property name="text">
+    <string>Auto set volume</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1361,6 +1411,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>txtSongSearchTitle</tabstop>
   <tabstop>cmbSongSearchFunc_Singers</tabstop>
   <tabstop>cmbSongSearchLanguage</tabstop>
   <tabstop>cmbSongSearchStyle</tabstop>
@@ -1378,11 +1429,13 @@
   <tabstop>cmbSongLanguage</tabstop>
   <tabstop>cmbSongStyle</tabstop>
   <tabstop>cmbSongChannel</tabstop>
+  <tabstop>txtSongVolume</tabstop>
   <tabstop>cmbSongLibrary</tabstop>
   <tabstop>txtSongMedia_File</tabstop>
   <tabstop>btnSongMedia</tabstop>
   <tabstop>txtSongRemark</tabstop>
   <tabstop>btnSongSave</tabstop>
+  <tabstop>txtSingerSearchName</tabstop>
   <tabstop>cmbSingerSearchRegion</tabstop>
   <tabstop>cmbSingerSearchType</tabstop>
   <tabstop>btnSingerAdd</tabstop>
@@ -1424,15 +1477,18 @@
   <tabstop>btnLibraryAdd</tabstop>
   <tabstop>btnLibraryDelete</tabstop>
   <tabstop>btnLibrarySave</tabstop>
-  <tabstop>btnLibraryUpdateSongs</tabstop>
   <tabstop>tblYoutube</tabstop>
   <tabstop>scrollArea_Youtube</tabstop>
   <tabstop>txtYoutubeName</tabstop>
   <tabstop>txtYoutubeUser</tabstop>
   <tabstop>txtYoutubeUrl</tabstop>
+  <tabstop>chkYoutubeEnable</tabstop>
   <tabstop>btnYoutubeAdd</tabstop>
   <tabstop>btnYoutubeDelete</tabstop>
   <tabstop>btnYoutubeSave</tabstop>
+  <tabstop>btnSongPlayPause</tabstop>
+  <tabstop>slideSongVideo</tabstop>
+  <tabstop>btnSongAudio</tabstop>
  </tabstops>
  <resources/>
  <connections/>

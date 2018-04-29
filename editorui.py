@@ -1,19 +1,25 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QMessageBox, QInputDialog, QFileDialog, QCheckBox, QMenu, QDialog, \
-    qApp, QPushButton, QHeaderView, QGridLayout, QLabel, QStyle, QTextEdit, QCompleter, QLineEdit, QComboBox
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIntValidator, QPixmap
+    qApp, QPushButton, QHeaderView, QCompleter, QLineEdit, QComboBox
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIntValidator, QDoubleValidator, QPixmap
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QRegExp, QPoint, QStringListModel
 import os
+import sys
 import fnmatch
 from collections import OrderedDict
+import re
+from opencc import OpenCC
+from tqdm import tqdm
 from pprint import pprint
 
-from pywidgets import QUpperValidator, QLineEditDelegate, QComboBoxDelegate, QTagCompleterLineEditDelegate
+from pywidgets import QUpperValidator, QLineEditDelegate, QComboBoxDelegate, QTagCompleterLineEditDelegate, \
+    QLargeMessageBox, QStatusDialog
 import settings
 import functions
 
 
 
+NUL = 'NUL' if sys.platform == "win32" else '/dev/null'
 
 class EditorWindow(QMainWindow):
     def __init__(self):
@@ -144,15 +150,19 @@ class EditorWindow(QMainWindow):
                     obj.setCurrentText(txt)
 
 
+    def setPageStatusTip(self, table, selectedrows, total):
+        obj=getattr(self, 'page_'+table)
+        if obj:
+            status = "%s selected of %s %s(s)" % (selectedrows, total, table)
+            obj.setStatusTip(status)
+            self.statusBar.showMessage(status)
+
+
     def tblSelectionChanged(self, table, tblview, columns):
         rows = [r.row() for r in tblview.selectionModel().selectedRows()]
         rows.sort()
 
-        status = str(len(rows))+" selected of "+str(tblview.model().rowCount())+" "+table+"(s)"
-        obj=getattr(self, 'page_'+table)
-        if obj:
-            obj.setStatusTip(status)
-            self.statusBar.showMessage(status)
+        self.setPageStatusTip(table, len(rows), tblview.model().rowCount())
         wname = table.capitalize()
 
         for i, k in enumerate(columns):
@@ -371,6 +381,7 @@ class EditorWindow(QMainWindow):
         'language': {'title': 'Language', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongLanguageModel.__func__},
         'style': {'title': 'Category', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongStyleModel.__func__},
         'channel': {'title': 'Channel', 'itemdelegateclass': QComboBoxDelegate, 'validator':QUpperValidator(QRegExp('[lrLR]|[0-9]')), 'getmodel': getSongChannelModel.__func__},
+        'volume': {'title': 'Volume (±dB)', 'itemdelegateclass': QLineEditDelegate, 'validator': QDoubleValidator()},
         'library': {'title': 'Library', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongLibraryModel.__func__},
         'media_file': {'title': 'Media file'},
         'remark': {'title': 'Remark'}
@@ -397,6 +408,7 @@ class EditorWindow(QMainWindow):
 
         self.tblSong.setModel(self.songModelProxy4)
         self.tblSong.selectionModel().selectionChanged.connect(self.songSelectionChanged)
+        self.tblSong.customContextMenuRequested.connect(self.tblSongMenuRequested)
 
         self.txtSongSearchTitle.textChanged.connect(self.songSearch)
         self.cmbSongSearchFunc_Singers.editTextChanged.connect(self.songSearch)
@@ -428,6 +440,13 @@ class EditorWindow(QMainWindow):
         self.mpvMediaPlayer.wid = int(self.lblSongVideoFrame.winId())
         self.mpvMediaPlayer.observe_property('percent-pos', self.songVideoPositionChanged)
 
+        self.menuSong.menuAction().setVisible(False)
+        self.actionConvert_to_Simplified_Chinese.triggered.connect(self.convert2Simplified)
+        self.actionConvert_to_Traditional_Chinese.triggered.connect(self.convert2Traditional)
+        self.actionCheck_medias.triggered.connect(self.checkMedias)
+        self.actionAuto_set_volume.triggered.connect(self.setVolume)
+
+
 
         self.songRefresh()
         self.tblSong.sortByColumn(1, Qt.AscendingOrder)
@@ -454,7 +473,7 @@ class EditorWindow(QMainWindow):
     def songRefresh(self):
         self.refreshFromDB('song', self.tblSong, self.songColumns, self.songModel, self.joinsingers, self.splitsingers)
         self.setComboBoxModal('song', self.songColumns)
-        self.page_song.setStatusTip("0 selected of "+str(self.songModel.rowCount())+" song(s)")
+        self.setPageStatusTip('song', 0, self.songModel.rowCount())
 
 
     def songSelectionChanged(self, selected=None, deselected=None):
@@ -462,14 +481,23 @@ class EditorWindow(QMainWindow):
 
 
     def songSearch(self):
-        self.songModelProxy1.setFilterWildcard(self.txtSongSearchTitle.text())
+        self.songModelProxy1.setFilterWildcard(self.txtSongSearchTitle.text().strip())
         self.songModelProxy1.setFilterKeyColumn(list(self.songColumns).index('title'))
-        self.songModelProxy2.setFilterWildcard(self.cmbSongSearchFunc_Singers.currentText())
+        self.songModelProxy2.setFilterWildcard(self.cmbSongSearchFunc_Singers.currentText().strip())
         self.songModelProxy2.setFilterKeyColumn(list(self.songColumns).index('func_singers'))
-        self.songModelProxy3.setFilterFixedString(self.cmbSongSearchLanguage.currentText())
-        self.songModelProxy3.setFilterKeyColumn(list(self.songColumns).index('language'))
-        self.songModelProxy4.setFilterFixedString(self.cmbSongSearchStyle.currentText())
-        self.songModelProxy4.setFilterKeyColumn(list(self.songColumns).index('style'))
+        slang=self.cmbSongSearchLanguage.currentText()
+        if slang:
+            self.songModelProxy3.setFilterRegExp(QRegExp('^%s$'%slang))
+            self.songModelProxy3.setFilterKeyColumn(list(self.songColumns).index('language'))
+        else:
+            self.songModelProxy3.setFilterWildcard('')
+        sstyle=self.cmbSongSearchStyle.currentText()
+        if sstyle:
+            self.songModelProxy4.setFilterRegExp(QRegExp('^%s$'%sstyle))
+            self.songModelProxy4.setFilterKeyColumn(list(self.songColumns).index('style'))
+        else:
+            self.songModelProxy4.setFilterWildcard('')
+        self.setPageStatusTip('song', 0, self.tblSong.model().rowCount())
 
 
     def songAdd(self):
@@ -514,7 +542,7 @@ class EditorWindow(QMainWindow):
                             settings.logger.printException()
                         ids.append(id)
                 settings.dbconn.commit()
-                self.refreshAndSelectRows(self.songRefresh, self.tblSong, rows)
+                self.refreshAndSelectRows(self.songRefresh, self.tblSong, ids)
 
 
     def songSetSearchChar(self):
@@ -526,10 +554,10 @@ class EditorWindow(QMainWindow):
         filename=self.txtSongMedia_File.text()
         if lib and os.path.isdir(lib) or filename:
             lib = os.path.normcase(lib)
-            path = os.path.dirname(os.path.join(lib, filename))
+            path = os.path.dirname(os.path.join(lib, filename.lstrip(os.path.sep)))
 
         qfd=QFileDialog(self, "Open Video", path, "Video (*.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv);;All files (*.*)")
-        if path:
+        if lib:
             qfd.directoryEntered.connect(lambda dir: os.path.normcase(dir).startswith(lib) or qfd.setDirectory(lib))
         if qfd.exec():
             filename = os.path.normcase(qfd.selectedFiles()[0])
@@ -543,10 +571,136 @@ class EditorWindow(QMainWindow):
         self.txtSongChars.setText(str(l) if l else '')
 
 
+    def tblSongMenuRequested(self, pos):
+        self.menuSong.exec_(self.sender().viewport().mapToGlobal(pos))
+
+
+    def convertChinese(self, str, type):
+        if QMessageBox.question(self, 'Convert to %s'%str, 'Are you sure?', QMessageBox.YesToAll|QMessageBox.NoToAll)==QMessageBox.NoToAll:
+            return
+        openCC = OpenCC(type)
+        rows = [r.row() for r in self.tblSong.selectionModel().selectedRows()]
+        ids=[]
+        pos_singers=list(self.songColumns.keys()).index('func_singers')
+        pos_title=list(self.songColumns.keys()).index('title')
+        for r in rows:
+            id=self.tblSong.model().index(r, 1).data(Qt.UserRole)
+            cols = self.splitsingers('func_singers', openCC.convert(self.tblSong.model().index(r, pos_singers).data()))
+            cols['title'] = openCC.convert(self.tblSong.model().index(r, pos_title).data()).strip()
+            settings.dbconn.execute("update song set [%s]=? where id = ?" % ']=?,['.join(cols), list(cols.values()) + [id])
+            ids.append(id)
+        settings.dbconn.commit()
+        self.refreshAndSelectRows(self.songRefresh, self.tblSong, ids)
+
+    def convert2Simplified(self):
+        self.convertChinese('Simplified Chinese', 't2s')
+
+    def convert2Traditional(self):
+        self.convertChinese('Traditional Chinese', 's2t')
+
+    @staticmethod
+    def checkSingleMedia(cmd, file):
+        """
+
+        :param cmd: CommandRunner
+        :param file: video to check
+        :return: error message, None if no error
+        """
+        if not os.path.isfile(file):
+            return 'File not found'
+        try:
+            cmd.run_command(['ffmpeg', '-i', file, '-c', 'copy', '-f', 'null', NUL])
+        except Exception as e:
+            settings.logger.printException('Error in %s' % videopath)
+            return 'ffmpeg error: ' + str(e)
+        try:
+            dur = functions.to_sec(cmd.DUR_REGEX.search(cmd.output).group(1))
+        except:
+            return 'Duration not found'
+        try:
+            vtime = functions.to_sec(re.search(r'.*\stime=(\d\d:\d\d:\d\d.\d\d)', cmd.output, re.DOTALL).group(1))
+        except:
+            return 'ffmpeg cant find the ending time'
+        if not vtime-2 <= dur <= vtime+2:
+            return 'Video time does not match duration (%.2fs)'%(vtime-dur)
+
+    def checkMedias(self):
+        rows = [r.row() for r in self.tblSong.selectionModel().selectedRows()]
+        progress = QStatusDialog('Checking medias...', 'Stop', 0, len(rows), self, Qt.Dialog | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
+        cmd = functions.CommandRunner()
+        pos_title=list(self.songColumns.keys()).index('title')
+        pos_library=list(self.songColumns.keys()).index('library')
+        pos_media=list(self.songColumns.keys()).index('media_file')
+        errors=[]
+
+        for i, r in enumerate(tqdm(rows, file=progress.getUpdateClass())):
+            progress.setValue(i)
+            if progress.wasCanceled():
+                break
+            library = self.tblSong.model().index(r, pos_library).data()
+            mediafile = self.tblSong.model().index(r, pos_media).data()
+            videopath=mediafile if library=='' else os.path.join(library, mediafile.lstrip(os.path.sep))
+            error=self.checkSingleMedia(cmd, videopath)
+            if error:
+                errors.append('<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>'%(self.tblSong.model().index(r, pos_title).data(),library,mediafile,error))
+        progress.setValue(len(rows))
+        if errors:
+            QLargeMessageBox.warning(self, 'Check medias', 'Errors in these medias', '<table><tr><th>Title</th><th>Library</th><th>Media</th><th>Error</th></tr>'+'\n'.join(errors)+'</table>')
+        else:
+            QMessageBox.information(self, 'Check medias', 'No errors found.')
+
+
+    def setVolume(self):
+        goalLUFS = -14
+        maxPeak = -2
+
+        if QMessageBox.question(self, 'Set volume', 'Program will scan each file to find the suitable volume.<br><b>This will take very long.</b><br><br>Are you sure?', QMessageBox.YesToAll|QMessageBox.NoToAll)==QMessageBox.NoToAll:
+            return
+        rows = [r.row() for r in self.tblSong.selectionModel().selectedRows()]
+        progress = QStatusDialog('Scanning medias for volume...', 'Stop', 0, len(rows), self, Qt.Dialog | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
+        progress.setMinimumDuration(0)
+        progress.forceShow()
+        cmd=functions.CommandRunner()
+        pos_library=list(self.songColumns.keys()).index('library')
+        pos_media=list(self.songColumns.keys()).index('media_file')
+        ids=[]
+
+        for i, r in enumerate(tqdm(rows, file=progress.getUpdateClass())):
+            progress.setValue(i)
+            if progress.wasCanceled():
+                break
+            library = self.tblSong.model().index(r, pos_library).data()
+            mediafile = self.tblSong.model().index(r, pos_media).data()
+            videopath=mediafile if library=='' else os.path.join(library, mediafile.lstrip(os.path.sep))
+            try:
+                id = self.tblSong.model().index(r, 1).data(Qt.UserRole)
+                for p in cmd.run_ffmpeg_command(['ffmpeg', '-i', videopath, '-vn', '-filter_complex', 'ebur128=dualmono=true:peak=true', '-f', 'null', NUL]):
+                    qApp.processEvents()
+                    progress.setLabelSubText("Processing file %s - %s%%" %(i+1, p))
+                summaryList = cmd.output[cmd.output.rfind('Summary:'):].split()
+                LUFS = float(summaryList[summaryList.index('I:') + 1])
+                Peak = float(summaryList[summaryList.index('Peak:') + 1])
+
+                gainDB = goalLUFS-LUFS
+                if gainDB>0 and Peak+gainDB > maxPeak:
+                    if Peak<maxPeak:
+                        gainDB=maxPeak-Peak
+                    else:
+                        gainDB=0
+                settings.dbconn.execute("update song set [volume]=? where id = ?", (round(gainDB,3), id,))
+                ids.append(id)
+            except:
+                settings.logger.printException()
+        progress.setValue(len(rows))
+        settings.dbconn.commit()
+        self.refreshAndSelectRows(self.songRefresh, self.tblSong, ids)
+
+
     ### media player functions
 
     previousplaying=-1
     sliderpressed=False
+    volumestr=''
 
 
     def songPlayPause(self):
@@ -555,15 +709,12 @@ class EditorWindow(QMainWindow):
         if len(rows)==1 and (player.idle_active or self.previousplaying!=rows[0].data()):
             library = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('library')).data()
             mediafile = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('media_file')).data()
-            if library=='':
-                videopath=mediafile
-            else:
-                mediafile=mediafile.lstrip(os.path.sep)
-                videopath=os.path.join(library,mediafile)
-            # print(videopath, rows[0].data())
+            volume = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('volume')).data()
+            videopath = mediafile if library == '' else os.path.join(library, mediafile.lstrip(os.path.sep))
             player.play(videopath)
             player.aid = 1
-            player.command('af', 'clr', '')
+            self.volumestr='volume=volume=%sdB'%volume
+            player.command('af', 'set', self.volumestr)
             self.channel=''
             self.previousplaying=rows[0].data()
             self.statusBar.showMessage(videopath)
@@ -621,19 +772,19 @@ class EditorWindow(QMainWindow):
             action = action.text()
             self.mpvMediaPlayer.aid = 1
             if action=='Stereo':
-                self.mpvMediaPlayer.command('af', 'clr', '')
+                self.mpvMediaPlayer.command('af', 'set', self.volumestr)
                 self.channel=''
             elif action=='Left':
-                self.mpvMediaPlayer.command('af', 'set', 'pan="mono|c0=c0"')
+                self.mpvMediaPlayer.command('af', 'set', 'pan="mono|c0=c0",' + self.volumestr)
                 self.channel='L'
             elif action == 'Right':
-                self.mpvMediaPlayer.command('af', 'set', 'pan="mono|c0=c1"')
+                self.mpvMediaPlayer.command('af', 'set', 'pan="mono|c0=c1",' + self.volumestr)
                 self.channel='R'
             elif action.startswith('Track '):
                 try:
                     ch = int(action[6:])
                     self.mpvMediaPlayer.aid = ch+1
-                    self.mpvMediaPlayer.command('af', 'clr', '')
+                    self.mpvMediaPlayer.command('af', 'set', self.volumestr)
                     self.channel = '' if ch==0 else ch
                 except:
                     pass
@@ -698,7 +849,7 @@ class EditorWindow(QMainWindow):
     def singerRefresh(self):
         self.refreshFromDB('singer', self.tblSinger, self.singerColumns, self.singerModel)
         self.setComboBoxModal('singer', self.singerColumns)
-        self.page_singer.setStatusTip("0 selected of "+str(self.singerModel.rowCount())+" singer(s)")
+        self.setPageStatusTip('singer', 0, self.singerModel.rowCount())
 
 
     def singerSelectionChanged(self, selected=None, deselected=None):
@@ -715,12 +866,21 @@ class EditorWindow(QMainWindow):
 
 
     def singerSearch(self):
-        self.singerModelProxy1.setFilterWildcard(self.txtSingerSearchName.text())
+        self.singerModelProxy1.setFilterWildcard(self.txtSingerSearchName.text().strip())
         self.singerModelProxy1.setFilterKeyColumn(list(self.singerColumns).index('name'))
-        self.singerModelProxy2.setFilterWildcard(self.cmbSingerSearchRegion.currentText())
-        self.singerModelProxy2.setFilterKeyColumn(list(self.singerColumns).index('region'))
-        self.singerModelProxy3.setFilterFixedString(self.cmbSingerSearchType.currentText())
-        self.singerModelProxy3.setFilterKeyColumn(list(self.singerColumns).index('type'))
+        sregion=self.cmbSingerSearchRegion.currentText()
+        if sregion:
+            self.singerModelProxy2.setFilterRegExp(QRegExp('^%s$'%sregion))
+            self.singerModelProxy2.setFilterKeyColumn(list(self.singerColumns).index('region'))
+        else:
+            self.singerModelProxy2.setFilterWildcard('')
+        stype=self.cmbSingerSearchType.currentText()
+        if stype:
+            self.singerModelProxy3.setFilterRegExp(QRegExp('^%s$'%stype))
+            self.singerModelProxy3.setFilterKeyColumn(list(self.singerColumns).index('type'))
+        else:
+            self.singerModelProxy3.setFilterWildcard('')
+        self.setPageStatusTip('singer', 0, self.tblSinger.model().rowCount())
 
 
     def singerAdd(self):
@@ -780,7 +940,7 @@ class EditorWindow(QMainWindow):
 
     def libraryRefresh(self):
         self.refreshFromDB('library', self.tblLibrary, self.libraryColumns, self.libraryModel)
-        self.page_library.setStatusTip("0 selected of "+str(self.libraryModel.rowCount())+" library(s)")
+        self.setPageStatusTip('library', 0, self.libraryModel.rowCount())
 
 
     def librarySelectionChanged(self, selected=None, deselected=None):
@@ -840,7 +1000,7 @@ class EditorWindow(QMainWindow):
 
     def youtubeRefresh(self):
         self.refreshFromDB('youtube', self.tblYoutube, self.youtubeColumns, self.youtubeModel)
-        self.page_youtube.setStatusTip("0 selected of "+str(self.youtubeModel.rowCount())+" youtube(s)")
+        self.setPageStatusTip('youtube', 0, self.youtubeModel.rowCount())
 
 
     def youtubeSelectionChanged(self, selected=None, deselected=None):
@@ -892,21 +1052,9 @@ class EditorWindow(QMainWindow):
         rows = settings.dbconn.execute("select count(id), library, media_file from song where media_file<>'' group by library, media_file having count(id)>1")
         medias=['<tr><td>'+str(r[0])+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>' for r in rows]
         if medias:
-            self.dupmediadialog = QDialog(self, Qt.Tool)
-            self.dupmediadialog.setWindowTitle("Search duplicate media")
-            self.dupmediadialog.setMinimumWidth(600)
-            self.dupmediadialog.setMinimumHeight(400)
-            # self.dupmediadialog.setWindowFlags()
-            layout=QGridLayout(self.dupmediadialog)
-            label=QLabel()
-            label.setPixmap(self.style().standardIcon(QStyle.SP_MessageBoxWarning).pixmap(100,100))
-            layout.addWidget(label, 0, 0)
-            layout.addWidget(QLabel(str(len(medias)) + " media(s) are found in duplicates:"), 0, 1)
-            layout.setColumnStretch(1,100)
-            textedit=QTextEdit("<table><tr><th>Duplicates</th><th>Library</th><th>Media</th></tr>"+"\n".join(medias)+"</table>")
-            textedit.setReadOnly(True)
-            layout.addWidget(textedit, 1, 0, 1, 2)
-            self.dupmediadialog.show()
+            QLargeMessageBox.warning(self, 'Search duplicate media',
+                                     str(len(medias)) + " media(s) are found in duplicates:",
+                                     "<table><tr><th>Duplicates</th><th>Library</th><th>Media</th></tr>"+"\n".join(medias)+"</table>")
         else:
             QMessageBox.information(self, "Search duplicate media", "No duplicate media found")
 
@@ -924,20 +1072,9 @@ class EditorWindow(QMainWindow):
                      '</td></tr>'
                      for r in songs]
 
-            self.dupmediadialog = QDialog(self, Qt.Tool)
-            self.dupmediadialog.setWindowTitle("Search duplicate song")
-            self.dupmediadialog.setMinimumWidth(600)
-            self.dupmediadialog.setMinimumHeight(400)
-            layout=QGridLayout(self.dupmediadialog)
-            label=QLabel()
-            label.setPixmap(self.style().standardIcon(QStyle.SP_MessageBoxWarning).pixmap(100,100))
-            layout.addWidget(label, 0, 0)
-            layout.addWidget(QLabel(str(len(songs)) + " song(s) are found in duplicates:"), 0, 1)
-            layout.setColumnStretch(1,100)
-            textedit=QTextEdit("<table><tr><th>Duplicates</th><th>Song</th><th>Singers</th></tr>"+"\n".join(message)+"</table>")
-            textedit.setReadOnly(True)
-            layout.addWidget(textedit, 1, 0, 1, 2)
-            self.dupmediadialog.show()
+            QLargeMessageBox.warning(self, 'Search duplicate song',
+                                     str(len(songs)) + " song(s) are found in duplicates:",
+                                     "<table><tr><th>Duplicates</th><th>Song</th><th>Singers</th></tr>"+"\n".join(message)+"</table>")
         else:
             QMessageBox.information(self, "Search duplicate song", "No duplicate song found")
 

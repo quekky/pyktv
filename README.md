@@ -92,6 +92,7 @@ There are 3 tables in the database.
  style        | song category                                     
  channel      | which channel is music only (L, R, 0, 1)          
  library      | which library it belongs to
+ volume       | Volume to increase (in decibel(dB)), put - to decrease
  media_file   | media file name within the library                
  remark       | remarks                                           
 
@@ -165,6 +166,9 @@ $ pip install -r requirements.txt
 Download MPV library from https://mpv.io/ and put it in the path (For Windows, download **mpv-1.dll**)
 If there's no library for the OS you're using, you'll need to compile it from MPV source and drop the library file
 in the root of the project
+
+If you want to use the media checking features in Song Editor, download ffmpeg and put it in the path
+(or install from dnf/apt)
 
 After downloading youtube_dl source (or from pip), edit the code https://github.com/rg3/youtube-dl/issues/15787
 
