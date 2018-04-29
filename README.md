@@ -92,6 +92,7 @@ There are 3 tables in the database.
  style        | song category                                     
  channel      | which channel is music only (L, R, 0, 1)          
  library      | which library it belongs to
+ volume       | Volume to increase (in decibel(dB)), put - to decrease
  media_file   | media file name within the library                
  remark       | remarks                                           
 

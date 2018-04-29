@@ -1,10 +1,22 @@
-version 2018.04.25-beta
+## version 2018.04.25-beta
 
-- Song Editor - a new program to edit the database
+- Volume for each song (please use the new DB format)
+- In Song Editor, added a few new features for song:
+  - Translate title and singers between TC and SC
+  - Check if media is valid
+  - Find the loudness and set the volume for each song
+  - (right click on the song to find the new feature)
 - Bugfix
 
 
-version 2018.04.20-beta
+## version 2018.04.25-beta
+
+- Song Editor - a new program to edit the database
+- Replace xpinyin with pypinyin
+- Bugfix
+
+
+## version 2018.04.20-beta
 
 - Web server support (browse on your smartphone/tablet port 5000)
 - Allow change of keyboard mapping
@@ -12,20 +24,20 @@ version 2018.04.20-beta
 - Bugfix
 
 
-version 2018.04.17-beta
+## version 2018.04.17-beta
 
 - Web server support (browse on your smartphone/tablet port 5000)
 - update to youtube_dl 2018.4.16
 - Bugfix
 
 
-version 2018.04.10-beta
+## version 2018.04.10-beta
 
 - Browse and play from DLNA servers on local network
 - Bugfix
 
 
-version 2018.04.07-beta
+## version 2018.04.07-beta
 
 - Use coding to create the labels and buttons for the selector.
   Now the background image does not need to manually draw the lines/boxes/numberings for the labels
@@ -34,7 +46,7 @@ version 2018.04.07-beta
 - Bugfix
 
 
-version 2018.04.04-beta
+## version 2018.04.04-beta
 
 - Change from VLC to MPV (switching audio tracks do not have long delay now)
 - Implement pitch control (key-up/key-down)
@@ -42,13 +54,13 @@ version 2018.04.04-beta
 - minor bugfix
 
 
-version 2018.03.09-beta
+## version 2018.03.09-beta
 
 - implement randomplay on idle
 - minor bugfix
 
 
-Initial release 2018.03.07 beta
+## Initial release 2018.03.07 beta
 
 - Video playback using VLC 3
 - GUI using pyqt5
