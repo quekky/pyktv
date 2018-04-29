@@ -418,4 +418,3 @@ class QStatusDialog(QProgressDialog):
 
     def setLabelSubText(self, text):
         self.subtext = text
-        self.updateLabelText()

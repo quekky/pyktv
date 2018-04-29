@@ -43,7 +43,7 @@ class CommandRunner():
                 result = self.TIME_REGEX.search(line)
                 if result:
                     elapsed_time = float(result.group(1))
-                    yield int(elapsed_time / total_dur * 100)
+                    yield int(elapsed_time / total_dur * 100) if elapsed_time<=total_dur else 100
         yield 100
 
     def run_command(self, cmd):

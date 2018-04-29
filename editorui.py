@@ -91,6 +91,11 @@ class EditorWindow(QMainWindow):
                 item = QStandardItem(str(s))
                 item.setData(r['id'], Qt.UserRole)
                 item.setData(s, Qt.UserRole+1)
+                if 'type' in columns[k].keys():
+                    try:
+                        item.setData(columns[k]['type'](s), Qt.UserRole + 1)
+                    except:
+                        pass
                 item.setData(table, Qt.UserRole+2)
                 item.setData(k, Qt.UserRole+3)
                 if k.startswith('func_') and callable(columnjoinfunc):
@@ -374,17 +379,17 @@ class EditorWindow(QMainWindow):
     songColumns = OrderedDict({
         'id': {'title': 'ID'},
         'index': {'title': 'Index', 'itemdelegateclass': QLineEditDelegate, 'validator': QIntValidator()},
-        'title': {'title': 'Title'},
+        'title': {'title': 'Title', 'type': str},
         'chars': {'title': 'Chars', 'itemdelegateclass': QLineEditDelegate, 'validator': QIntValidator()},
-        'search': {'title': 'Search letter', 'itemdelegateclass': QLineEditDelegate, 'validator': QUpperValidator(QRegExp('[0-9a-zA-Z]+'))},
+        'search': {'title': 'Search letter', 'itemdelegateclass': QLineEditDelegate, 'validator': QUpperValidator(QRegExp('[0-9a-zA-Z]+')), 'type': str},
         'func_singers': {'title': 'Singers', 'itemdelegateclass': QTagCompleterLineEditDelegate, 'getmodel': getSongSingerModel.__func__},
-        'language': {'title': 'Language', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongLanguageModel.__func__},
-        'style': {'title': 'Category', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongStyleModel.__func__},
-        'channel': {'title': 'Channel', 'itemdelegateclass': QComboBoxDelegate, 'validator':QUpperValidator(QRegExp('[lrLR]|[0-9]')), 'getmodel': getSongChannelModel.__func__},
-        'volume': {'title': 'Volume (±dB)', 'itemdelegateclass': QLineEditDelegate, 'validator': QDoubleValidator()},
+        'language': {'title': 'Language', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongLanguageModel.__func__, 'type': str},
+        'style': {'title': 'Category', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongStyleModel.__func__, 'type': str},
+        'channel': {'title': 'Channel', 'itemdelegateclass': QComboBoxDelegate, 'validator':QUpperValidator(QRegExp('[lrLR]|[0-9]')), 'getmodel': getSongChannelModel.__func__, 'type': str},
+        'volume': {'title': 'Volume (±dB)', 'itemdelegateclass': QLineEditDelegate, 'validator': QDoubleValidator(), 'type': float},
         'library': {'title': 'Library', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongLibraryModel.__func__},
         'media_file': {'title': 'Media file'},
-        'remark': {'title': 'Remark'}
+        'remark': {'title': 'Remark', 'type': str}
     })
 
     channel = ''
@@ -611,16 +616,20 @@ class EditorWindow(QMainWindow):
         try:
             cmd.run_command(['ffmpeg', '-i', file, '-c', 'copy', '-f', 'null', NUL])
         except Exception as e:
-            settings.logger.printException('Error in %s' % videopath)
+            settings.logger.printException('Error in %s' % file)
             return 'ffmpeg error: ' + str(e)
+        print(cmd.output)
+        dur=None
         try:
             dur = functions.to_sec(cmd.DUR_REGEX.search(cmd.output).group(1))
         except:
-            return 'Duration not found'
+            pass
         try:
             vtime = functions.to_sec(re.search(r'.*\stime=(\d\d:\d\d:\d\d.\d\d)', cmd.output, re.DOTALL).group(1))
         except:
-            return 'ffmpeg cant find the ending time'
+            return 'ffmpeg cant find the video time'
+        if not dur and vtime<120:
+            return 'Video time seems too short (%.2fs)'%vtime
         if not vtime-2 <= dur <= vtime+2:
             return 'Video time does not match duration (%.2fs)'%(vtime-dur)
 
@@ -652,21 +661,22 @@ class EditorWindow(QMainWindow):
 
     def setVolume(self):
         goalLUFS = -14
-        maxPeak = -2
+        maxPeak = -1
 
         if QMessageBox.question(self, 'Set volume', 'Program will scan each file to find the suitable volume.<br><b>This will take very long.</b><br><br>Are you sure?', QMessageBox.YesToAll|QMessageBox.NoToAll)==QMessageBox.NoToAll:
             return
         rows = [r.row() for r in self.tblSong.selectionModel().selectedRows()]
-        progress = QStatusDialog('Scanning medias for volume...', 'Stop', 0, len(rows), self, Qt.Dialog | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
+        ids=[r.data(Qt.UserRole) for r in self.tblSong.selectionModel().selectedRows()]
+        progress = QStatusDialog('Scanning medias for volume...', 'Stop', 0, len(rows)*100, self, Qt.Dialog | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
         progress.setMinimumDuration(0)
         progress.forceShow()
         cmd=functions.CommandRunner()
         pos_library=list(self.songColumns.keys()).index('library')
         pos_media=list(self.songColumns.keys()).index('media_file')
-        ids=[]
+        pbar=tqdm(total=len(rows)*100, file=progress.getUpdateClass())
 
-        for i, r in enumerate(tqdm(rows, file=progress.getUpdateClass())):
-            progress.setValue(i)
+        for i, r in enumerate(rows):
+            progress.setValue(i*100)
             if progress.wasCanceled():
                 break
             library = self.tblSong.model().index(r, pos_library).data()
@@ -674,9 +684,14 @@ class EditorWindow(QMainWindow):
             videopath=mediafile if library=='' else os.path.join(library, mediafile.lstrip(os.path.sep))
             try:
                 id = self.tblSong.model().index(r, 1).data(Qt.UserRole)
+                prevp = 0
                 for p in cmd.run_ffmpeg_command(['ffmpeg', '-i', videopath, '-vn', '-filter_complex', 'ebur128=dualmono=true:peak=true', '-f', 'null', NUL]):
                     qApp.processEvents()
-                    progress.setLabelSubText("Processing file %s - %s%%" %(i+1, p))
+                    progress.setLabelSubText("Processing file %s/%s - %s%%" %(i+1, len(rows), p))
+                    if prevp!=p:
+                        pbar.update(p-prevp)
+                        prevp=p
+                        progress.setValue(i*100+p)
                 summaryList = cmd.output[cmd.output.rfind('Summary:'):].split()
                 LUFS = float(summaryList[summaryList.index('I:') + 1])
                 Peak = float(summaryList[summaryList.index('Peak:') + 1])
@@ -688,11 +703,10 @@ class EditorWindow(QMainWindow):
                     else:
                         gainDB=0
                 settings.dbconn.execute("update song set [volume]=? where id = ?", (round(gainDB,3), id,))
-                ids.append(id)
+                settings.dbconn.commit()
             except:
                 settings.logger.printException()
-        progress.setValue(len(rows))
-        settings.dbconn.commit()
+        progress.setValue(len(rows)*100)
         self.refreshAndSelectRows(self.songRefresh, self.tblSong, ids)
 
 
@@ -807,11 +821,11 @@ class EditorWindow(QMainWindow):
 
     singerColumns = OrderedDict({
         'id': {'title': 'ID'},
-        'name': {'title': 'Name'},
-        'search': {'title': 'Search letter', 'itemdelegateclass': QLineEditDelegate, 'validator': QUpperValidator(QRegExp('[0-9a-zA-Z]+'))},
-        'region': {'title': 'Region', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSingerRegionModel.__func__},
-        'type': {'title': 'Category', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSingerTypeModel.__func__},
-        'remark': {'title': 'Remark'}
+        'name': {'title': 'Name', 'type': str},
+        'search': {'title': 'Search letter', 'itemdelegateclass': QLineEditDelegate, 'validator': QUpperValidator(QRegExp('[0-9a-zA-Z]+')), 'type': str},
+        'region': {'title': 'Region', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSingerRegionModel.__func__, 'type': str},
+        'type': {'title': 'Category', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSingerTypeModel.__func__, 'type': str},
+        'remark': {'title': 'Remark', 'type': str}
     })
 
 
@@ -973,7 +987,8 @@ class EditorWindow(QMainWindow):
     """ youtube functions """
 
 
-    youtubeColumns = OrderedDict({'id':{'title':'ID'}, 'name':{'title':'Name'}, 'user':{'title':'User'}, 'url':{'title':'URL'},
+    youtubeColumns = OrderedDict({'id':{'title':'ID'}, 'name':{'title':'Name', 'type': str},
+                                  'user':{'title':'User', 'type': str}, 'url':{'title':'URL', 'type': str},
                                   'enable': {'title': 'Enable', 'itemdelegateclass': QLineEditDelegate,'validator': QIntValidator(0, 1)}})
 
 
