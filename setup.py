@@ -11,6 +11,10 @@ qtplugins=['sqldrivers','styles']
 paths = [os.path.join(str(libpath), plug) for libpath in QCoreApplication.libraryPaths() for plug in qtplugins]
 include_files.extend(filter(os.path.exists, paths))
 
+qtplugins=['sqldrivers','styles']
+paths = [os.path.join(str(libpath), plug) for libpath in QCoreApplication.libraryPaths() for plug in qtplugins]
+include_files.extend(filter(os.path.exists, paths))
+
 # GUI applications require a different base on Windows (the default is for a console application).
 base = None
 if sys.platform == "win32":
