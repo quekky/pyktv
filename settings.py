@@ -8,9 +8,9 @@ import configparser
 import os
 import sys
 import traceback
-import sqlite3
 import gettext
 
+import functions
 
 programDir = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 mpvMediaPlayer = None
@@ -43,8 +43,7 @@ def __init__():
     themeDir = os.path.join(config.get('theme.dir'), '')
     singerdir = os.path.join(programDir, config.get('singer.picture', ''))
 
-    dbconn = sqlite3.connect(os.path.join(programDir, config['sqlitefile']))
-    dbconn.row_factory = sqlite3.Row
+    dbconn = functions.createDatabase()
 
 
     localedir = os.path.join(programDir, 'locale')

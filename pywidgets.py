@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, QUrl, pyqtSignal, pyqtSlot, QTimer, QSortFilterProxyModel
+from PyQt5.QtCore import Qt, QUrl, pyqtSignal, pyqtSlot, QTimer, QSortFilterProxyModel, QObject
 from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QLineEdit, QStyledItemDelegate, QComboBox, QCompleter, QDialog, \
     QGridLayout, QStyle, QTextEdit, QProgressDialog
@@ -379,14 +379,20 @@ class QLargeMessageBox(QDialog):
 
 
 class QStatusDialog(QProgressDialog):
-    class UpdateStream():
+    class UpdateStream(QObject):
+        updatetext = pyqtSignal(str)
+        updatepercent = pyqtSignal(int)
+
         def __init__(self, parent):
+            super().__init__()
             self.parent=parent
 
         def write(self, bar):
             try:
-                eta = re.search('\[([\d:]+)<([\d:]+).*\]', bar.strip())
-                self.parent.setLabelMainText('%ss elapsed, %ss remaining' % eta.groups())
+                eta = re.search(r'\[([\d:]+)<([\d:]+).*\]', bar)
+                self.updatetext.emit('%ss elapsed, %ss remaining' % eta.groups())
+                percent = re.search(r'\|\s*(\d+)\/', bar)
+                self.updatepercent.emit(int(percent.group(1)))
             except:
                 pass
 
@@ -402,6 +408,8 @@ class QStatusDialog(QProgressDialog):
         self.setWindowModality(Qt.ApplicationModal)
         self.setLabelMainText('0s elapsed, ? remaining')
         self.updateClass = self.UpdateStream(self)
+        self.updateClass.updatetext.connect(self.setLabelMainText)
+        self.updateClass.updatepercent.connect(self.setValue)
 
     def getUpdateClass(self):
         return self.updateClass
@@ -412,6 +420,7 @@ class QStatusDialog(QProgressDialog):
             text+='\n\n'+self.subtext
         self.setLabelText(text)
 
+    @pyqtSlot(str)
     def setLabelMainText(self, text):
         self.maintext=text
         self.updateLabelText()

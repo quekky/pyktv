@@ -2,13 +2,15 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QMessageBox, QInputDialog, QFileDialog, QCheckBox, QMenu, QDialog, \
     qApp, QPushButton, QHeaderView, QCompleter, QLineEdit, QComboBox
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIntValidator, QDoubleValidator, QPixmap
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QRegExp, QPoint, QStringListModel
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QRegExp, QPoint, QStringListModel, QRunnable, \
+    QThreadPool, QItemSelection, QItemSelectionRange
 import os
 import sys
 import fnmatch
 from collections import OrderedDict
 import re
 from opencc import OpenCC
+import concurrent.futures
 from tqdm import tqdm
 from pprint import pprint
 
@@ -63,10 +65,16 @@ class EditorWindow(QMainWindow):
     @staticmethod
     def selectRows(tblview, ids):
         tblview.selectionModel().clearSelection()
+        firstidx=tblview.model().index(0, 1)
+        selections = QItemSelection()
         for id in ids:
-            for idx in tblview.model().match(tblview.model().index(0, 1), Qt.UserRole, id):
-                tblview.selectionModel().select(idx, QItemSelectionModel.Select | QItemSelectionModel.Rows)
-                tblview.scrollTo(idx)
+            for idx in tblview.model().match(firstidx, Qt.UserRole, id, 1, Qt.MatchExactly):
+                selections.append(QItemSelectionRange(idx))
+        tblview.selectionModel().select(selections, QItemSelectionModel.Select | QItemSelectionModel.Rows)
+        try:
+            tblview.scrollTo(tblview.model().match(firstidx, Qt.UserRole, ids[0], 1, Qt.MatchExactly)[0])
+        except:
+            pass
 
     @staticmethod
     def refreshAndSelectRows(refreshfunc, tblview, rows):
@@ -660,54 +668,139 @@ class EditorWindow(QMainWindow):
 
 
     def setVolume(self):
-        goalLUFS = -14
-        maxPeak = -1
-
         if QMessageBox.question(self, 'Set volume', 'Program will scan each file to find the suitable volume.<br><b>This will take very long.</b><br><br>Are you sure?', QMessageBox.YesToAll|QMessageBox.NoToAll)==QMessageBox.NoToAll:
             return
-        rows = [r.row() for r in self.tblSong.selectionModel().selectedRows()]
-        ids=[r.data(Qt.UserRole) for r in self.tblSong.selectionModel().selectedRows()]
-        progress = QStatusDialog('Scanning medias for volume...', 'Stop', 0, len(rows)*100, self, Qt.Dialog | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
-        progress.setMinimumDuration(0)
-        progress.forceShow()
-        cmd=functions.CommandRunner()
-        pos_library=list(self.songColumns.keys()).index('library')
-        pos_media=list(self.songColumns.keys()).index('media_file')
-        pbar=tqdm(total=len(rows)*100, file=progress.getUpdateClass())
 
-        for i, r in enumerate(rows):
-            progress.setValue(i*100)
-            if progress.wasCanceled():
-                break
-            library = self.tblSong.model().index(r, pos_library).data()
-            mediafile = self.tblSong.model().index(r, pos_media).data()
-            videopath=mediafile if library=='' else os.path.join(library, mediafile.lstrip(os.path.sep))
+        def setVolumeTask(id, videopath, pbar):
+            goalLUFS = -14
+            maxPeak = -1
+
             try:
-                id = self.tblSong.model().index(r, 1).data(Qt.UserRole)
                 prevp = 0
+                cmd = functions.CommandRunner()
                 for p in cmd.run_ffmpeg_command(['ffmpeg', '-i', videopath, '-vn', '-filter_complex', 'ebur128=dualmono=true:peak=true', '-f', 'null', NUL]):
-                    qApp.processEvents()
-                    progress.setLabelSubText("Processing file %s/%s - %s%%" %(i+1, len(rows), p))
-                    if prevp!=p:
-                        pbar.update(p-prevp)
-                        prevp=p
-                        progress.setValue(i*100+p)
+                    if prevp != p:
+                        pbar.update(p - prevp)
+                        prevp = p
                 summaryList = cmd.output[cmd.output.rfind('Summary:'):].split()
                 LUFS = float(summaryList[summaryList.index('I:') + 1])
                 Peak = float(summaryList[summaryList.index('Peak:') + 1])
 
-                gainDB = goalLUFS-LUFS
-                if gainDB>0 and Peak+gainDB > maxPeak:
-                    if Peak<maxPeak:
-                        gainDB=maxPeak-Peak
+                gainDB = goalLUFS - LUFS
+                if gainDB > 0 and Peak + gainDB > maxPeak:
+                    if Peak < maxPeak:
+                        gainDB = maxPeak - Peak
                     else:
-                        gainDB=0
-                settings.dbconn.execute("update song set [volume]=? where id = ?", (round(gainDB,3), id,))
-                settings.dbconn.commit()
+                        gainDB = 0
+
+                # new thread, need to create new SQLite objects
+                dbconn = functions.createDatabase()
+                dbconn.execute("update song set [volume]=? where id = ?", (round(gainDB, 3), id,))
+                dbconn.commit()
             except:
                 settings.logger.printException()
-        progress.setValue(len(rows)*100)
+
+        rows = [r.row() for r in self.tblSong.selectionModel().selectedRows()]
+        ids = [r.data(Qt.UserRole) for r in self.tblSong.selectionModel().selectedRows()]
+        progress = QStatusDialog('Scanning medias for volume...', 'Stop', 0, len(rows) * 100, self,
+                                 Qt.Dialog | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
+        progress.setMinimumDuration(0)
+        pos_library = list(self.songColumns.keys()).index('library')
+        pos_media = list(self.songColumns.keys()).index('media_file')
+        pbar = tqdm(total=len(rows) * 100, file=progress.getUpdateClass())
+
+        with concurrent.futures.ThreadPoolExecutor(os.cpu_count()*1.5) as executor:
+            furtures=[]
+            for r in rows:
+                library = self.tblSong.model().index(r, pos_library).data()
+                mediafile = self.tblSong.model().index(r, pos_media).data()
+                videopath = mediafile if library == '' else os.path.join(library, mediafile.lstrip(os.path.sep))
+                id = self.tblSong.model().index(r, 1).data(Qt.UserRole)
+                furtures.append(executor.submit(setVolumeTask, id, videopath, pbar))
+
+            while len(furtures)>0:
+                if progress.wasCanceled():
+                    pbar.close()
+                    progress.setCancelButton(None)
+                    progress.setLabelMainText('Cancelling, please wait...')
+                    [furtures.remove(f) for f in furtures if f.cancel()]
+                try:
+                    f = next(concurrent.futures.as_completed(furtures, 0.25))
+                    if f:
+                        furtures.remove(f)
+                        progress.setLabelSubText('Processing %s of %s' %(len(rows)-len(furtures), len(rows)))
+                except concurrent.futures.TimeoutError:
+                    pass
+                qApp.processEvents()
+
+        progress.setValue(len(rows) * 100)
         self.refreshAndSelectRows(self.songRefresh, self.tblSong, ids)
+
+        # Alternative code using QThreadPool, but does not show the number of files processed
+        #
+        # class setVolumeTask(QRunnable):
+        #     goalLUFS = -14
+        #     maxPeak = -1
+        #
+        #     def __init__(self, id, videopath, pbar):
+        #         super().__init__()
+        #         self.id=id
+        #         self.videopath=videopath
+        #         self.pbar=pbar
+        #
+        #     def run(self):
+        #         try:
+        #             prevp = 0
+        #             cmd = functions.CommandRunner()
+        #             for p in cmd.run_ffmpeg_command(['ffmpeg', '-i', self.videopath, '-vn', '-filter_complex', 'ebur128=dualmono=true:peak=true', '-f', 'null', NUL]):
+        #                 if prevp!=p:
+        #                     self.pbar.update(p-prevp)
+        #                     prevp=p
+        #             summaryList = cmd.output[cmd.output.rfind('Summary:'):].split()
+        #             LUFS = float(summaryList[summaryList.index('I:') + 1])
+        #             Peak = float(summaryList[summaryList.index('Peak:') + 1])
+        #
+        #             gainDB = self.goalLUFS-LUFS
+        #             if gainDB>0 and Peak+gainDB > self.maxPeak:
+        #                 if Peak<self.maxPeak:
+        #                     gainDB=self.maxPeak-Peak
+        #                 else:
+        #                     gainDB=0
+        #
+        #             # new thread, need to create new SQLite objects
+        #             dbconn=functions.createDatabase()
+        #             dbconn.execute("update song set [volume]=? where id = ?", (round(gainDB,3), id,))
+        #             dbconn.commit()
+        #         except:
+        #             settings.logger.printException()
+        #
+        # rows = [r.row() for r in self.tblSong.selectionModel().selectedRows()]
+        # ids=[r.data(Qt.UserRole) for r in self.tblSong.selectionModel().selectedRows()]
+        # progress = QStatusDialog('Scanning medias for volume...', 'Stop', 0, len(rows)*100, self, Qt.Dialog | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
+        # progress.setMinimumDuration(0)
+        # pos_library=list(self.songColumns.keys()).index('library')
+        # pos_media=list(self.songColumns.keys()).index('media_file')
+        # pbar = tqdm(total=len(rows) * 100, file=progress.getUpdateClass())
+        # pool = QThreadPool()
+        # pool.setMaxThreadCount(int(os.cpu_count()*2))
+        #
+        # for r in rows:
+        #     library = self.tblSong.model().index(r, pos_library).data()
+        #     mediafile = self.tblSong.model().index(r, pos_media).data()
+        #     videopath=mediafile if library=='' else os.path.join(library, mediafile.lstrip(os.path.sep))
+        #     id = self.tblSong.model().index(r, 1).data(Qt.UserRole)
+        #     pool.start(setVolumeTask(id, videopath, pbar))
+        #
+        # while not pool.waitForDone(25):
+        #     if progress.wasCanceled():
+        #         pool.clear()
+        #         pbar.close()
+        #         progress.setCancelButton(None)
+        #         progress.setLabelMainText('Stopping current ffmpeg, please wait...')
+        #     qApp.processEvents()
+        #
+        # progress.setValue(len(rows) * 100)
+        # self.refreshAndSelectRows(self.songRefresh, self.tblSong, ids)
 
 
     ### media player functions

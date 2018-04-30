@@ -1,9 +1,18 @@
 import re
 import pypinyin
 import subprocess
+import sqlite3
+import os
+import settings
 
 
 CREATE_NO_WINDOW=0x08000000
+
+
+def createDatabase():
+    dbconn = sqlite3.connect(os.path.join(settings.programDir, settings.config['sqlitefile']))
+    dbconn.row_factory = sqlite3.Row
+    return dbconn
 
 def get_initials(word):
     split=pypinyin.lazy_pinyin(word, errors=lambda w: [m.group() for m in re.finditer('[A-Za-z]+|[0-9]', w)])
