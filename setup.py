@@ -11,9 +11,6 @@ qtplugins=['sqldrivers','styles']
 paths = [os.path.join(str(libpath), plug) for libpath in QCoreApplication.libraryPaths() for plug in qtplugins]
 include_files.extend(filter(os.path.exists, paths))
 
-qtplugins=['sqldrivers','styles']
-paths = [os.path.join(str(libpath), plug) for libpath in QCoreApplication.libraryPaths() for plug in qtplugins]
-include_files.extend(filter(os.path.exists, paths))
 
 # GUI applications require a different base on Windows (the default is for a console application).
 base = None
@@ -27,8 +24,8 @@ if sys.platform == "win32":
         if lib: include_files.append(lib)
 
 
-executables = [Executable("pyktv.py", base=base, icon='pyktv.ico'),
-               Executable("songeditor.py", base=base, icon='pyktv.ico')]
+executables = [Executable("pyktv.py", base=base, icon='themes/pyktv.ico'),
+               Executable("songeditor.py", base=base, icon='themes/pyktv.ico')]
 
 options = {
     'build_exe': {

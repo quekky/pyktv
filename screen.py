@@ -83,7 +83,7 @@ def startHomeScreen(data=None, page=None):
                  3: {'text': _('Language'), 'func': langSearch1},
                  4: {'text': _('Category'), 'func': categorySearch1},
                  5: {'text': _('Char number'), 'func': charSearch1},
-                 # 6: {'text': _('Popular'), 'func': None},
+                 6: {'text': _('Popular'), 'func': popularSearch},
                  8: {'text': _('Local Network'), 'func': networkSearch1},
                  9: {'text': _('Youtube'), 'func': youtubeScreen1}
                  }
@@ -337,6 +337,22 @@ def charSearch2(data, page=0):
         rows = settings.dbconn.execute("select * from song where [index]!=0 and chars>=10 order by title COLLATE NOCASE")
     else:
         rows = settings.dbconn.execute("select * from song where [index]!=0 and chars=? order by title COLLATE NOCASE", (index,))
+
+    tracks = [extractSingersAndSetDisplay(dict(r)) for r in rows]
+
+    try:
+        pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
+        pager.startDisplay(page)
+    except:
+        settings.logger.printException()
+
+
+@pyqtSlot(object, int)
+def popularSearch(data=None, page=0):
+    # print('find music by popular')
+    addHistory(popularSearch, data)
+
+    rows = settings.dbconn.execute("select * from song where [index]!=0 order by order_time desc, title limit 100")
 
     tracks = [extractSingersAndSetDisplay(dict(r)) for r in rows]
 

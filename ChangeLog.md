@@ -1,7 +1,22 @@
+## version 2018.05.02-beta
+
+- Popular songs (only songs played after certain time is consider popular)
+- Library supports mirror dir
+- Realtime replace dir separator with the system separator
+- [Song Editor] Speed up volume detection by running ffmpeg in parallel
+- [Song Editor] Save/restore window position
+- Bugfix
+
+With this release, you can have players in both Windows and Linux using the same database,
+with the files in shared drives. As Windows use UNC and Linux use mountpoint, you can put
+1 in the root_path and the other in mirror. Also Linux does not support "\", program will
+auto replace it with "/" (or whatever the system supposed to be)
+
+
 ## version 2018.04.29-beta
 
 - Volume for each song (please use the new DB format)
-- In Song Editor, added a few new features for song:
+- [Song Editor] added a few new features for song:
   - Translate title and singers between TC and SC
   - Check if media is valid
   - Find the loudness and set the volume for each song
@@ -11,7 +26,7 @@
 
 ## version 2018.04.25-beta
 
-- Song Editor - a new program to edit the database
+- [Song Editor] - a new program to edit the database
 - Replace xpinyin with pypinyin
 - Bugfix
 

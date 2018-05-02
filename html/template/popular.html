@@ -1,0 +1,61 @@
+{% import 'functions.html' as func %}
+{% set uniquename = func.random_var(10) -%}
+<ons-page>
+
+<script>
+var {{uniquename}}_alltitles = {{ json_tracks|safe }}
+var {{uniquename}}_titles = {{uniquename}}_alltitles
+
+ons.getScriptPage().onInit =  function() {
+    {{uniquename}}_lazy_repeat=$(this).find("ons-lazy-repeat")[0]
+    $(this).find("ons-lazy-repeat")[0].delegate = {
+        countItems: function(){
+            return {{uniquename}}_titles.length
+        },
+        createItemContent: function(index, template) {
+            return ons.createElement($.templates(template.outerHTML).render({{uniquename}}_titles[index]))
+        }
+    }
+
+    $(this).find("ons-pull-hook")[0].onAction = function(done) {
+        $.getJSON('/api/popular', function(data) {
+            {{uniquename}}_alltitles = {{uniquename}}_titles = data;
+            {{uniquename}}_lazy_repeat.refresh();
+            done();
+        })
+    }
+}
+</script>
+
+
+    <ons-toolbar>
+        <div class="center">{{ _('Popular')}}</div>
+    </ons-toolbar>
+
+    <ons-pull-hook>
+        <ons-icon icon="md-spinner" size="28px" spin></ons-icon>
+    </ons-pull-hook>
+
+    <ons-list>
+        <ons-lazy-repeat>
+            {% raw %}
+            <ons-list-item index="{{:index}}">
+                <div class="center">
+                    <span class="list-item__title">{{:title}}</span>
+                    <span class="list-item__subtitle">《{{:singers_str}}》  （{{:language}}）</span>
+                </div>
+                <div class="right icon-button" onclick="addvideo(this)">
+                    <ons-icon icon="ion-plus"></ons-icon>
+                </div>
+            </ons-list-item>
+            {% endraw %}
+        </ons-lazy-repeat>
+    </ons-list>
+
+    <ons-modal>
+        <ons-icon icon="md-spinner" size="28px" spin></ons-icon> Loading...
+    </ons-modal>
+
+
+
+</ons-page>

@@ -2,6 +2,7 @@ import re
 import pypinyin
 import subprocess
 import sqlite3
+from urllib.parse import urlparse
 import os
 import settings
 
@@ -13,6 +14,36 @@ def createDatabase():
     dbconn = sqlite3.connect(os.path.join(settings.programDir, settings.config['sqlitefile']))
     dbconn.row_factory = sqlite3.Row
     return dbconn
+
+
+def isValidUrl(url):
+    #https://ffmpeg.org/ffmpeg-protocols.html
+    return urlparse(url).scheme in ("http", "https", "ftp", "ftps", "sftp", "file",
+                                    "rtmp", "rtmps", "rtmpe", "rtmpt", "rtmpts", "rtmpte",
+                                    "rtp", "rtsp", "sctp", "srt", "tcp", "tls", "udp", "unix"
+                                    "bluray", "dvd", "bd", "tv", "pvr", "cdda", "icecast", "mmsh",
+                                    "data", "ytdl", "smb",)
+
+def getVideoPath(library, mediafile):
+    """joins library and mediafile
+    If media is not found in the main library, try all the mirrors
+    """
+    if library == '' or isValidUrl(mediafile):
+        videopath = mediafile
+    else:
+        mediafile = mediafile.lstrip('\\/')
+        videopath = os.path.join(library, mediafile).replace('\\', os.path.sep).replace('/', os.path.sep)
+
+    if not isValidUrl(videopath):
+        if not os.path.isfile(videopath) and library in settings.libraries.keys():
+            for path in settings.libraries[library]:
+                tempfile=os.path.join(path, mediafile).replace('\\', os.path.sep).replace('/', os.path.sep)
+                if os.path.isfile(tempfile):
+                    videopath=tempfile
+                    break
+
+    return videopath
+
 
 def get_initials(word):
     split=pypinyin.lazy_pinyin(word, errors=lambda w: [m.group() for m in re.finditer('[A-Za-z]+|[0-9]', w)])

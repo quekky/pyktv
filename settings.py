@@ -18,6 +18,7 @@ config = None
 keyboardshortcut = None
 themeDir = ''
 singerdir = ''
+libraries={}
 
 videoWindow = None
 selectorWindow = None
@@ -44,12 +45,18 @@ def __init__():
     singerdir = os.path.join(programDir, config.get('singer.picture', ''))
 
     dbconn = functions.createDatabase()
-
+    loadLibraries()
 
     localedir = os.path.join(programDir, 'locale')
     translate = gettext.translation('messages', localedir, languages=[config['language']])
     translate.install()
 
+
+def loadLibraries():
+    global dbconn, libraries
+    rows = dbconn.execute('select * from library')
+    for r in rows:
+        libraries[r['root_path']] = list(filter(None, [r['mirror1'],r['mirror2'],r['mirror3'],r['mirror4'],r['mirror5'],r['mirror6'],r['mirror7'],r['mirror8'],r['mirror9'],r['mirror10']]))
 
 
 class mainLogger(object):

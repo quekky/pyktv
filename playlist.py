@@ -6,8 +6,10 @@ from collections import deque
 import os
 import time
 from PyQt5.QtCore import QTimer, pyqtSlot
+
 import settings
 import screen
+import functions
 
 #Song structure is a dict:
 songstructure_enum={
@@ -52,6 +54,8 @@ videostarttime = 0
 videoendtime = 0
 #wait for x seconds for video to start (sometime youtube is slower to start)
 videowaittimeout = 10
+videopopularupdated=False
+videopopulartimeout = 60
 randomplaytimeout = 0
 statusTempText = None
 
@@ -113,7 +117,7 @@ def deleteSong(video):
 
 
 def playNextSong():
-    global video_playlist, current_playing, videostarttime, videostatushasbeenset, channelhasbeenset, network_channel, audiopitch, audiovolume
+    global video_playlist, current_playing, videostarttime, videostatushasbeenset, videopopularupdated, channelhasbeenset, network_channel, audiopitch, audiovolume
     # print(current_playing)
     # print(video_playlist)
     try:
@@ -123,22 +127,20 @@ def playNextSong():
             # normal files
             library=current_playing['library']
             mediafile=str(current_playing['media_file'])
-            if library=='':
-                videopath=mediafile
-            else:
-                mediafile=mediafile.lstrip(os.path.sep)
-                videopath=os.path.join(library,mediafile)
-        else:
+            videopath=functions.getVideoPath(library, mediafile)
+        elif 'network' in current_playing :
             #network/youtube
             videopath=current_playing['url']
-            if not (videopath.startswith('http://') or videopath.startswith('https://')):
-                videopath='http://youtu.be/'+videopath
+            if current_playing['network']=='youtube'and not functions.isValidUrl(videopath):
+                videopath=r'ytdl://'+videopath
+                print(videopath)
 
         try:
             player = settings.mpvMediaPlayer
             player.play(videopath)
 
             videostatushasbeenset=False
+            videopopularupdated=False
             channelhasbeenset=False
             videostarttime=time.time()
             network_channel = 0
@@ -156,9 +158,17 @@ def playNextSong():
         settings.logger.printException()
 
 
+def updateVideoPopular(song):
+    if 'media_file' in song.keys():
+        try:
+            settings.dbconn.execute('update song set order_time=order_time+1 where id=?', (song['id'],))
+            settings.dbconn.commit()
+        except:
+            pass
+
 
 def checkMediaPlayback():
-    global video_playlist, current_playing, videostarttime, videowaittimeout, videoendtime
+    global video_playlist, current_playing, videostarttime, videowaittimeout, videoendtime, videopopulartimeout, videopopularupdated
     global videostatushasbeenset, channelhasbeenset
     player = settings.mpvMediaPlayer
     timenow=time.time()
@@ -170,6 +180,9 @@ def checkMediaPlayback():
         if player_time_pos > 0 and not videostatushasbeenset:
             videostatushasbeenset = True
             settings.videoWindow.setStatusTempText(_("Now playing: ") + current_playing['display'], 3000)
+        elif player_time_pos>videopopulartimeout and not videopopularupdated:
+            videopopularupdated = True
+            updateVideoPopular(current_playing)
         elif len(video_playlist)>0 and (player_time_pos > player_duration - 5):
             settings.videoWindow.setStatusTempText(_("Prepare for: ") + video_playlist[0]['display'], 3000)
     elif timenow-videostarttime > videowaittimeout:
@@ -195,7 +208,7 @@ def setPlayerFilter():
     try:
         #start with no rubberband (in MPV, for vorbis/opus, if there's rubberband the sound is not playing)
         audiopitchstr = None if audiopitch==0 else 'rubberband=pitch-scale=' + str(1 + audiopitch / 10)
-        audiovolumestr = None if audiovolume==0 else 'volume=volume=%sdB' % audiovolume
+        audiovolumestr = None if audiovolume==0 else 'lavfi="volume=volume=%sdB"' % audiovolume
         str1=','.join(filter(None, (audiovolumestr, audiopanstr, audiopitchstr)))
         settings.mpvMediaPlayer.command('af', 'clr', '')
         if str1: settings.mpvMediaPlayer.command('af', 'set', str1)
@@ -323,7 +336,7 @@ def setStatusTempText():
 
 
 def randomPlay():
-    global audiopitch
+    global audiopitch, videopopularupdated
     try:
         rows = settings.dbconn.execute(r"select * from song where [index]!=0 order by random() limit 1")
         song=rows.fetchone()
@@ -338,6 +351,8 @@ def randomPlay():
         player = settings.mpvMediaPlayer
         player.play(path)
 
+        # do not update popular song
+        videopopularupdated=True
         audiopitch = 0
         #set voice track
         channel=song['channel']

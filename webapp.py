@@ -111,6 +111,19 @@ def indexSearchApi():
     return json.dumps(tracks)
 
 
+@fapp.route("/popular")
+def popularSearch1():
+    return flask.render_template('popular.html', json_tracks=popularSearchApi())
+
+@fapp.route("/api/popular")
+def popularSearchApi():
+    rows = dbconn.execute("select * from song where [index]!=0 order by order_time desc, title limit 100 COLLATE NOCASE")
+    tracks = [extractSingers(dict(r)) for r in rows]
+    for d in tracks:
+        d['search'] = str(d['index'])
+    return json.dumps(tracks)
+
+
 @fapp.route("/network")
 def networkSearch1():
     return flask.render_template('page4.html')

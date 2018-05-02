@@ -6,8 +6,10 @@ Feel free to use in your small business as well
 copyleft quekky
 """
 
+import os
 import sys
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, qApp
 
 from layout import VideoWindow, SelectorWindow
 import settings
@@ -20,6 +22,9 @@ if __name__ == '__main__':
     settings.__init__()
     webapp.__init__()
     app = QApplication(sys.argv)
+    qApp.setOrganizationName('pyktv')
+    qApp.setApplicationName('songeditor')
+    qApp.setWindowIcon(QIcon(os.path.join(settings.programDir, 'themes/pyktv.ico')))
     settings.videoWindow = VideoWindow()
     settings.selectorWindow = SelectorWindow()
     screen.startHomeScreen()

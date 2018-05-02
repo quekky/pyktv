@@ -1,9 +1,9 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QMessageBox, QInputDialog, QFileDialog, QCheckBox, QMenu, QDialog, \
-    qApp, QPushButton, QHeaderView, QCompleter, QLineEdit, QComboBox
+    qApp, QPushButton, QHeaderView, QCompleter, QLineEdit, QComboBox, QSplitter
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIntValidator, QDoubleValidator, QPixmap
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QRegExp, QPoint, QStringListModel, QRunnable, \
-    QThreadPool, QItemSelection, QItemSelectionRange
+    QThreadPool, QItemSelection, QItemSelectionRange, pyqtSignal, QSettings
 import os
 import sys
 import fnmatch
@@ -24,6 +24,8 @@ import functions
 NUL = 'NUL' if sys.platform == "win32" else '/dev/null'
 
 class EditorWindow(QMainWindow):
+    refreshcomboboxes = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         uic.loadUi(os.path.join(settings.programDir, 'editor/EditorWindow.ui'), self)
@@ -44,7 +46,15 @@ class EditorWindow(QMainWindow):
         self.__singer__init__()
         self.__library__init__()
         self.__youtube__init__()
+        self.refreshcomboboxes.emit()
 
+        qsettings=QSettings()
+        try:
+            self.restoreGeometry(qsettings.value('editorWindowGeometry'))
+            for split in self.findChildren(QSplitter):
+                split.restoreState(qsettings.value('editorWindow_' + split.objectName()))
+        except:
+            pass
         self.show()
         self.stackedWidget.setCurrentIndex(0)
 
@@ -56,6 +66,10 @@ class EditorWindow(QMainWindow):
 
     def closeEvent(self, QCloseEvent):
         settings.mpvMediaPlayer.terminate()
+        qsettings=QSettings()
+        qsettings.setValue('editorWindowGeometry', self.saveGeometry())
+        for split in self.findChildren(QSplitter):
+            qsettings.setValue('editorWindow_'+split.objectName(), split.saveState())
         qApp.quit()
 
 
@@ -192,12 +206,12 @@ class EditorWindow(QMainWindow):
 
                 if isinstance(obj, QLineEdit):
                     obj.setText(values1[0] if len(values2)==1 else '')
-                    obj.setPlaceholderText(values1[0] if len(values2)>1 else '')
+                    obj.setPlaceholderText('No change' if len(values2)>1 else '')
                 elif isinstance(obj, QComboBox):
                     obj.setCurrentIndex(obj.findText(values1[0] if len(values2) == 1 else ''))
                     obj.setCurrentText(values1[0] if len(values2) == 1 else '')
                     if obj.lineEdit():
-                        obj.lineEdit().setPlaceholderText(values1[0] if len(values2)>1 else '')
+                        obj.lineEdit().setPlaceholderText('No change' if len(values2)>1 else '')
                 elif isinstance(obj, QCheckBox):
                     if len(values2)==1:
                         obj.setTristate(False)
@@ -262,6 +276,7 @@ class EditorWindow(QMainWindow):
         settings.dbconn.commit()
         item.setData(int(data) if data.isdigit() else data, Qt.UserRole+1)
 
+        self.refreshcomboboxes.emit()
         if hasattr(self, table+'SelectionChanged'):
             obj = getattr(self, table+'SelectionChanged')
             if callable(obj):
@@ -308,13 +323,15 @@ class EditorWindow(QMainWindow):
                 # update those that are already in db
                 id_to_update=list(filter(None, rows))
                 if len(id_to_update)>0:
-                    try:
-                        # print("update "+table+" set [%s]=? where id in (%s)" % (']=?[,'.join(cols), ','.join('?'*len(id_to_update))),
-                        #       list(cols.values()) + id_to_update)
-                        settings.dbconn.execute("update "+table+" set [%s]=? where id in (%s)" % (']=?,['.join(cols), ','.join('?'*len(id_to_update))),
-                                                list(cols.values()) + id_to_update)
-                    except:
-                        settings.logger.printException()
+                    #https://www.sqlite.org/limits.html#max_variable_number
+                    for i in range(0,len(id_to_update),500):
+                        try:
+                            # print("update "+table+" set [%s]=? where id in (%s)" % (']=?[,'.join(cols), ','.join('?'*len(id_to_update[i:i+500]))),
+                            #       list(cols.values()) + id_to_update[i:i+500])
+                            settings.dbconn.execute("update "+table+" set [%s]=? where id in (%s)" % (']=?,['.join(cols), ','.join('?'*len(id_to_update[i:i+500]))),
+                                                    list(cols.values()) + id_to_update[i:i+500])
+                        except:
+                            settings.logger.printException()
 
                 id_newly_added=[]
                 # do not save new rows if everything is empty
@@ -331,7 +348,8 @@ class EditorWindow(QMainWindow):
                             settings.logger.printException()
 
                 settings.dbconn.commit()
-                self.refreshAndSelectRows(refreshfunc, tblview, rows)
+                self.refreshcomboboxes.emit()
+                self.refreshAndSelectRows(refreshfunc, tblview, rows+id_newly_added)
 
 
     def setSearchChar(self, table, colkey, columns, tblview, refreshfunc=None):
@@ -460,6 +478,7 @@ class EditorWindow(QMainWindow):
         self.actionAuto_set_volume.triggered.connect(self.setVolume)
 
 
+        self.refreshcomboboxes.connect(lambda:self.setComboBoxModal('song', self.songColumns))
 
         self.songRefresh()
         self.tblSong.sortByColumn(1, Qt.AscendingOrder)
@@ -485,7 +504,6 @@ class EditorWindow(QMainWindow):
 
     def songRefresh(self):
         self.refreshFromDB('song', self.tblSong, self.songColumns, self.songModel, self.joinsingers, self.splitsingers)
-        self.setComboBoxModal('song', self.songColumns)
         self.setPageStatusTip('song', 0, self.songModel.rowCount())
 
 
@@ -626,7 +644,6 @@ class EditorWindow(QMainWindow):
         except Exception as e:
             settings.logger.printException('Error in %s' % file)
             return 'ffmpeg error: ' + str(e)
-        print(cmd.output)
         dur=None
         try:
             dur = functions.to_sec(cmd.DUR_REGEX.search(cmd.output).group(1))
@@ -656,7 +673,7 @@ class EditorWindow(QMainWindow):
                 break
             library = self.tblSong.model().index(r, pos_library).data()
             mediafile = self.tblSong.model().index(r, pos_media).data()
-            videopath=mediafile if library=='' else os.path.join(library, mediafile.lstrip(os.path.sep))
+            videopath = functions.getVideoPath(library, mediafile)
             error=self.checkSingleMedia(cmd, videopath)
             if error:
                 errors.append('<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>'%(self.tblSong.model().index(r, pos_title).data(),library,mediafile,error))
@@ -714,7 +731,7 @@ class EditorWindow(QMainWindow):
             for r in rows:
                 library = self.tblSong.model().index(r, pos_library).data()
                 mediafile = self.tblSong.model().index(r, pos_media).data()
-                videopath = mediafile if library == '' else os.path.join(library, mediafile.lstrip(os.path.sep))
+                videopath = functions.getVideoPath(library, mediafile)
                 id = self.tblSong.model().index(r, 1).data(Qt.UserRole)
                 furtures.append(executor.submit(setVolumeTask, id, videopath, pbar))
 
@@ -817,10 +834,10 @@ class EditorWindow(QMainWindow):
             library = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('library')).data()
             mediafile = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('media_file')).data()
             volume = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('volume')).data()
-            videopath = mediafile if library == '' else os.path.join(library, mediafile.lstrip(os.path.sep))
+            videopath = functions.getVideoPath(library, mediafile)
             player.play(videopath)
             player.aid = 1
-            self.volumestr='volume=volume=%sdB'%volume
+            self.volumestr='lavfi="volume=volume=%sdB"'%volume
             player.command('af', 'set', self.volumestr)
             self.channel=''
             self.previousplaying=rows[0].data()
@@ -949,13 +966,13 @@ class EditorWindow(QMainWindow):
         self.setInputValidators('singer', self.singerColumns)
 
 
+        self.refreshcomboboxes.connect(lambda:self.setComboBoxModal('singer', self.singerColumns))
         self.singerRefresh()
         self.tblSinger.sortByColumn(1, Qt.AscendingOrder)
 
 
     def singerRefresh(self):
         self.refreshFromDB('singer', self.tblSinger, self.singerColumns, self.singerModel)
-        self.setComboBoxModal('singer', self.singerColumns)
         self.setPageStatusTip('singer', 0, self.singerModel.rowCount())
 
 
@@ -1318,7 +1335,6 @@ class SearchMedia(QDialog):
 
 
     def swapTitleSinger(self, checked=False, row=None):
-        print(row)
         if row is None:
             row=self.sender().swapStandardItem.row()
         t=self.mediaModel.item(row, 1).data(Qt.DisplayRole)

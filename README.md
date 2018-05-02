@@ -94,7 +94,8 @@ There are 3 tables in the database.
  library      | which library it belongs to
  volume       | Volume to increase (in decibel(dB)), put - to decrease
  media_file   | media file name within the library                
- remark       | remarks                                           
+ remark       | remarks
+ order_time   | [internal use] how many times the video is played
 
 _rest of fields not used_
 
@@ -144,9 +145,9 @@ And of course Internet connection is required for YouTube to work.
  root_path    | The root directory
  enabled      | 1=enable, 0=disable
  last_mirror  | for future expansion
- mirror1      | Alternate dir. Not used at the moment, for future expansion
- mirror2      |
- mirror3      |
+ mirror1      | mirror1 to mirror10 - Alternate dir
+ mirror2      | If the file cannot be found in the root_path, program will try find the file in mirrors
+ mirror3      | Useful if you have backups on another harddisk
  mirror4      |
  mirror5      |
  mirror6      |
