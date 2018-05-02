@@ -1,4 +1,4 @@
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtGui import QKeySequence, QCursor
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QMenu, QStackedLayout, QGridLayout, QStyle, QShortcut, qApp
 import time
 
@@ -218,6 +218,8 @@ class VideoWindow(CommonWindow):
         self.statuslabel = QLabel(self)
         self.statuslabel.setStyleSheet('color:' + settings.config['font.color'] + '; background:black')
         self.statuslabel.hide()
+
+        self.setCursor(QCursor(Qt.BlankCursor))
 
         geo=list(map(int, settings.config['video.window'].split(',')))
         if settings.config.getboolean('video.frameless'): self.setWindowFlag(Qt.FramelessWindowHint)
