@@ -1,11 +1,12 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QMessageBox, QInputDialog, QFileDialog, QCheckBox, QMenu, QDialog, \
     qApp, QPushButton, QHeaderView, QCompleter, QLineEdit, QComboBox, QSplitter
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIntValidator, QDoubleValidator, QPixmap
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIntValidator, QRegExpValidator, QPixmap
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QRegExp, QPoint, QStringListModel, QRunnable, \
     QThreadPool, QItemSelection, QItemSelectionRange, pyqtSignal, QSettings
 import os
 import sys
+import time
 import fnmatch
 from collections import OrderedDict
 import re
@@ -412,7 +413,7 @@ class EditorWindow(QMainWindow):
         'language': {'title': 'Language', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongLanguageModel.__func__, 'type': str},
         'style': {'title': 'Category', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongStyleModel.__func__, 'type': str},
         'channel': {'title': 'Channel', 'itemdelegateclass': QComboBoxDelegate, 'validator':QUpperValidator(QRegExp('[lrLR]|[0-9]')), 'getmodel': getSongChannelModel.__func__, 'type': str},
-        'volume': {'title': 'Volume (±dB)', 'itemdelegateclass': QLineEditDelegate, 'validator': QDoubleValidator(), 'type': float},
+        'volume': {'title': 'Volume (±dB)', 'itemdelegateclass': QLineEditDelegate, 'validator': QRegExpValidator(QRegExp('^([-]?\d+(\.\d*)?)(,\s*[-]?\d+(\.\d*)?)?$')), 'type': float},
         'library': {'title': 'Library', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongLibraryModel.__func__},
         'media_file': {'title': 'Media file'},
         'remark': {'title': 'Remark', 'type': str}
@@ -587,7 +588,7 @@ class EditorWindow(QMainWindow):
             lib = os.path.normcase(lib)
             path = os.path.dirname(os.path.join(lib, filename.lstrip(os.path.sep)))
 
-        qfd=QFileDialog(self, "Open Video", path, "Video (*.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv);;All files (*.*)")
+        qfd=QFileDialog(self, "Open Video", path, "Video (*.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv *.vob);;All files (*.*)")
         if lib:
             qfd.directoryEntered.connect(lambda dir: os.path.normcase(dir).startswith(lib) or qfd.setDirectory(lib))
         if qfd.exec():
@@ -695,24 +696,35 @@ class EditorWindow(QMainWindow):
             try:
                 prevp = 0
                 cmd = functions.CommandRunner()
-                for p in cmd.run_ffmpeg_command(['ffmpeg', '-i', videopath, '-vn', '-filter_complex', 'ebur128=dualmono=true:peak=true', '-f', 'null', NUL]):
-                    if prevp != p:
-                        pbar.update(p - prevp)
-                        prevp = p
-                summaryList = cmd.output[cmd.output.rfind('Summary:'):].split()
-                LUFS = float(summaryList[summaryList.index('I:') + 1])
-                Peak = float(summaryList[summaryList.index('Peak:') + 1])
+                cmd.run_command(['ffmpeg', '-i', videopath])
+                numaudiotracks=len(re.findall(r"\s*Stream .* Audio:", cmd.output))
 
-                gainDB = goalLUFS - LUFS
-                if gainDB > 0 and Peak + gainDB > maxPeak:
-                    if Peak < maxPeak:
-                        gainDB = maxPeak - Peak
-                    else:
-                        gainDB = 0
+                gain=[]
+                for i in range(numaudiotracks):
+                    for p in cmd.run_ffmpeg_command(['ffmpeg', '-i', videopath, '-vn', '-filter_complex', '[0:a:%i]ebur128=dualmono=true:peak=true'%i, '-f', 'null', NUL]):
+                        p2=int(i/numaudiotracks*100+p/numaudiotracks)
+                        if prevp != p2:
+                            pbar.update(p2 - prevp)
+                            prevp = p2
+
+                    summaryList = cmd.output[cmd.output.rfind('Summary:'):].split()
+                    LUFS = float(summaryList[summaryList.index('I:') + 1])
+                    Peak = float(summaryList[summaryList.index('Peak:') + 1])
+
+                    gainDB = goalLUFS - LUFS
+                    if gainDB > 0 and Peak + gainDB > maxPeak:
+                        if Peak < maxPeak:
+                            gainDB = maxPeak - Peak
+                        else:
+                            gainDB = 0
+                    gain.append(str(round(gainDB,3)))
+
+                if prevp<100:
+                    pbar.update(100-prevp)
 
                 # new thread, need to create new SQLite objects
                 dbconn = functions.createDatabase()
-                dbconn.execute("update song set [volume]=? where id = ?", (round(gainDB, 3), id,))
+                dbconn.execute("update song set [volume]=? where id = ?", (",".join(gain), id,))
                 dbconn.commit()
             except:
                 settings.logger.printException()
@@ -726,7 +738,8 @@ class EditorWindow(QMainWindow):
         pos_media = list(self.songColumns.keys()).index('media_file')
         pbar = tqdm(total=len(rows) * 100, file=progress.getUpdateClass())
 
-        with concurrent.futures.ThreadPoolExecutor(os.cpu_count()*1.5) as executor:
+        numthreads=int(os.cpu_count()*1.5)
+        with concurrent.futures.ThreadPoolExecutor(numthreads) as executor:
             furtures=[]
             for r in rows:
                 library = self.tblSong.model().index(r, pos_library).data()
@@ -735,6 +748,7 @@ class EditorWindow(QMainWindow):
                 id = self.tblSong.model().index(r, 1).data(Qt.UserRole)
                 furtures.append(executor.submit(setVolumeTask, id, videopath, pbar))
 
+            progress.setLabelSubText('Processing %s of %s' % (0, len(rows)))
             while len(furtures)>0:
                 if progress.wasCanceled():
                     pbar.close()
@@ -833,12 +847,15 @@ class EditorWindow(QMainWindow):
         if len(rows)==1 and (player.idle_active or self.previousplaying!=rows[0].data()):
             library = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('library')).data()
             mediafile = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('media_file')).data()
-            volume = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('volume')).data()
+            self.volume = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('volume')).data().split(',')
+            if not self.volume:
+                self.volume=['0']
             videopath = functions.getVideoPath(library, mediafile)
             player.play(videopath)
+            time.sleep(0.2) # not sure why some songs need to wait, else it'll crash
             player.aid = 1
-            self.volumestr='lavfi="volume=volume=%sdB"'%volume
-            player.command('af', 'set', self.volumestr)
+            volumestr='lavfi="volume=volume=%sdB"'%self.volume[0]
+            player.command('af', 'set', volumestr)
             self.channel=''
             self.previousplaying=rows[0].data()
             self.statusBar.showMessage(videopath)
@@ -886,7 +903,7 @@ class EditorWindow(QMainWindow):
             menu.addSeparator()
             for i in range(tracks):
                 action=menu.addAction('Track '+str(i))
-                if self.channel==i or (not self.channel.isdigit() and i==0):
+                if self.channel==i or (self.channel in ['','L','R'] and i==0):
                     action.setCheckable(True)
                     action.setChecked(True)
 
@@ -896,19 +913,20 @@ class EditorWindow(QMainWindow):
             action = action.text()
             self.mpvMediaPlayer.aid = 1
             if action=='Stereo':
-                self.mpvMediaPlayer.command('af', 'set', self.volumestr)
+                self.mpvMediaPlayer.command('af', 'set', 'lavfi="volume=volume=%sdB"'%self.volume[0])
                 self.channel=''
             elif action=='Left':
-                self.mpvMediaPlayer.command('af', 'set', 'pan="mono|c0=c0",' + self.volumestr)
+                self.mpvMediaPlayer.command('af', 'set', 'pan="mono|c0=c0",' + 'lavfi="volume=volume=%sdB"'%self.volume[0])
                 self.channel='L'
             elif action == 'Right':
-                self.mpvMediaPlayer.command('af', 'set', 'pan="mono|c0=c1",' + self.volumestr)
+                self.mpvMediaPlayer.command('af', 'set', 'pan="mono|c0=c1",' + 'lavfi="volume=volume=%sdB"'%self.volume[0])
                 self.channel='R'
             elif action.startswith('Track '):
                 try:
                     ch = int(action[6:])
                     self.mpvMediaPlayer.aid = ch+1
-                    self.mpvMediaPlayer.command('af', 'set', self.volumestr)
+                    volumestr = 'lavfi="volume=volume=%sdB"'%self.volume[ch] if ch<len(self.volume) else 'lavfi="volume=volume=0dB"'
+                    self.mpvMediaPlayer.command('af', 'set', volumestr)
                     self.channel = '' if ch==0 else ch
                 except:
                     pass
@@ -1253,7 +1271,7 @@ class SearchMedia(QDialog):
         dbfiles=[r['media_file'] for r in rows]
 
         try:
-            file_exts = '.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv'.split(' ')
+            file_exts = '.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv *.vob'.split(' ')
             # find all files that match ext
             lib = os.path.join(lib,'')
             files = []

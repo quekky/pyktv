@@ -505,7 +505,7 @@ def youtubeScreen2(data=None, page=0):
                 t['network'] = 'youtube'
             pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
 
-        pager.startDisplay(page)
+        pager.startDisplay(page, 1)
     except:
         settings.logger.printException()
     else:
@@ -579,7 +579,7 @@ def networkSearch2(data=None, page=0):
             child['server'] = data
             child['location'] = '//' + data['name'] + '/' + child['title'] + '/'
         pager = pagerContent(children, 0, getCommon2_h_options(), networkSearch3)
-        pager.startDisplay(page)
+        pager.startDisplay(page, 1)
     except:
         settings.logger.printException()
 
@@ -600,7 +600,7 @@ def networkSearch3(data=None, page=0):
                 if 'artist' in child.keys():
                     child['display'] += "<span style='color:"+settings.config['font.secondarycolor']+"'> 《" + child['artist'] + '》</span>'
             pager = pagerContent(children, 0, getCommon2_h_options(), networkSearch3)
-            pager.startDisplay(page)
+            pager.startDisplay(page, 1)
         elif data['class'].startswith('object.item'):
             #something playable
             data['network'] = 'dlna'
@@ -699,7 +699,7 @@ class pagerContent:
     def filterList(self, searchstring):
         if searchstring=='':
             self.filterlist = self.displaylist
-        elif self.searchtype==2:
+        elif self.searchtype==1:
             self.filterlist = list(
                 filter(lambda i: 'search' in i.keys() and i['search'].find(searchstring)>=0, self.displaylist))
         else:

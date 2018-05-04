@@ -62,7 +62,7 @@ statusTempText = None
 maxpitchvariance = 5
 audiopanstr= ''
 audiopitch=0
-audiovolume=0
+audiovolume=[]
 
 
 
@@ -145,7 +145,7 @@ def playNextSong():
             videostarttime=time.time()
             network_channel = 0
             audiopitch = 0
-            audiovolume = current_playing['volume'] if 'volume' in current_playing.keys() else 0
+            audiovolume = current_playing['volume'] if 'volume' in current_playing.keys() else []
             setChannel()
 
         except:
@@ -208,7 +208,8 @@ def setPlayerFilter():
     try:
         #start with no rubberband (in MPV, for vorbis/opus, if there's rubberband the sound is not playing)
         audiopitchstr = None if audiopitch==0 else 'rubberband=pitch-scale=' + str(1 + audiopitch / 10)
-        audiovolumestr = None if audiovolume==0 else 'lavfi="volume=volume=%sdB"' % audiovolume
+        aid=settings.mpvMediaPlayer.aid-1
+        audiovolumestr = None if aid<len(audiovolume) or audiovolume[aid]==0 else 'lavfi="volume=volume=%sdB"' % audiovolume
         str1=','.join(filter(None, (audiovolumestr, audiopanstr, audiopitchstr)))
         settings.mpvMediaPlayer.command('af', 'clr', '')
         if str1: settings.mpvMediaPlayer.command('af', 'set', str1)

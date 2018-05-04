@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QKeySequence, QCursor
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QMenu, QStackedLayout, QGridLayout, QStyle, QShortcut, qApp
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QMenu, QStackedLayout, QShortcut, qApp
 import time
 
 import playlist
@@ -298,19 +298,23 @@ class SelectorWindow(CommonWindow):
 
         self.homeoption = QLabelButton()
         self.homeoption.clicked.connect(screen.startHomeScreen)
-        self.homeoption.setText('🏠')
+        self.homeoption.setScaledContents(True)
+        self.homeoption.setPixmap(QPixmap(settings.themeDir + 'buttons/home.png'))
         self.headeroption.append(self.homeoption)
         self.backoption = QLabelButton()
-        self.backoption.setText('◀')
+        self.backoption.setScaledContents(True)
+        self.backoption.setPixmap(QPixmap(settings.themeDir + 'buttons/arrow-left.png'))
         self.headeroption.append(self.backoption)
 
         self.switchchannel = QLabelButton()
         self.switchchannel.clicked.connect(playlist.switchChannel)
-        self.switchchannel.setText('🎜')
+        self.switchchannel.setScaledContents(True)
+        self.switchchannel.setPixmap(QPixmap(settings.themeDir + 'buttons/music.png'))
         self.headeroption.append(self.switchchannel)
         self.playnextsong = QLabelButton()
         self.playnextsong.clicked.connect(playlist.playNextSong)
-        self.playnextsong.setText('🞂🞂|')
+        self.playnextsong.setScaledContents(True)
+        self.playnextsong.setPixmap(QPixmap(settings.themeDir + 'buttons/step-forward.png'))
         self.headeroption.append(self.playnextsong)
         self.pitchup = QLabelButton()
         self.pitchup.clicked.connect(playlist.setPitchUp)
@@ -328,8 +332,7 @@ class SelectorWindow(CommonWindow):
         for opt in self.headeroption:
             opt.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
             opt.setAlignment(Qt.AlignCenter)
-            opt.setStyleSheet('color: '+settings.config['font.secondarycolor']+'; font-weight: 600; border-radius: 3px; background-color: rgba(120, 120, 120, 40);')
-        self.playnextsong.setStyleSheet('color: '+settings.config['font.secondarycolor']+'; font-weight: 100; border-radius: 3px; background-color: rgba(120, 120, 120, 40);')
+            opt.setStyleSheet('color: white; font-weight: 800; border-radius: 3px; background-color: rgba(120, 120, 120, 40);')
 
         self.headerlayout.addStretch(2)
         self.headerlayout.addWidget(self.homeoption, 4)
@@ -447,7 +450,7 @@ class SelectorWindow(CommonWindow):
 
     def setTextSize(self):
         """resize text size to label height"""
-        self.globalfont.setPixelSize(self.headeroption[0].size().height() * 0.9)
+        self.globalfont.setPixelSize(self.headeroption[0].size().height())
         for option in self.headeroption:
             option.setFont(self.globalfont)
         self.globalfont.setPixelSize(self.functionoption[0].size().height() * 0.7)

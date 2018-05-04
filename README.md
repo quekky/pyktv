@@ -71,61 +71,57 @@ There are 3 tables in the database.
 
 ## song
 
- Field        | Description                                       
---------------|---------------------------------------------------
- id           | Running number                                    
- index        | index number, for selecting by index              
- title        | title of the song                                 
- search       | search (must be A-Z in caps)                      
- chars        | number of char in title                           
- singer       | artist                                            
- singer2      | for multiple artist, use singer2-10 in order      
- singer3      |                                                   
- singer4      |                                                   
- singer5      |                                                   
- singer6      |                                                   
- singer7      |                                                   
- singer8      |                                                   
- singer9      |                                                   
- singer10     |                                                   
- language     | language of song                                  
- style        | song category                                     
- channel      | which channel is music only (L, R, 0, 1)          
- library      | which library it belongs to
- volume       | Volume to increase (in decibel(dB)), put - to decrease
- media_file   | media file name within the library                
- remark       | remarks
- order_time   | [internal use] how many times the video is played
+ Field        | Type | Description
+--------------|------|--------------------------------------------
+ id           | INT  | Running number
+ index        | INT  | index number, for selecting by index
+ title        | TEXT | title of the song
+ search       | TEXT | search (must be A-Z in caps)
+ chars        | INT  | number of char in title
+ singer       | TEXT | artist
+ singer2      | TEXT | for multiple artist, use singer2-10 in order
+ singer3      | TEXT |
+ singer4      | TEXT |
+ singer5      | TEXT |
+ singer6      | TEXT |
+ singer7      | TEXT |
+ singer8      | TEXT |
+ singer9      | TEXT |
+ singer10     | TEXT |
+ language     | TEXT | language of song
+ style        | TEXT | song category
+ channel      | TEXT | which channel is music only (L, R, 0, 1)
+ library      | TEXT | which library it belongs to
+ volume       | TEXT | Volume to increase (in decibel(dB)), put - to decrease. If there's multiple tracks, separate with comma by tracks
+ media_file   | TEXT | media file name within the library
+ remark       | TEXT | remarks
+ order_time   | INT  | [internal use] how many times the video is played
 
-_rest of fields not used_
-
-*note: library and media_file must be filled in*
-The final file name will be library+media_file
+*note: library and media_file must be filled in.
+The final file name will be library+media_file*
 
 
 ## singer
 
- Field        | Description                                       
---------------|---------------------------------------------------
- id           | Running number                                    
- name         | singer name   
- search       | search (must be A-Z in caps)                      
- region       | region of singer                                  
- type         | type of singer (eg M/F/Group/etc)                 
- remark       | remarks                                           
-
-_rest of fields not used_
+ Field        | Type | Description
+--------------|------|--------------------------------------------
+ id           | INT  | Running number
+ name         | TEXT | singer name
+ search       | TEXT | search (must be A-Z in caps)
+ region       | TEXT | region of singer
+ type         | TEXT | type of singer (eg M/F/Group/etc)
+ remark       | TEXT | remarks
 
 
 ## youtube
 
- Field        | Description                                       
---------------|---------------------------------------------------
- id           | Running number                                    
- name         | name for display                                  
- user         | user of the playlist/channel                      
- url          | youtube url                                       
- enable       | 1=enable, 0=disable                               
+ Field        | Type | Description
+--------------|------|--------------------------------------------
+ id           | INT  | Running number
+ name         | TEXT | name for display
+ user         | TEXT | user of the playlist/channel
+ url          | TEXT | youtube url
+ enable       | INT  | 1=enable, 0=disable
 
 YouTube plugin only supports playlist (https://www.youtube.com/playlist?list=xxx), user playlist 
 (https://www.youtube.com/user/xxx/playlists), and user (https://www.youtube.com/user/ziller)
@@ -139,23 +135,23 @@ And of course Internet connection is required for YouTube to work.
 
 ## library
 
- Field        | Description
---------------|---------------------------------------------------
- id           | Running number
- root_path    | The root directory
- enabled      | 1=enable, 0=disable
- last_mirror  | for future expansion
- mirror1      | mirror1 to mirror10 - Alternate dir
- mirror2      | If the file cannot be found in the root_path, program will try find the file in mirrors
- mirror3      | Useful if you have backups on another harddisk
- mirror4      |
- mirror5      |
- mirror6      |
- mirror7      |
- mirror8      |
- mirror9      |
- mirror10     |
- available    | for future expansion
+ Field        | Type | Description
+--------------|------|--------------------------------------------
+ id           | INT  | Running number
+ root_path    | TEXT | The root directory
+ enabled      | INT  | 1=enable, 0=disable
+ last_mirror  | TEXT | for future expansion
+ mirror1      | TEXT | mirror1 to mirror10 - Alternate dir
+ mirror2      | TEXT | If the file cannot be found in the root_path, program will try find the file in mirrors
+ mirror3      | TEXT | Useful if you have backups on another harddisk
+ mirror4      | TEXT |
+ mirror5      | TEXT |
+ mirror6      | TEXT |
+ mirror7      | TEXT |
+ mirror8      | TEXT |
+ mirror9      | TEXT |
+ mirror10     | TEXT |
+ available    | INT  | for future expansion
 
 
 # DEVELOPER
