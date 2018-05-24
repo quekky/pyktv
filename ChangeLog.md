@@ -1,3 +1,11 @@
+## version 2018.05.24-beta
+
+- Added a small program to show what is the key pressed (to map special keys in the config.ini, eg remote controls buttons usually return special keys)
+- Support for CDG files
+- If alphabets (A-Z) are mapped to run functions, ignore them in the search
+- Bugfix
+
+
 ## version 2018.05.02-beta
 
 - Popular songs (only songs played after certain time is consider popular)
