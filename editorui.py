@@ -585,16 +585,16 @@ class EditorWindow(QMainWindow):
         path=lib=self.cmbSongLibrary.currentText()
         filename=self.txtSongMedia_File.text()
         if lib and os.path.isdir(lib) or filename:
-            lib = os.path.normcase(lib)
+            lib = os.path.normpath(lib)
             path = os.path.dirname(os.path.join(lib, filename.lstrip(os.path.sep)))
 
-        qfd=QFileDialog(self, "Open Video", path, "Video (*.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv *.vob);;All files (*.*)")
+        qfd=QFileDialog(self, "Open Video", path, "Video (*.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv *.vob *.cdg);;All files (*.*)")
         if lib:
-            qfd.directoryEntered.connect(lambda dir: os.path.normcase(dir).startswith(lib) or qfd.setDirectory(lib))
+            qfd.directoryEntered.connect(lambda dir: os.path.normpath(dir).startswith(lib) or qfd.setDirectory(lib))
         if qfd.exec():
-            filename = os.path.normcase(qfd.selectedFiles()[0])
+            filename = os.path.normpath(qfd.selectedFiles()[0])
             if lib and filename.startswith(lib):
-                filename=os.path.sep+filename[len(lib):]
+                filename=filename[len(lib):]
             self.txtSongMedia_File.setText(filename)
 
 
@@ -1108,7 +1108,7 @@ class EditorWindow(QMainWindow):
 
         dir=QFileDialog.getExistingDirectory(self, "Select directory", dirname)
         if dir:
-            lbl.setText(os.path.normcase(dir))
+            lbl.setText(os.path.normpath(dir))
 
 
 
@@ -1271,7 +1271,7 @@ class SearchMedia(QDialog):
         dbfiles=[r['media_file'] for r in rows]
 
         try:
-            file_exts = '.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv *.vob'.split(' ')
+            file_exts = '.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv *.vob *.cdg'.split(' ')
             # find all files that match ext
             lib = os.path.join(lib,'')
             files = []

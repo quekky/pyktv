@@ -30,7 +30,7 @@ dbconn = None
 def __init__():
     global mpvMediaPlayer, config, keyboardshortcut, themeDir, singerdir, dbconn
 
-    mpvMediaPlayer = mpv.MPV(hwdec=True, log_handler=logger.warning, loglevel='warn', ytdl=True)
+    mpvMediaPlayer = mpv.MPV(hwdec=True, log_handler=logger.warning, loglevel='warn', ytdl=True, audio_file_auto='exact')
 
     configfile = configparser.ConfigParser()
     configfile.read(os.path.join(programDir,"config.ini"))

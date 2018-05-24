@@ -33,38 +33,52 @@ def raiseVideoWindow():
 class CommonWindow(QWidget):
     """Common window for both windows"""
 
+    ignore_keys=[]
+    def getQKeySequence(self, key):
+        if key.startswith('0x'):
+            try:
+                key = int(key, 16)
+            except ValueError:
+                pass
+        seq = QKeySequence(key)
+        s = seq.toString()
+        if len(s)==1 and s.isalpha():
+            self.ignore_keys.append(ord(s))
+        return seq
+
+
     def __init__(self):
         super().__init__()
         # map keyboard shortcuts
         for key in settings.keyboardshortcut.get('Home','').split('|'):
-            QShortcut(QKeySequence(key), self, self.key_home)
+            QShortcut(self.getQKeySequence(key), self, self.key_home)
         for key in settings.keyboardshortcut.get('Backspace','').split('|'):
-            QShortcut(QKeySequence(key), self, self.key_backspace)
+            QShortcut(self.getQKeySequence(key), self, self.key_backspace)
         for key in settings.keyboardshortcut.get('Enter','').split('|'):
-            QShortcut(QKeySequence(key), self, self.key_enter)
+            QShortcut(self.getQKeySequence(key), self, self.key_enter)
         for key in settings.keyboardshortcut.get('PageUp','').split('|'):
-            QShortcut(QKeySequence(key), self, self.key_pageup)
+            QShortcut(self.getQKeySequence(key), self, self.key_pageup)
         for key in settings.keyboardshortcut.get('PageDown','').split('|'):
-            QShortcut(QKeySequence(key), self, self.key_pagedown)
+            QShortcut(self.getQKeySequence(key), self, self.key_pagedown)
         for key in settings.keyboardshortcut.get('F1','').split('|'):
-            QShortcut(QKeySequence(key), self, self.key_F1)
+            QShortcut(self.getQKeySequence(key), self, self.key_F1)
         for key in settings.keyboardshortcut.get('F2','').split('|'):
-            QShortcut(QKeySequence(key), self, self.key_F2)
+            QShortcut(self.getQKeySequence(key), self, self.key_F2)
         for key in settings.keyboardshortcut.get('F3','').split('|'):
-            QShortcut(QKeySequence(key), self, self.key_F3)
+            QShortcut(self.getQKeySequence(key), self, self.key_F3)
         for key in settings.keyboardshortcut.get('F4','').split('|'):
-            QShortcut(QKeySequence(key), self, self.key_F4)
+            QShortcut(self.getQKeySequence(key), self, self.key_F4)
 
         for key in settings.keyboardshortcut.get('switchchannel','').split('|'):
-            QShortcut(QKeySequence(key), self, playlist.switchChannel)
+            QShortcut(self.getQKeySequence(key), self, playlist.switchChannel)
         for key in settings.keyboardshortcut.get('playnextsong','').split('|'):
-            QShortcut(QKeySequence(key), self, playlist.playNextSong)
+            QShortcut(self.getQKeySequence(key), self, playlist.playNextSong)
         for key in settings.keyboardshortcut.get('pitchup','').split('|'):
-            QShortcut(QKeySequence(key), self, playlist.setPitchUp)
+            QShortcut(self.getQKeySequence(key), self, playlist.setPitchUp)
         for key in settings.keyboardshortcut.get('pitchflat','').split('|'):
-            QShortcut(QKeySequence(key), self, playlist.setPitchFlat)
+            QShortcut(self.getQKeySequence(key), self, playlist.setPitchFlat)
         for key in settings.keyboardshortcut.get('pitchdown','').split('|'):
-            QShortcut(QKeySequence(key), self, playlist.setPitchDown)
+            QShortcut(self.getQKeySequence(key), self, playlist.setPitchDown)
 
 
     def contextMenuEvent(self, QContextMenuEvent):
@@ -98,7 +112,7 @@ class CommonWindow(QWidget):
                     index = key - Qt.Key_0 - 1
                     if index == -1: index = 9
                     settings.selectorWindow.searchcontentoption[index].click()
-                if Qt.Key_A <= key <= Qt.Key_Z:
+                if (Qt.Key_A <= key <= Qt.Key_Z) and key not in self.ignore_keys:
                     raiseSelectorWindow()
                     index = key
                     settings.selectorWindow.searchKeyPressedAlpha(chr(index))

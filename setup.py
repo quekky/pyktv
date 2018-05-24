@@ -25,7 +25,8 @@ if sys.platform == "win32":
 
 
 executables = [Executable("pyktv.py", base=base, icon='themes/pyktv.ico'),
-               Executable("songeditor.py", base=base, icon='themes/pyktv.ico')]
+               Executable("songeditor.py", base=base, icon='themes/pyktv.ico'),
+               Executable("show_key.py", base=base, icon='themes/pyktv.ico')]
 
 options = {
     'build_exe': {
