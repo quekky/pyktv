@@ -139,7 +139,7 @@ def titleSearch(data=None, page=0):
 
     try:
         pager = pagerContent(tracks, 0, getCommon1_h_options(), playlist.addVideo)
-        pager.startSearch(page,0 )
+        pager.startSearch(page)
     except:
         settings.logger.printException()
 
@@ -157,7 +157,7 @@ def indexSearch(data=None, page=0):
 
     try:
         pager = pagerContent(tracks, 0, getCommon1_h_options(), playlist.addVideo)
-        pager.startSearch(page,1 )
+        pager.startSearch(page, 1)
     except:
         settings.logger.printException()
 
@@ -505,7 +505,7 @@ def youtubeScreen2(data=None, page=0):
                 t['network'] = 'youtube'
             pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
 
-        pager.startDisplay(page, 1)
+        pager.startDisplay(page, 0, 1)
     except:
         settings.logger.printException()
     else:
@@ -637,16 +637,17 @@ class pagerContent:
         self.h_options = h_options
         self.contentcallback = callback
 
-    def startDisplay(self, page=0, searchtype=0):
+    def startDisplay(self, page=0, searchtype=0, searchfilter=0):
         for option in self.h_options.values():
             if 'search' in option.keys() and option['search']:
                 option['func']=self.showSearch
         self.searchtype=searchtype
+        self.searchfilter=searchfilter
         settings.selectorWindow.setHeaders(self.h_options)
         self.contentDisplay(page)
 
-    def startSearch(self, page=0, searchtype=0):
-        self.startDisplay(page, searchtype)
+    def startSearch(self, page=0, searchtype=0, searchfilter=0):
+        self.startDisplay(page, searchtype, searchfilter)
         self.showSearch()
 
     def showSearch(self, data=None):
@@ -699,7 +700,7 @@ class pagerContent:
     def filterList(self, searchstring):
         if searchstring=='':
             self.filterlist = self.displaylist
-        elif self.searchtype==1:
+        elif self.searchfilter==1:
             self.filterlist = list(
                 filter(lambda i: 'search' in i.keys() and i['search'].find(searchstring)>=0, self.displaylist))
         else:

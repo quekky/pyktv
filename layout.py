@@ -80,6 +80,13 @@ class CommonWindow(QWidget):
         for key in settings.keyboardshortcut.get('pitchdown','').split('|'):
             QShortcut(self.getQKeySequence(key), self, playlist.setPitchDown)
 
+        for key in settings.keyboardshortcut.get('jumpforward','').split('|'):
+            QShortcut(self.getQKeySequence(key), self, playlist.jumpForward).setAutoRepeat(True)
+        for key in settings.keyboardshortcut.get('jumpbackward','').split('|'):
+            QShortcut(self.getQKeySequence(key), self, playlist.jumpBackward).setAutoRepeat(True)
+        for key in settings.keyboardshortcut.get('playpause','').split('|'):
+            QShortcut(self.getQKeySequence(key), self, playlist.playpause)
+
 
     def contextMenuEvent(self, QContextMenuEvent):
         func=lambda f: (lambda: settings.ignoreInputKey or f())
@@ -101,9 +108,18 @@ class CommonWindow(QWidget):
         menu.addAction(self.style().standardIcon(QStyle.SP_DialogCloseButton), _("Quit"), qApp.quit)
         action = menu.exec_(self.mapToGlobal(QContextMenuEvent.pos()))
 
+    prevtime=0
     def keyReleaseEvent(self, QKeyEvent):
         """Key press"""
         key = QKeyEvent.key()
+
+        # if modifier is pressed, ignore the key
+        now = time.time()
+        if now-self.prevtime<=1 or QKeyEvent.modifiers()!=Qt.NoModifier:
+            return
+        if key in (Qt.Key_Shift,Qt.Key_Control,Qt.Key_Meta,Qt.Key_Alt):
+            self.prevtime=now
+
         if not settings.ignoreInputKey:
             #keys affecting selector screen
             if settings.selectorWindow.insearch:

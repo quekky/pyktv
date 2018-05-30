@@ -34,7 +34,7 @@ options = {
         'packages': ['multiprocessing', 'idna', 'certifi', 'chardet', 'urllib3', 'asyncio', 'jinja2'],
         'excludes': ['tkinter'],
         'zip_include_packages': ['*'],
-        'zip_exclude_packages': [],
+        'zip_exclude_packages': ['opencc'],
     },
 }
 

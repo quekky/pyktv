@@ -282,7 +282,7 @@
                  <item row="9" column="0">
                   <widget class="QLabel" name="lblSong10">
                    <property name="text">
-                    <string>Librarry</string>
+                    <string>Library</string>
                    </property>
                    <property name="buddy">
                     <cstring>cmbSongLibrary</cstring>

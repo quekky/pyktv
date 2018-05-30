@@ -244,7 +244,7 @@ def startServer():
         http_server = WSGIServer(('0.0.0.0', 5000), fapp)
         http_server.serve_forever()
     else:
-        fapp.run(host='0.0.0.0', debug=True, use_reloader=False)
+        fapp.run(host='0.0.0.0', debug=True, threaded=False, use_reloader=False)
 
 def __init__():
     # translate based on program language (not browser language)

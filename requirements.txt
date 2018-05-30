@@ -8,3 +8,5 @@ gevent>=1.2
 pypinyin
 opencc-python-reimplemented
 tqdm
+#gevent 1.3 breaks cx_freeze
+gevent==1.2.2

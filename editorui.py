@@ -588,7 +588,7 @@ class EditorWindow(QMainWindow):
             lib = os.path.normpath(lib)
             path = os.path.dirname(os.path.join(lib, filename.lstrip(os.path.sep)))
 
-        qfd=QFileDialog(self, "Open Video", path, "Video (*.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv *.vob *.cdg);;All files (*.*)")
+        qfd=QFileDialog(self, "Open Video", path, "Video (*.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv *.vob *.divx *.cdg);;All files (*.*)")
         if lib:
             qfd.directoryEntered.connect(lambda dir: os.path.normpath(dir).startswith(lib) or qfd.setDirectory(lib))
         if qfd.exec():
@@ -848,7 +848,7 @@ class EditorWindow(QMainWindow):
             library = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('library')).data()
             mediafile = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('media_file')).data()
             self.volume = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('volume')).data().split(',')
-            if not self.volume:
+            if not self.volume or not self.volume[0]:
                 self.volume=['0']
             videopath = functions.getVideoPath(library, mediafile)
             player.play(videopath)
@@ -1271,7 +1271,7 @@ class SearchMedia(QDialog):
         dbfiles=[r['media_file'] for r in rows]
 
         try:
-            file_exts = '.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv *.vob *.cdg'.split(' ')
+            file_exts = '.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv *.vob *.divx *.cdg'.split(' ')
             # find all files that match ext
             lib = os.path.join(lib,'')
             files = []

@@ -145,8 +145,7 @@ def playNextSong():
             videostarttime=time.time()
             network_channel = 0
             audiopitch = 0
-            audiovolume = current_playing['volume'] if 'volume' in current_playing.keys() else []
-            setChannel()
+            audiovolume = current_playing['volume'].split(',') if 'volume' in current_playing.keys() else []
 
         except:
             settings.logger.printException()
@@ -180,6 +179,8 @@ def checkMediaPlayback():
         if player_time_pos > 0 and not videostatushasbeenset:
             videostatushasbeenset = True
             settings.videoWindow.setStatusTempText(_("Now playing: ") + current_playing['display'], 3000)
+            # wait till video loaded, then set channel
+            setChannel()
         elif player_time_pos>videopopulartimeout and not videopopularupdated:
             videopopularupdated = True
             updateVideoPopular(current_playing)
@@ -209,7 +210,7 @@ def setPlayerFilter():
         #start with no rubberband (in MPV, for vorbis/opus, if there's rubberband the sound is not playing)
         audiopitchstr = None if audiopitch==0 else 'rubberband=pitch-scale=' + str(1 + audiopitch / 10)
         aid=settings.mpvMediaPlayer.aid-1
-        audiovolumestr = None if aid<len(audiovolume) or audiovolume[aid]==0 else 'lavfi="volume=volume=%sdB"' % audiovolume
+        audiovolumestr = None if aid>=len(audiovolume) or str(audiovolume[aid])=='0' else 'lavfi="volume=volume=%sdB"' % audiovolume[aid]
         str1=','.join(filter(None, (audiovolumestr, audiopanstr, audiopitchstr)))
         settings.mpvMediaPlayer.command('af', 'clr', '')
         if str1: settings.mpvMediaPlayer.command('af', 'set', str1)
@@ -308,6 +309,20 @@ def setPitchFlat():
     if current_playing is not None:
         audiopitch=0
         setPitch()
+
+
+def jumpForward():
+    time_pos=settings.mpvMediaPlayer.time_pos
+    if time_pos is not None:
+        settings.mpvMediaPlayer.time_pos=time_pos+0.5
+
+def jumpBackward():
+    time_pos=settings.mpvMediaPlayer.time_pos
+    if time_pos is not None:
+        settings.mpvMediaPlayer.time_pos=time_pos-0.5
+
+def playpause():
+    settings.mpvMediaPlayer.cycle('pause')
 
 
 """
