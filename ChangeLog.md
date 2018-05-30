@@ -1,3 +1,12 @@
+## version 2018.05.30-beta
+
+- Added video jump forward, jump backwards, pause
+- Bugfix
+  - Fix OnsenUI version to 2.9.2 instead of latest version (which is buggy)
+  - Index search - search startswith (instead of search in any part of the string)
+  - other bugfix
+
+
 ## version 2018.05.24-beta
 
 - Added a small program to show what is the key pressed (to map special keys in the config.ini, eg remote controls buttons usually return special keys)
