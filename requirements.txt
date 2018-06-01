@@ -10,3 +10,4 @@ opencc-python-reimplemented
 tqdm
 #gevent 1.3 breaks cx_freeze
 gevent==1.2.2
+jamotools>=0.1

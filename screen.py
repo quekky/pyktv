@@ -139,7 +139,7 @@ def titleSearch(data=None, page=0):
 
     try:
         pager = pagerContent(tracks, 0, getCommon1_h_options(), playlist.addVideo)
-        pager.startSearch(page)
+        pager.startSearch(page, 0, 1)
     except:
         settings.logger.printException()
 
@@ -157,7 +157,7 @@ def indexSearch(data=None, page=0):
 
     try:
         pager = pagerContent(tracks, 0, getCommon1_h_options(), playlist.addVideo)
-        pager.startSearch(page, 1)
+        pager.startSearch(page, 1, 0)
     except:
         settings.logger.printException()
 
@@ -244,7 +244,7 @@ def artistSearch4(data, page=0):
         h_options=getCommon2_h_options()
         h_options[0]['search']=2
         pager = pagerContent(tracks, 0, h_options, playlist.addVideo)
-        pager.startDisplay(page)
+        pager.startDisplay(page, 0, 1)
     except:
         settings.logger.printException()
 
@@ -276,7 +276,7 @@ def langSearch2(data, page=0):
 
     try:
         pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
-        pager.startDisplay(page)
+        pager.startDisplay(page, 0, 1)
     except:
         settings.logger.printException()
 
@@ -308,7 +308,7 @@ def categorySearch2(data, page=0):
 
     try:
         pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
-        pager.startDisplay(page)
+        pager.startDisplay(page, 0, 1)
     except:
         settings.logger.printException()
 
@@ -342,7 +342,7 @@ def charSearch2(data, page=0):
 
     try:
         pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
-        pager.startDisplay(page)
+        pager.startDisplay(page, 0, 1)
     except:
         settings.logger.printException()
 
@@ -358,7 +358,7 @@ def popularSearch(data=None, page=0):
 
     try:
         pager = pagerContent(tracks, 0, getCommon2_h_options(), playlist.addVideo)
-        pager.startDisplay(page)
+        pager.startDisplay(page, 0, 1)
     except:
         settings.logger.printException()
 
@@ -579,7 +579,7 @@ def networkSearch2(data=None, page=0):
             child['server'] = data
             child['location'] = '//' + data['name'] + '/' + child['title'] + '/'
         pager = pagerContent(children, 0, getCommon2_h_options(), networkSearch3)
-        pager.startDisplay(page, 1)
+        pager.startDisplay(page, 0, 1)
     except:
         settings.logger.printException()
 
@@ -600,7 +600,7 @@ def networkSearch3(data=None, page=0):
                 if 'artist' in child.keys():
                     child['display'] += "<span style='color:"+settings.config['font.secondarycolor']+"'> 《" + child['artist'] + '》</span>'
             pager = pagerContent(children, 0, getCommon2_h_options(), networkSearch3)
-            pager.startDisplay(page, 1)
+            pager.startDisplay(page, 0, 1)
         elif data['class'].startswith('object.item'):
             #something playable
             data['network'] = 'dlna'
@@ -638,6 +638,17 @@ class pagerContent:
         self.contentcallback = callback
 
     def startDisplay(self, page=0, searchtype=0, searchfilter=0):
+        """
+
+        :param page:
+        :param searchtype:
+            0=alphanumeric
+            1=numbers only
+        :param searchfilter:
+            0=startswith
+            1=find anywhere
+        :return:
+        """
         for option in self.h_options.values():
             if 'search' in option.keys() and option['search']:
                 option['func']=self.showSearch

@@ -37,6 +37,7 @@ if __name__ == '__main__':
     #screen.artistSearch1(None)
     #screen.artistSearch3({'display': '组合', 'region': '華語', 'type': '男歌手'})
     #screen.artistSearch4( {'display': '黃明志', 'region': '華語', 'type': '男歌手', 'name': '黃明志'})
+    #screen.artistSearch4({'display': '다비치(Davichi)', 'region': '한국', 'type': '여자(Girl)', 'name': '다비치(Davichi)'})
     # screen.youtubeScreen1()
     # screen.youtubeScreen2({'id': 1, 'name': 'Popular Music in Singapore', 'url': 'https://www.youtube.com/playlist?list=PLsn0k7lyjYpl_uyG35AKRrj2toaJoi_gH', 'enable': 1, 'display': 'Popular Music in Singapore'})
     # screen.youtubeScreen2({'id': 2, 'name': 'Latest Music Videos','url': 'https://www.youtube.com/playlist?list=PLFgquLnL59akA2PflFpeQG9L01VFg90wS', 'enable': 1,'display': 'Latest Music Videos'})

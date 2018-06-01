@@ -1,6 +1,7 @@
 from PyQt5.QtGui import QKeySequence, QCursor
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QMenu, QStackedLayout, QShortcut, qApp
 import time
+import jamotools
 
 import playlist
 import screen
@@ -506,12 +507,33 @@ class SelectorWindow(CommonWindow):
     """
 
     insearch=False
-    cell_keyboard = {0: ('1', 'ABC2', 'DEF3', 'GHI4', 'JKL5', 'MNO6', 'PQRS7', 'TUV8', 'WXYZ9', '0'),
-                     1: ('1', '2', '3', '4', '5', '6', '7', '8', '9', '0')}
+    numstylesheet='<span style="color:#999999">'
+    search_display = {
+        0: [
+            ['EN', ('1', 'ABC2', 'DEF3', 'GHI4', 'JKL5', 'MNO6', 'PQRS7', 'TUV8', 'WXYZ9', '0')],
+            ['JP', (numstylesheet+'1:</span> あ', numstylesheet+'2:</span> か', numstylesheet+'3:</span> さ',
+                    numstylesheet+'4:</span> た', numstylesheet+'5:</span> な', numstylesheet+'6:</span> は',
+                    numstylesheet+'7:</span> ま', numstylesheet+'8:</span> や', numstylesheet+'9:</span> ら',
+                    numstylesheet+'0:</span> わ')],
+            ['KR', (numstylesheet+'1:</span> ㅣ', numstylesheet+'2:</span> ㆍ', numstylesheet+'3:</span> ㅡ',
+                    numstylesheet+'4:</span> ㄱㅋ', numstylesheet+'5:</span> ㄴㄹ', numstylesheet+'6:</span> ㄷㅌ',
+                    numstylesheet+'7:</span> ㅂㅍ', numstylesheet+'8:</span> ㅅㅎ', numstylesheet+'9:</span> ㅈㅊ',
+                    numstylesheet+'0:</span> ㅇㅁ')]
+          ],
+       1: [['NUM', ('1', '2', '3', '4', '5', '6', '7', '8', '9', '0')]]
+     }
+    search_keyboard = {
+        0: [
+            ['EN', ('1', 'ABC2', 'DEF3', 'GHI4', 'JKL5', 'MNO6', 'PQRS7', 'TUV8', 'WXYZ9', '0')],
+            ['JP', ('あいうえおぁぃぅぇぉ', 'かきくけこ', 'さしすせそ', 'たちつてとっ', 'なにぬねの', 'はひふへほ', 'まみむめも', 'やゆよゃゅょ', 'らりるれろ', 'わゐゑを')],
+            ['KR', ('', '', '', 'ㄱㅋㄲ', 'ㄴㄹ', 'ㄷㅌㄸ', 'ㅂㅍㅃ', 'ㅅㅎㅆ', 'ㅈㅊㅉ', 'ㅇㅁ')]
+          ],
+       1: [['NUM', ('1', '2', '3', '4', '5', '6', '7', '8', '9', '0')]]
+     }
     searchtype = 0
-    searchlastkey = [-1, 0]
+    searchindex = 0
+    searchlastkey = [-1, 0, '']
     searchstring = ''
-    searchresponsetime = 0
     searchthreshold = 2
     searchtimer = QTimer()
     searchcallback = None
@@ -552,10 +574,10 @@ class SelectorWindow(CommonWindow):
         self.searchtitle.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.searchtitle.setStyleSheet(fontstylesheet+';font:bold;')
         self.searchtitle.setText(_("Search character:"))
-        self.searchlayout.addWidget(self.searchtitle, 0, 0, 1, 3)
+        self.searchlayout.addWidget(self.searchtitle, 0, 0, 1, 2)
 
         # F1 to F4
-        f_text=(_('F1: Ok'),_('F2: Del'),_('F3: Cancel'),_('F4:'))
+        f_text=(_('F1: Ok'),_('F2: Del'),_('F3: Cancel'),_('F4: 🌐'))
         self.searchfunctionoption = []
         #create a filler "F4"
         for i in range(4):
@@ -568,6 +590,7 @@ class SelectorWindow(CommonWindow):
             self.searchfunctionoption[i].clicked.connect(self.searchButtonPressedFunction)
         for i in range(3):
             self.searchlayout.addWidget(self.searchfunctionoption[i], 1 , i)
+        self.searchlayout.addWidget(self.searchfunctionoption[3], 0, 2)
 
         # display text
         self.searchlabel = QLabel()
@@ -633,6 +656,10 @@ class SelectorWindow(CommonWindow):
         if self.searchbg.isVisible():
             self.searchbg.setFixedSize(self.width(), self.height())
 
+    def displaySearchNumbers(self):
+        for i in range(10):
+            self.searchcontentoption[i].setText(self.search_display[self.searchtype][self.searchindex][1][i])
+
     def startSearch(self, searchtype=0):
         """display the search bar
 
@@ -643,10 +670,14 @@ class SelectorWindow(CommonWindow):
         self.insearch=True
         self.searchstring=''
         self.searchtype=searchtype
+        self.searchindex=0
 
-        for i in range(10):
-            self.searchcontentoption[i].setText(self.cell_keyboard[self.searchtype][i])
+        if len(self.search_keyboard[self.searchtype]) > 1:
+            self.searchfunctionoption[3].show()
+        else:
+            self.searchfunctionoption[3].hide()
 
+        self.displaySearchNumbers()
         self.searchbg.show()
         self.setSearchPos()
         self.setSearchTextSize()
@@ -657,21 +688,30 @@ class SelectorWindow(CommonWindow):
         self.insearch=False
         self.searchbg.hide()
 
+    def searchGetJoinString(self):
+        searchstring=self.searchstring
+        if 0 <= self.searchlastkey[0] < 10:
+            searchstring+=self.search_keyboard[self.searchtype][self.searchindex][1][self.searchlastkey[0]][self.searchlastkey[1]]
+        elif self.searchlastkey[0]==-2:
+            searchstring+=self.searchlastkey[2]
+        return searchstring
+
+    def searchGetFinalString(self):
+        return jamotools.join_jamos(self.searchGetJoinString())
+
     def setSearchCallback(self, callback):
         self.searchcallback=callback
 
     def callSearchCallback(self):
         if callable(self.searchcallback):
-            sel = ''
-            if 0 <= self.searchlastkey[0] < 10:
-                sel = str(self.cell_keyboard[self.searchtype][self.searchlastkey[0]][self.searchlastkey[1]])
-            self.searchcallback(self.searchstring+sel)
+            self.searchcallback(self.searchGetFinalString())
 
     def searchTextDisplay(self):
-        sel=''
-        if 0 <= self.searchlastkey[0] < 10:
-            sel = ' <font color="cyan">'+str(self.cell_keyboard[self.searchtype][self.searchlastkey[0]][self.searchlastkey[1]])+'</font>'
-        self.searchlabel.setText('<font>'+' '.join(self.searchstring)+'</font>'+sel)
+        searchstring=' '.join(self.searchGetFinalString())
+        if self.searchlastkey[0]!=-1:
+            searchstring=searchstring[:-1]+'<font color="cyan">' + searchstring[-1] + '</font>'
+        self.searchlabel.setText(searchstring)
+
 
     @pyqtSlot(object)
     def searchKeyPressedAlpha(self, char):
@@ -682,35 +722,89 @@ class SelectorWindow(CommonWindow):
             self.searchTextDisplay()
             self.callSearchCallback()
 
-    @pyqtSlot(object)
-    def searchButtonPressedNumber(self, index):
-        timenow=time.time()
+    def searchKoreanNumber(self, index):
+        if 0 <= index <= 2: # Vowels
+            if 3 <= self.searchlastkey[0] <= 9:
+                self.searchstring = self.searchGetJoinString()
+                self.searchlastkey = [-1, 0, '']
+
+            beforedata = self.searchlastkey[2] if self.searchlastkey[0]==-2 else ''
+            nowdata = ""
+            newdata = False
+            if index==0: # ㅣ ㅓ ㅕ ㅐ ㅔ ㅖ ㅒ ㅚ ㅟ ㅙ ㅝ ㅞ ㅢ
+                if beforedata=="ㆍ": nowdata = "ㅓ"
+                elif beforedata=="ᆢ": nowdata = "ㅕ"
+                elif beforedata=="ㅏ": nowdata = "ㅐ"
+                elif beforedata=="ㅑ": nowdata = "ㅒ"
+                elif beforedata=="ㅓ": nowdata = "ㅔ"
+                elif beforedata=="ㅕ": nowdata = "ㅖ"
+                elif beforedata=="ㅗ": nowdata = "ㅚ"
+                elif beforedata=="ㅜ": nowdata = "ㅟ"
+                elif beforedata=="ㅠ": nowdata = "ㅝ"
+                elif beforedata=="ㅘ": nowdata = "ㅙ"
+                elif beforedata=="ㅝ": nowdata = "ㅞ"
+                elif beforedata=="ㅡ": nowdata = "ㅢ"
+                else:
+                    nowdata = "ㅣ"
+                    newdata = True
+            elif index==1: # ㆍ ㆍㆍ ㅏ ㅑ ㅜ ㅠ ㅘ
+                if beforedata=="ㆍ": nowdata = "ᆢ"
+                elif beforedata=="ᆢ": nowdata = "ㆍ"
+                elif beforedata=="ㅣ": nowdata = "ㅏ"
+                elif beforedata=="ㅏ": nowdata = "ㅑ"
+                elif beforedata=="ㅡ": nowdata = "ㅜ"
+                elif beforedata=="ㅜ": nowdata = "ㅠ"
+                elif beforedata=="ㅚ": nowdata = "ㅘ"
+                else:
+                    nowdata = "ㆍ"
+                    newdata = True
+            elif index==2: # ㅡ ㅗ ㅛ
+                if beforedata=="ㆍ": nowdata="ㅗ"
+                elif beforedata=="ᆢ": nowdata="ㅛ"
+                else:
+                    nowdata = "ㅡ"
+                    newdata = True
+
+            if newdata:
+                self.searchstring += beforedata
+            self.searchlastkey = [-2, 0, nowdata]
+        elif 3 <= index <= 9: # Consonants
+            self.searchFindFromKeyboard(index)
+
+
+    def searchFindFromKeyboard(self, index):
         if 0<=index<10:
-            if len(self.cell_keyboard[self.searchtype][index])==1:
-                self.searchstring += str(self.cell_keyboard[self.searchtype][index])
+            if len(self.search_keyboard[self.searchtype][self.searchindex][1][index])==1:
+                self.searchstring += str(self.search_keyboard[self.searchtype][self.searchindex][1][index])
             else:
                 if index==self.searchlastkey[0]:
-                    if timenow-self.searchresponsetime<self.searchthreshold:
-                        self.searchlastkey[1]=(self.searchlastkey[1]+1)%len(self.cell_keyboard[self.searchtype][index])
-                    else:
-                        self.searchstring += str(self.cell_keyboard[self.searchtype][self.searchlastkey[0]][self.searchlastkey[1]])
-                        self.searchlastkey[1]=0
+                    self.searchlastkey[1]=(self.searchlastkey[1]+1)%len(self.search_keyboard[self.searchtype][self.searchindex][1][index])
                 else:
-                    if 0<=self.searchlastkey[0]<10:
-                        self.searchstring += str(self.cell_keyboard[self.searchtype][self.searchlastkey[0]][self.searchlastkey[1]])
-                    self.searchlastkey[0] = index
-                    self.searchlastkey[1] = 0
+                    if self.searchlastkey[0]!=-1:
+                        self.searchstring = self.searchGetJoinString()
+                    self.searchlastkey = [index, 0, '']
+
+
+    @pyqtSlot(object)
+    def searchButtonPressedNumber(self, index):
+        try:
             self.searchtimer.stop()
+            if self.search_keyboard[self.searchtype][self.searchindex][0]=='KR':
+                self.searchKoreanNumber(index)
+            else:
+                self.searchFindFromKeyboard(index)
             self.searchtimer.start()
-        self.searchresponsetime = timenow
+        except:
+            settings.logger.printException()
         self.searchTextDisplay()
         self.callSearchCallback()
 
     @pyqtSlot()
     def searchButtonPressedTimeout(self):
-        if 0 <= self.searchlastkey[0] < 10:
-            self.searchstring += str(self.cell_keyboard[self.searchtype][self.searchlastkey[0]][self.searchlastkey[1]])
-            self.searchlastkey[0] = -1
+        self.searchtimer.stop()
+        if self.searchlastkey[0]!=-1:
+            self.searchstring = self.searchGetJoinString()
+            self.searchlastkey = [-1, 0, '']
             self.searchTextDisplay()
 
     @pyqtSlot(object)
@@ -721,14 +815,17 @@ class SelectorWindow(CommonWindow):
             self.searchbackspaceoption.click()
         elif index=='F3':
             self.searchstring=''
-            self.searchlastkey[0]=-1
-            self.stopSearch()
-            self.callSearchCallback()
+            self.searchlastkey = [-1, 0, '']
+            self.searchenteroption.click()
+        elif index == 'F4':
+            self.searchButtonPressedTimeout()
+            self.searchindex = (self.searchindex+1)%len(self.search_keyboard[self.searchtype])
+            self.displaySearchNumbers()
 
     @pyqtSlot(object)
     def searchButtonPressedBackspace(self, index):
-        if 0 <= self.searchlastkey[0] < 10:
-            self.searchlastkey[0]=-1
+        if self.searchlastkey[0]!=-1:
+            self.searchlastkey=[-1, 0, '']
         else:
             self.searchstring=self.searchstring[:-1]
         self.searchtimer.stop()

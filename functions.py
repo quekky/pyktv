@@ -46,7 +46,9 @@ def getVideoPath(library, mediafile):
 
 
 def get_initials(word):
-    split=pypinyin.lazy_pinyin(word, errors=lambda w: [m.group() for m in re.finditer('[A-Za-z]+|[0-9]', w)])
+    re_jap='[ぁ-んァ-ン]'
+    re_hangul='[\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uAC00-\uD7AF\uD7B0-\uD7FF]'
+    split=pypinyin.lazy_pinyin(word, errors=lambda w: [m.group() for m in re.finditer('[A-Za-z]+|[0-9]|'+re_jap+'|'+re_hangul, w)])
     return ''.join([x[0] for x in split]).upper()
 
 

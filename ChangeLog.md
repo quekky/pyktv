@@ -1,3 +1,9 @@
+## version 2018.06.01-beta
+
+- Search using Jap and Korean
+- Bugfix
+
+
 ## version 2018.05.30-beta
 
 - Added video jump forward, jump backwards, pause
