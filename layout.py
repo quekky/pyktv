@@ -1,11 +1,10 @@
 from PyQt5.QtGui import QKeySequence, QCursor
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QMenu, QStackedLayout, QShortcut, qApp
 import time
-import jamotools
 
 import playlist
 import screen
-from functions import setZeroMargins
+from functions import setZeroMargins, Hangul
 from pywidgets import *
 import webapp
 
@@ -532,11 +531,13 @@ class SelectorWindow(CommonWindow):
      }
     searchtype = 0
     searchindex = 0
-    searchlastkey = [-1, 0, '']
+    searchlastkey = [-1, 0]
     searchstring = ''
     searchthreshold = 2
     searchtimer = QTimer()
     searchcallback = None
+    search_hangul = Hangul()
+
 
     def createSearchLayout(self):
         fontstylesheet=self.fontstylesheet
@@ -671,6 +672,7 @@ class SelectorWindow(CommonWindow):
         self.searchstring=''
         self.searchtype=searchtype
         self.searchindex=0
+        self.search_hangul = Hangul()
 
         if len(self.search_keyboard[self.searchtype]) > 1:
             self.searchfunctionoption[3].show()
@@ -688,16 +690,13 @@ class SelectorWindow(CommonWindow):
         self.insearch=False
         self.searchbg.hide()
 
-    def searchGetJoinString(self):
-        searchstring=self.searchstring
-        if 0 <= self.searchlastkey[0] < 10:
-            searchstring+=self.search_keyboard[self.searchtype][self.searchindex][1][self.searchlastkey[0]][self.searchlastkey[1]]
-        elif self.searchlastkey[0]==-2:
-            searchstring+=self.searchlastkey[2]
-        return searchstring
-
     def searchGetFinalString(self):
-        return jamotools.join_jamos(self.searchGetJoinString())
+        searchstring=self.searchstring
+        if self.searchlastkey[0]==-2:
+            searchstring+=self.search_hangul.getHangul()
+        elif 0 <= self.searchlastkey[0] < 10:
+            searchstring+=self.search_keyboard[self.searchtype][self.searchindex][1][self.searchlastkey[0]][self.searchlastkey[1]]
+        return searchstring
 
     def setSearchCallback(self, callback):
         self.searchcallback=callback
@@ -723,17 +722,24 @@ class SelectorWindow(CommonWindow):
             self.callSearchCallback()
 
     def searchKoreanNumber(self, index):
+        self.searchlastkey = [-2, 0]
         if 0 <= index <= 2: # Vowels
-            if 3 <= self.searchlastkey[0] <= 9:
-                self.searchstring = self.searchGetJoinString()
-                self.searchlastkey = [-1, 0, '']
+            if self.search_hangul.step == 2:
+                self.searchstring += self.search_hangul.getHangul(1)
+                self.search_hangul.chosung = self.search_hangul.jongsung
+                self.search_hangul.jungsung = self.search_hangul.jongsung = self.search_hangul.jongsung2 = ""
+            elif self.search_hangul.step == 3:
+                self.searchstring += self.search_hangul.getHangul(2)
+                self.search_hangul.chosung = self.search_hangul.jongsung2
+                self.search_hangul.jungsung = self.search_hangul.jongsung = self.search_hangul.jongsung2 = ""
 
-            beforedata = self.searchlastkey[2] if self.searchlastkey[0]==-2 else ''
-            nowdata = ""
-            newdata = False
+            beforedata = self.search_hangul.jungsung
+            self.search_hangul.step = 1
+            self.search_hangul.searchlastkey = [-1, 0]
+
             if index==0: # ㅣ ㅓ ㅕ ㅐ ㅔ ㅖ ㅒ ㅚ ㅟ ㅙ ㅝ ㅞ ㅢ
                 if beforedata=="ㆍ": nowdata = "ㅓ"
-                elif beforedata=="ᆢ": nowdata = "ㅕ"
+                elif beforedata==":": nowdata = "ㅕ"
                 elif beforedata=="ㅏ": nowdata = "ㅐ"
                 elif beforedata=="ㅑ": nowdata = "ㅒ"
                 elif beforedata=="ㅓ": nowdata = "ㅔ"
@@ -746,10 +752,9 @@ class SelectorWindow(CommonWindow):
                 elif beforedata=="ㅡ": nowdata = "ㅢ"
                 else:
                     nowdata = "ㅣ"
-                    newdata = True
-            elif index==1: # ㆍ ㆍㆍ ㅏ ㅑ ㅜ ㅠ ㅘ
-                if beforedata=="ㆍ": nowdata = "ᆢ"
-                elif beforedata=="ᆢ": nowdata = "ㆍ"
+            elif index==1: # ㆍ : ㅏ ㅑ ㅜ ㅠ ㅘ
+                if beforedata=="ㆍ": nowdata = ":"
+                elif beforedata==":": nowdata = "ㆍ"
                 elif beforedata=="ㅣ": nowdata = "ㅏ"
                 elif beforedata=="ㅏ": nowdata = "ㅑ"
                 elif beforedata=="ㅡ": nowdata = "ㅜ"
@@ -757,19 +762,35 @@ class SelectorWindow(CommonWindow):
                 elif beforedata=="ㅚ": nowdata = "ㅘ"
                 else:
                     nowdata = "ㆍ"
-                    newdata = True
             elif index==2: # ㅡ ㅗ ㅛ
                 if beforedata=="ㆍ": nowdata="ㅗ"
-                elif beforedata=="ᆢ": nowdata="ㅛ"
+                elif beforedata==":": nowdata="ㅛ"
                 else:
                     nowdata = "ㅡ"
-                    newdata = True
 
-            if newdata:
-                self.searchstring += beforedata
-            self.searchlastkey = [-2, 0, nowdata]
+            self.search_hangul.jungsung = nowdata
+
         elif 3 <= index <= 9: # Consonants
-            self.searchFindFromKeyboard(index)
+            if self.search_hangul.step == 1:
+                if self.search_hangul.jungsung=="ㆍ" or self.search_hangul.jungsung==":":
+                    self.search_hangul = Hangul()
+                else:
+                    self.search_hangul.step = 2
+
+            if index==self.search_hangul.searchlastkey[0]:
+                self.search_hangul.searchlastkey[1]=(self.search_hangul.searchlastkey[1]+1)%len(self.search_keyboard[self.searchtype][self.searchindex][1][index])
+            else:
+                self.search_hangul.searchlastkey = [index, 0]
+                if self.search_hangul.step == 2 and self.search_hangul.jongsung:
+                    self.search_hangul.step = 3
+                elif self.search_hangul.step == 3:
+                    self.searchstring += self.search_hangul.getHangul()
+                    self.search_hangul = Hangul()
+
+            nowdata = self.search_keyboard[self.searchtype][self.searchindex][1][index][self.search_hangul.searchlastkey[1]]
+            if self.search_hangul.step==0:   self.search_hangul.chosung = nowdata
+            elif self.search_hangul.step==2: self.search_hangul.jongsung = nowdata
+            elif self.search_hangul.step==3: self.search_hangul.jongsung2 = nowdata
 
 
     def searchFindFromKeyboard(self, index):
@@ -803,8 +824,9 @@ class SelectorWindow(CommonWindow):
     def searchButtonPressedTimeout(self):
         self.searchtimer.stop()
         if self.searchlastkey[0]!=-1:
-            self.searchstring = self.searchGetJoinString()
+            self.searchstring = self.searchGetFinalString()
             self.searchlastkey = [-1, 0, '']
+            self.search_hangul = Hangul()
             self.searchTextDisplay()
 
     @pyqtSlot(object)
@@ -824,11 +846,24 @@ class SelectorWindow(CommonWindow):
 
     @pyqtSlot(object)
     def searchButtonPressedBackspace(self, index):
-        if self.searchlastkey[0]!=-1:
+        self.searchtimer.stop()
+        if self.searchlastkey[0]==-2:
+            if self.search_hangul.step==0:
+                self.search_hangul=Hangul()
+                self.searchlastkey = [-1, 0]
+            else:
+                self.search_hangul.step -= 1
+                self.search_hangul.searchlastkey = [-1, 0]
+                if self.search_hangul.step<=2: self.search_hangul.jongsung2 = ''
+                if self.search_hangul.step<=1: self.search_hangul.jongsung = ''
+                if self.search_hangul.step<=0: self.search_hangul.jungsung = ''
+                # if delete vowel and no leading consonant
+                if self.search_hangul.step == 0 and not self.search_hangul.chosung: self.searchlastkey = [-1, 0]
+                self.searchtimer.start()
+        elif self.searchlastkey[0]!=-1:
             self.searchlastkey=[-1, 0, '']
         else:
             self.searchstring=self.searchstring[:-1]
-        self.searchtimer.stop()
         self.searchTextDisplay()
         self.callSearchCallback()
 

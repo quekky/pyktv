@@ -92,3 +92,56 @@ class CommandRunner():
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=CREATE_NO_WINDOW)
         stdout, stderr = p.communicate()
         self.output=stderr.decode("utf8", errors='replace')
+
+
+""" Hangul functions """
+
+LEADING_CONSONANTS = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ']
+INDEX_BY_LEADING_CONSONANT = { leading_consonant: index for index, leading_consonant in enumerate(LEADING_CONSONANTS) }
+
+VOWELS = ['ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ']
+INDEX_BY_VOWEL = { vowel: index for index, vowel in enumerate(VOWELS) }
+
+TRAILING_CONSONANTS = [None, 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ']
+INDEX_BY_TRAILING_CONSONANT = { trailing_consonant: index for index, trailing_consonant in enumerate(TRAILING_CONSONANTS) }
+
+COMPLEXJOOGSUNG = {'ㄹㄱ': 'ㄺ', 'ㄹㄷ': 'ㄾ', 'ㄹㅂ': 'ㄼ', 'ㄹㅍ': 'ㄿ', 'ㄱㅅ': 'ㄳ', 'ㄴㅎ': 'ㄶ', 'ㄹㅅ': 'ㄽ', 'ㄹㅎ': 'ㅀ', 'ㅂㅅ': 'ㅄ', 'ㄴㅈ': 'ㄵ', 'ㄹㅁ': 'ㄻ'}
+
+
+class Hangul():
+    chosung = ""
+    jungsung = ""
+    jongsung = ""
+    jongsung2 = ""
+    step = 0
+    searchlastkey = [-1, 0]
+
+
+
+    def compose_jamo(self, cho, jung, jong=''):
+        if cho in LEADING_CONSONANTS and jung in VOWELS:
+            code = 0xAC00 + INDEX_BY_LEADING_CONSONANT[cho] * 588 + INDEX_BY_VOWEL[jung] * 28
+            end = ''
+            if jong in TRAILING_CONSONANTS:
+                code += INDEX_BY_TRAILING_CONSONANT[jong]
+            else:
+                end = jong
+            return chr(code) + end
+        else:
+            return cho + jung + jong
+
+
+    def getHangul(self, step=-1):
+        if step == -1: step = self.step
+        if step == 0:
+            return self.chosung
+        elif step == 1:
+            return self.compose_jamo(self.chosung, self.jungsung)
+        elif step == 2:
+            return self.compose_jamo(self.chosung, self.jungsung, self.jongsung)
+        elif step == 3:
+            jamojoin = self.jongsung + self.jongsung2
+            if jamojoin in COMPLEXJOOGSUNG.keys():
+                return self.compose_jamo(self.chosung, self.jungsung, COMPLEXJOOGSUNG[jamojoin])
+            else:
+                return self.compose_jamo(self.chosung, self.jungsung, self.jongsung) + self.jongsung2

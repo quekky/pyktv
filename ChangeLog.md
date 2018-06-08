@@ -1,3 +1,10 @@
+## version 2018.06.08-beta
+
+- Rewrite the code for Hangul (Korean) search, now supports complex jamo (CVCC) (eg 훯), and remove the need for external package
+- Fix cx_freeze with gevent 1.2.3
+- Bugfix
+
+
 ## version 2018.06.01-beta
 
 - Search using Jap and Korean
