@@ -31,7 +31,7 @@ executables = [Executable("pyktv.py", base=base, icon='themes/pyktv.ico'),
 options = {
     'build_exe': {
         'include_files': include_files,
-        'packages': ['multiprocessing', 'idna', 'certifi', 'chardet', 'urllib3', 'asyncio', 'jinja2'],
+        'packages': ['multiprocessing', 'idna', 'certifi', 'chardet', 'urllib3', 'asyncio', 'jinja2', 'gevent', 'PyQt5.sip'],
         'excludes': ['tkinter'],
         'zip_include_packages': ['*'],
         'zip_exclude_packages': ['opencc', 'gevent'],
