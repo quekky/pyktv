@@ -1,4 +1,4 @@
-from PyQt5.QtGui import QKeySequence, QCursor
+from PyQt5.QtGui import QKeySequence, QCursor, QPixmap
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QMenu, QStackedLayout, QShortcut, qApp
 import time
 

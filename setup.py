@@ -7,7 +7,7 @@ from PyQt5.QtCore import QCoreApplication
 
 include_files=['README.md','ChangeLog.md','LICENSE','config.ini','db.sqlite3','locale','themes','html','editor']
 
-qtplugins=['sqldrivers','styles']
+qtplugins=['sqldrivers','styles','platforms','imageformats']
 paths = [os.path.join(str(libpath), plug) for libpath in QCoreApplication.libraryPaths() for plug in qtplugins]
 include_files.extend(filter(os.path.exists, paths))
 

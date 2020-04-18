@@ -41,8 +41,8 @@ def __init__():
     mpvMediaPlayer.ytdl_format=config.get('youtube.format','best')
     mpvMediaPlayer.slang = config.get('youtube.subtitleslangs', '')
 
-    themeDir = os.path.join(config.get('theme.dir'), '')
-    singerdir = os.path.join(programDir, config.get('singer.picture', ''))
+    themeDir = os.path.normcase(os.path.join(programDir, config.get('theme.dir'), ''))
+    singerdir = os.path.normcase(os.path.join(programDir, config.get('singer.picture', '')))
 
     dbconn = functions.createDatabase()
     loadLibraries()

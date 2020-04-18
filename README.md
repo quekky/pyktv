@@ -53,7 +53,8 @@ Mouse/touchscreen works as well
 
 ## Web server
 
-pyktv have a very simple web server. Use your smartphone/tablet to browse to your computer port 5000.
+pyktv have a very simple web server. Use your smartphone/tablet to browse to your computer port 5000, 
+your browser will need to have Internet.
 
 eg, http://{computer_ip}:5000/ _(replace computer_ip with your actual computer IP address)_
 
@@ -127,7 +128,7 @@ YouTube plugin only supports playlist (https://www.youtube.com/playlist?list=xxx
 (https://www.youtube.com/user/xxx/playlists), and user (https://www.youtube.com/user/ziller)
 
 I will recommend not to link to a huge list, as it takes a long time to download the list everytime it is clicked.
-For some youtube users who have a big list, I'll suggust that you point to their playlists instead 
+For some youtube users who have a big list, I'll suggest that you point to their playlists instead 
 (https://www.youtube.com/user/xxx/playlists)
 
 And of course Internet connection is required for YouTube to work.
@@ -167,7 +168,8 @@ in the root of the project
 If you want to use the media checking features in Song Editor, download ffmpeg and put it in the path
 (or install from dnf/apt)
 
-After downloading youtube_dl source (or from pip), edit the code https://github.com/rg3/youtube-dl/issues/15787
+~~-After downloading youtube_dl source (or from pip), edit the code https://github.com/rg3/youtube-dl/issues/15787~~
+fixed in newer version of youtube_dl
 
 
 # FAQ
@@ -192,11 +194,11 @@ computer. If it can be play, try playing it in MPV.
 
 ### Unable to show certain YouTube playlist
 
-The program is using youtube-dl to download the playlist (current version 2018.4.3)
+The program is using youtube-dl to download the playlist (current version 2020.3.24)
    
 Try downloading youtube-dl.exe and run ```youtube-dl.exe -j --flat-playlist url``` If it is not able to download,
 report bug under youtube-dl project. If the latest version is working, let me know the url so that I can update the 
-library
+library.
 
 ### When I try your program after unzipping the release, videos are not playing
 

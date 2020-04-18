@@ -16,7 +16,7 @@ function getPlaylist() {
     )
 }
 ons.getScriptPage().onInit =  function() {
-    $.templates('playlistTmpl', '#playlist_list');
+    $.templates('playlistTmpl', $('#playlist_list').html());
     $("#playlist_list").sortable({
         axis: "y",
         cursor: "move",
@@ -56,7 +56,7 @@ function postandrefresh(url, uuid) {
         {% raw %}
         <ons-list-item uuid="uuid_{{:playlist_uuid}}">
             <div class="left sort-handle icon-button">
-                <ons-icon icon="ion-arrow-move"></ons-icon>
+                <ons-icon icon="arrows-alt-v"></ons-icon>
             </div>
             <div class="center">
                 <span class="list-item__title">{{:title}}</span>
@@ -64,10 +64,10 @@ function postandrefresh(url, uuid) {
             </div>
             <div class="right">
                 <div class="icon-button" onclick="postandrefresh('/api/playlistmovetotop',{{:playlist_uuid}})">
-                    <ons-icon icon="ion-ios-skipforward" rotate="270"></ons-icon>
+                    <ons-icon icon="md-long-arrow-tab" rotate="270"></ons-icon>
                 </div>
                 <div class="icon-button" onclick="postandrefresh('/api/playlistdelete',{{:playlist_uuid}})">
-                    <ons-icon icon="ion-trash-a"></ons-icon>
+                    <ons-icon icon="trash"></ons-icon>
                 </div>
             </div>
         </ons-list-item>

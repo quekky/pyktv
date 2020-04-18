@@ -9,10 +9,10 @@
     <link rel="apple-touch-icon" href="/static/images/icon-180x180.png" />
     <meta name="viewport" content = "width = device-width, initial-scale = 1.0, minimum-scale = 1, maximum-scale = 1, user-scalable = no" >
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/onsenui@2.9.2/css/onsenui.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/onsenui@2.9.2/css/onsen-css-components.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/onsenui@2.10.10/css/onsenui.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/onsenui@2.10.10/css/onsen-css-components.min.css">
     <!--
-    <script src="https://cdn.jsdelivr.net/npm/onsenui@2.9.2/js/onsenui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/onsenui@2.10.10/js/onsenui.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jqueryui/jquery-ui.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-ui-touch-punch/jquery.ui.touch-punch.js"></script>
@@ -20,7 +20,8 @@
     <script src="https://cdn.jsdelivr.net/npm/lazyloadxt@1/dist/jquery.lazyloadxt.js"></script>
     -->
     <!--<script src="https://cdn.jsdelivr.net/combine/npm/onsenui@2.9.2,npm/jquery,npm/jqueryui,npm/jquery-ui-touch-punch,npm/jsrender/jsrender.min.js,npm/lazyloadxt@1/dist/jquery.lazyloadxt.js"></script>-->
-    <script src="https://cdn.jsdelivr.net/combine/npm/onsenui@2.9.2,npm/jquery@3.3.1,npm/jqueryui@1.11.1,npm/jquery-ui-touch-punch@0.2.3,npm/jsrender@0.9.90/jsrender.min.js,npm/lazyloadxt@1.1.0/dist/jquery.lazyloadxt.js"></script>
+    <!--<script src="https://cdn.jsdelivr.net/combine/npm/onsenui@2.9.2,npm/jquery@3.3.1,npm/jqueryui@1.11.1,npm/jquery-ui-touch-punch@0.2.3,npm/jsrender@0.9.90/jsrender.min.js,npm/lazyloadxt@1.1.0/dist/jquery.lazyloadxt.js"></script>-->
+    <script src="https://cdn.jsdelivr.net/combine/npm/onsenui@2.10.10,npm/jquery@3.5.0,npm/jqueryui@1.11.1,npm/jquery-ui-touch-punch@0.2.3,npm/jsrender@1.0.6,npm/lazyloadxt@1.1.0/dist/jquery.lazyloadxt.min.js"></script>
 
     <script src="/static/js/modernizr-grid.js"></script>
     <link rel="stylesheet" href="/static/css/app.css">
@@ -33,11 +34,11 @@
         <ons-tab name="title" page="/title" icon="md-sort-by-alpha" label="{{_('Title')}}" active></ons-tab>
         <ons-tab name="artist" page="/artist" icon="md-face" label="{{_('Artist')}}" ></ons-tab>
         <ons-tab name="index" page="/index" icon="list-ol" label="{{_('Index')}}" ></ons-tab>
-        <ons-tab name="popular" page="/popular" icon="ion-flame" label="{{_('Popular')}}" ></ons-tab>
+        <ons-tab name="popular" page="/popular" icon="fire" label="{{_('Popular')}}" ></ons-tab>
         <!-- <ons-tab name="network" page="/dlna" icon="md-cast" label="DLNA"></ons-tab>
         <ons-tab name="youtube" page="/youtube" icon="fa-youtube" label="Youtube"></ons-tab> -->
-        <ons-tab name="playlist" page="/playlist" icon="list-alt" label="{{_('F3:Playlist')}}" id="playlisttab" badge="0" ></ons-tab>
-        <label class="tabbar__item" onclick="$('#quick-functions')[0].show(this)"><button class="tabbar__button"><ons-icon icon="ion-navicon" class="tabbar__icon"></ons-icon></button></label>
+        <ons-tab name="playlist" page="/playlist" icon="shopping-cart" label="{{_('F3:Playlist')}}" id="playlisttab" badge="0" ></ons-tab>
+        <label class="tabbar__item" onclick="$('#quick-functions')[0].show(this)"><button class="tabbar__button"><ons-icon icon="bars" class="tabbar__icon"></ons-icon></button></label>
     </ons-tabbar>
 
     <ons-popover cancelable id="quick-functions" class="quick-functions">
@@ -45,10 +46,10 @@
             <ons-list-item>
                 <ons-row>
                     <ons-col>
-                        <ons-button modifier="large outline" icon="ion-ios-musical-notes" onclick="$.get('/api/switchchannel')"></ons-button>
+                        <ons-button modifier="large outline" icon="itunes-note" onclick="$.get('/api/switchchannel')"></ons-button>
                     </ons-col>
                     <ons-col>
-                        <ons-button modifier="large outline" icon="ion-ios-skipforward" onclick="$.get('/api/playnextsong')"></ons-button>
+                        <ons-button modifier="large outline" icon="step-forward" onclick="$.get('/api/playnextsong')"></ons-button>
                     </ons-col>
                 </ons-row>
                 <ons-row>
