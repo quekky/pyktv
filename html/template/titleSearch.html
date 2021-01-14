@@ -34,7 +34,7 @@ function title_opensearch() {
 function title_searchtext(inputbox) {
     search=inputbox.value.toUpperCase()
     {{uniquename}}_titles = {{uniquename}}_alltitles.filter( function(title) {
-        return title['search'].indexOf(search)==0 || title['title'].toUpperCase().indexOf(search)>0
+        return title['search'].indexOf(search)==0 || title['title'].toUpperCase().indexOf(search)>=0
     })
     {{uniquename}}_lazy_repeat.refresh()
 }

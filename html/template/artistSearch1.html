@@ -75,7 +75,7 @@ function search(search, region, type) {
         search=search.toUpperCase()
         artists=[]
         {{uniquename}}_allartists.forEach( function(item) {
-            if( (search==='' || item['search'].indexOf(search)===0 || item['name'].toUpperCase().indexOf(search)>0) &&
+            if( (search==='' || item['search'].indexOf(search)===0 || item['name'].toUpperCase().indexOf(search)>=0) &&
                 (region==='' || region===item.region) && (type==='' || type===item.type) )
                 artists.push(item)
         })

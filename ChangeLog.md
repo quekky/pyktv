@@ -1,3 +1,8 @@
+## version 2021.01.14-beta
+
+- Fix web app search unable to search for certain text
+
+
 ## version 2018.06.08-beta
 
 - Rewrite the code for Hangul (Korean) search, now supports complex jamo (CVCC) (eg 훯), and remove the need for external package
