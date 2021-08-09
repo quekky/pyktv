@@ -19,12 +19,7 @@ ons.ready(function() {
 })
 
 
-
-function addvideo(item, index) {
-    item=$(item).parent('ons-list-item')
-    index=item.attr('index')
-    $.get('/api/addvideo',{index:index})
-    console.log(item.offset())
+function animateadd(item) {
     clone=item.clone()
     clone.insertBefore(item)
         .addClass('ui-sortable-helper')
@@ -34,6 +29,22 @@ function addvideo(item, index) {
     setTimeout(function() {
         clone.remove()
     }, 1000)
+}
+
+function addvideo(item, index) {
+    item=$(item).parent('ons-list-item')
+    index=item.attr('index')
+    $.get('/api/addvideo',{index:index})
+    animateadd(item)
+}
+
+
+function addyoutube(item, index) {
+    item=$(item).parent('ons-list-item')
+    index=item.attr('index')
+    title=$(item).find('#title').html()
+    $.get('/api/addyoutube',{index:index,title:title})
+    animateadd(item)
 }
 
 function filterlist(list, filter) {

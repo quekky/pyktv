@@ -129,6 +129,22 @@ def networkSearch1():
     return flask.render_template('page4.html')
 
 
+@fapp.route("/youtube")
+def youtubeSearch():
+    return flask.render_template('youtube.html', googleapi=settings.config['googleapi'])
+
+
+@fapp.route("/api/addyoutube")
+def addYoutube():
+    data={}
+    data['url'] = flask.request.args.get('index')
+    data['title'] = flask.request.args.get('title')
+    data['display'] = data['title']
+    data['network'] = 'youtube'
+    playlist.addVideo(data)
+    return ""
+
+
 @fapp.route("/playlist")
 def playlistSearch():
     return flask.render_template('playlist.html')

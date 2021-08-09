@@ -41,6 +41,22 @@ ons-list-item .center, ons-list-item .center span {
     text-overflow: ellipsis;
 }
 
+.thumbnail {
+  width: 88px;
+}
+
+.user {
+  font-size: 10px;
+  opacity: 0.8;
+  color: #e52d27;
+  margin-bottom: 3px;
+  width: 100%;
+}
+
+.list-item__desc {
+  font-size: 12px;
+  white-space: normal;
+}
 
 
 // fix for iphone X

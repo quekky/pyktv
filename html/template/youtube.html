@@ -1,0 +1,66 @@
+{% import 'functions.html' as func %}
+{% set uniquename = func.random_var(10) -%}
+<ons-page>
+
+<script>
+
+ons.getScriptPage().onInit =  function() {
+    // create template
+    tmplstr=$('#youtubelist').clone()
+    $.templates('youtubelistTmpl', tmplstr.html());
+    $('#youtubelist').html("")
+}
+
+function youtube_searchtext(inputbox) {
+    $.getJSON("https://www.googleapis.com/youtube/v3/search", {
+            key: '{{googleapi}}',
+            type: 'video',
+            maxResults: '50',
+            part: 'snippet',
+            fields: 'items/id,items/snippet/title,items/snippet/description,items/snippet/thumbnails/default,items/snippet/channelTitle,nextPageToken',
+            q: inputbox.value
+        }, function(data) {
+            $('#youtubelist').html($.render.youtubelistTmpl(data.items))
+        })
+}
+</script>
+
+
+    <ons-toolbar>
+        <form onsubmit="$(this).find('input').blur();return false">
+            <ons-toolbar class="search-bar">
+                <div class="center" onclick="event.stopPropagation()">
+                    <ons-search-input placeholder="YouTube" onchange="youtube_searchtext(this)"></ons-search-input>
+                </div>
+            </ons-toolbar>
+        </form>
+    </ons-toolbar>
+
+    <ons-pull-hook>
+        <ons-icon icon="md-spinner" size="28px" spin></ons-icon>
+    </ons-pull-hook>
+
+    <ons-list>
+        <section id="youtubelist" class="center">
+            {% raw %}
+            <ons-list-item index="{{:id.videoId}}">
+                <div class="left" style="align-items: baseline;">
+                    <img class="thumbnail" src="{{:snippet.thumbnails.default.url}}">
+                </div>
+                <div class="center">
+                    <div class="list-item__title" id="title">{{:snippet.title}}</div>
+                    <div class="user">
+                        <ons-icon icon="fa-user"></ons-icon><span style="font-size: 12px"> {{if snippet.channelTitle}}{{:snippet.channelTitle}}{{else}}Anonymous{{/if}}</span>
+                    </div>
+                    <div class="list-item__subtitle list-item__desc">{{:snippet.description}}</div>
+                </div>
+                <div class="right icon-button" onclick="addyoutube(this)">
+                    <ons-icon icon="md-plus"></ons-icon>
+                </div>
+            </ons-list-item>
+            {% endraw %}
+        </section>
+    </ons-list>
+
+
+</ons-page>
