@@ -1,3 +1,8 @@
+## version 2021.08.09-beta
+
+- Add YouTube search in webapp
+
+
 ## version 2021.01.14-beta
 
 - Fix web app search unable to search for certain text
