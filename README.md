@@ -23,7 +23,7 @@ Current pyktv features:
 * Select by number of characters
 * Youtube playlist
 * DLNA support, pyktv will automatically find DLNA servers on your network
-* Web server
+* Web server (scan QR code to access)
 
 
 # USAGE
@@ -54,10 +54,11 @@ Mouse/touchscreen works as well
 ## Web server
 
 pyktv have a very simple web server. Use your smartphone/tablet to browse to your computer port 5000, 
-your browser will need to have Internet.
+your browser will need to have Internet and in the same network as your computer. 
 
 eg, http://{computer_ip}:5000/ _(replace computer_ip with your actual computer IP address)_
 
+**Just scan the QR code on screen to access**
 
 # CONFIGURATION
 
@@ -92,14 +93,18 @@ There are 3 tables in the database.
  language     | TEXT | language of song
  style        | TEXT | song category
  channel      | TEXT | which channel is music only (L, R, 0, 1)
- library      | TEXT | which library it belongs to
  volume       | TEXT | Volume to increase (in decibel(dB)), put - to decrease. If there's multiple tracks, separate with comma by tracks
+ library      | TEXT | which library it belongs to
  media_file   | TEXT | media file name within the library
+ library2     | TEXT | which library the 2nd audio track belongs to
+ media_file2  | TEXT | the 2nd audio track of media file name within library2 (can be audio or video)
  remark       | TEXT | remarks
  order_time   | INT  | [internal use] how many times the video is played
 
 *note: library and media_file must be filled in.
 The final file name will be library+media_file*
+
+*note2: to use online (eg youtube) links, leave library empty*
 
 
 ## singer

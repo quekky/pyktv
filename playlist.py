@@ -3,7 +3,6 @@
 """
 
 from collections import deque
-import os
 import time
 from PyQt5.QtCore import QTimer, pyqtSlot
 
@@ -122,22 +121,27 @@ def playNextSong():
     # print(video_playlist)
     try:
         current_playing = video_playlist.popleft()
+        mpv_opts = {}
 
         if 'media_file' in current_playing.keys():
             # normal files
             library=current_playing['library']
             mediafile=str(current_playing['media_file'])
             videopath=functions.getVideoPath(library, mediafile)
+            library2=current_playing.get('library2','')
+            mediafile2=str(current_playing.get('media_file2',''))
+            videopath2 = functions.getVideoPath(library2, mediafile2, True)
+            mpv_opts = {'external_files': videopath2}
         elif 'network' in current_playing :
             #network/youtube
             videopath=current_playing['url']
             if current_playing['network']=='youtube'and not functions.isValidUrl(videopath):
                 videopath=r'ytdl://'+videopath
-                print(videopath)
+                #print(videopath)
 
         try:
             player = settings.mpvMediaPlayer
-            player.play(videopath)
+            player.loadfile(videopath, **mpv_opts)
 
             videostatushasbeenset=False
             videopopularupdated=False
@@ -358,11 +362,7 @@ def randomPlay():
         song=rows.fetchone()
         library=song['library']
         mediafile=str(song['media_file'])
-        if library=='':
-            path=mediafile
-        else:
-            mediafile=mediafile.lstrip(os.path.sep)
-            path=os.path.join(library,mediafile)
+        path=functions.getVideoPath(library, mediafile)
         settings.logger.debug("Playing random file:",path)
         player = settings.mpvMediaPlayer
         player.play(path)

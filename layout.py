@@ -1,11 +1,12 @@
-from PyQt5.QtGui import QKeySequence, QCursor, QPixmap
+from PyQt5.QtGui import QKeySequence, QCursor, QImage
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QMenu, QStackedLayout, QShortcut, qApp
 import time
 
 import playlist
 import screen
-from functions import setZeroMargins, Hangul
+from functions import setZeroMargins, Hangul, get_ip
 from pywidgets import *
+import qrcode
 import webapp
 
 
@@ -220,6 +221,24 @@ class CommonWindow(QWidget):
         qApp.quit()
 
 
+class QRImage(qrcode.image.base.BaseImage):
+    def new_image(self, **kwargs):
+        image = QImage(self.pixel_size, self.pixel_size, QImage.Format_RGB16)
+        image.fill(Qt.white)
+        return image
+
+    def pixmap(self):
+        return QPixmap.fromImage(self._img)
+
+    def drawrect(self, row, col):
+        painter = QPainter(self._img)
+        painter.fillRect(
+            (col + self.border) * self.box_size,
+            (row + self.border) * self.box_size,
+            self.box_size, self.box_size,
+            Qt.black)
+
+
 class VideoWindow(CommonWindow):
     """Video window"""
 
@@ -249,6 +268,15 @@ class VideoWindow(CommonWindow):
         self.statuslabel.setStyleSheet('color:' + settings.config['font.color'] + '; background:black')
         self.statuslabel.hide()
 
+        self.qrcodelabel = QLabel(self)
+        self.qrcodelabel.hide()
+        self.qrcodelabel.setScaledContents(True)
+        self.qrcodelabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        print(get_ip())
+        qr_image = qrcode.make("http://"+get_ip()+":5000", image_factory=QRImage, border=0).pixmap()
+        self.qrcodelabel.setPixmap(qr_image)
+        self.qrcodelabel.show()
+
         self.setCursor(QCursor(Qt.BlankCursor))
 
         geo=list(map(int, settings.config['video.window'].split(',')))
@@ -266,6 +294,10 @@ class VideoWindow(CommonWindow):
         self.statuslabel.move(width*0.01, height*0.01)
         self.statuslabel.setFont(self.globalfont)
         self.statuslabel.adjustSize()
+        qrwidth=width*0.05
+        self.qrcodelabel.move(width*0.994-qrwidth, height*0.01)
+        self.qrcodelabel.setFixedWidth(qrwidth)
+        self.qrcodelabel.setFixedHeight(qrwidth)
 
     def setStatusTempText(self, p_str, msec):
         if self.timer.isActive():

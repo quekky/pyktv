@@ -1,3 +1,10 @@
+## version 2021.12.25-beta
+
+- Add option to have second audio from as a different file (Note: mpv may have a lag when switching audio from youtube)
+- Add QR code link on main screen
+- Fix youtube "Auto set volume"
+
+
 ## version 2021.08.09-beta
 
 - Add YouTube search in webapp

@@ -5,6 +5,9 @@ import sqlite3
 from urllib.parse import urlparse
 import os
 import settings
+import json
+#import youtube_dl.YoutubeDL as ytdl
+import socket
 
 
 CREATE_NO_WINDOW=0x08000000
@@ -24,7 +27,7 @@ def isValidUrl(url):
                                     "bluray", "dvd", "bd", "tv", "pvr", "cdda", "icecast", "mmsh",
                                     "data", "ytdl", "smb",)
 
-def getVideoPath(library, mediafile):
+def getVideoPath(library, mediafile, get_audio_url=False):
     """joins library and mediafile
     If media is not found in the main library, try all the mirrors
     """
@@ -33,6 +36,7 @@ def getVideoPath(library, mediafile):
     else:
         mediafile = mediafile.lstrip('\\/')
         videopath = os.path.join(library, mediafile).replace('\\', os.path.sep).replace('/', os.path.sep)
+        if not os.path.isfile(videopath): videopath = ''
 
     if not isValidUrl(videopath):
         if not os.path.isfile(videopath) and library in settings.libraries.keys():
@@ -41,6 +45,17 @@ def getVideoPath(library, mediafile):
                 if os.path.isfile(tempfile):
                     videopath=tempfile
                     break
+    elif get_audio_url:
+        try:
+            ### throws "'NoneType' object has no attribute 'write'" inside youtube-dl module if run headless
+            # info = ytdl({'format':'bestaudio'}).extract_info(videopath, download=False)
+
+            cmd = CommandRunner()
+            cmd.run_command(['youtube-dl', '-j', '-f', 'bestaudio', videopath])
+            info = json.loads(cmd.stdout)
+            videopath = info['url']
+        except:
+            pass
 
     return videopath
 
@@ -91,7 +106,8 @@ class CommandRunner():
     def run_command(self, cmd):
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=CREATE_NO_WINDOW)
         stdout, stderr = p.communicate()
-        self.output=stderr.decode("utf8", errors='replace')
+        self.output = stderr.decode("utf8", errors='replace')
+        self.stdout = stdout.decode("utf8", errors='replace')
 
 
 """ Hangul functions """
@@ -145,3 +161,16 @@ class Hangul():
                 return self.compose_jamo(self.chosung, self.jungsung, COMPLEXJOOGSUNG[jamojoin])
             else:
                 return self.compose_jamo(self.chosung, self.jungsung, self.jongsung) + self.jongsung2
+
+
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP

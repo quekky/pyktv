@@ -37,7 +37,7 @@ def __init__():
     config = configfile['program']
     keyboardshortcut = configfile['keyboard']
 
-    mpvMediaPlayer.video_aspect = config.get('video.aspect_ratio', '-1')
+    #mpvMediaPlayer.video_aspect = config.get('video.aspect_ratio', '-1')
     mpvMediaPlayer.ytdl_format=config.get('youtube.format','best')
     mpvMediaPlayer.slang = config.get('youtube.subtitleslangs', '')
 
@@ -45,6 +45,7 @@ def __init__():
     singerdir = os.path.normcase(os.path.join(programDir, config.get('singer.picture', '')))
 
     dbconn = functions.createDatabase()
+    upgradedatabase()
     loadLibraries()
 
     localedir = os.path.join(programDir, 'locale')
@@ -57,6 +58,30 @@ def loadLibraries():
     rows = dbconn.execute('select * from library')
     for r in rows:
         libraries[r['root_path']] = list(filter(None, [r['mirror1'],r['mirror2'],r['mirror3'],r['mirror4'],r['mirror5'],r['mirror6'],r['mirror7'],r['mirror8'],r['mirror9'],r['mirror10']]))
+
+
+upgradedbsql = [
+    # version 2021.12.25-beta
+    [20211225, "ALTER TABLE song ADD COLUMN library2 TEXT NOT NULL DEFAULT ''"],
+    [20211225, "ALTER TABLE song ADD COLUMN media_file2 TEXT NOT NULL DEFAULT ''"],
+    [20211225, "CREATE UNIQUE INDEX idx_song_index ON song (`index`)"],
+]
+
+def upgradedatabase():
+    global dbconn
+    rows = dbconn.execute('PRAGMA user_version')
+    user_version = next(rows)[0]
+
+    for sql in upgradedbsql:
+        if user_version < sql[0]:
+            try:
+                print(sql[1])
+                dbconn.execute(sql[1])
+            except:
+                next
+    if user_version != sql[0]:
+        dbconn.execute('PRAGMA user_version=%d'%(sql[0]))
+    dbconn.commit()
 
 
 class mainLogger(object):

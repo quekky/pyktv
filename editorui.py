@@ -12,6 +12,7 @@ from collections import OrderedDict
 import re
 from opencc import OpenCC
 import concurrent.futures
+#import multiprocessing
 from tqdm import tqdm
 from pprint import pprint
 
@@ -413,9 +414,11 @@ class EditorWindow(QMainWindow):
         'language': {'title': 'Language', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongLanguageModel.__func__, 'type': str},
         'style': {'title': 'Category', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongStyleModel.__func__, 'type': str},
         'channel': {'title': 'Channel', 'itemdelegateclass': QComboBoxDelegate, 'validator':QUpperValidator(QRegExp('[lrLR]|[0-9]')), 'getmodel': getSongChannelModel.__func__, 'type': str},
-        'volume': {'title': 'Volume (±dB)', 'itemdelegateclass': QLineEditDelegate, 'validator': QRegExpValidator(QRegExp('^([-]?\d+(\.\d*)?)(,\s*[-]?\d+(\.\d*)?)?$')), 'type': float},
+        'volume': {'title': 'Volume (±dB)', 'itemdelegateclass': QLineEditDelegate, 'validator': QRegExpValidator(QRegExp('^([-]?\d+(\.\d*)?)(,\s*[-]?\d+(\.\d*)?)?$')), 'type': str},
         'library': {'title': 'Library', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongLibraryModel.__func__},
         'media_file': {'title': 'Media file'},
+        'library2': {'title': 'Library2', 'itemdelegateclass': QComboBoxDelegate, 'getmodel': getSongLibraryModel.__func__},
+        'media_file2': {'title': 'Media file2'},
         'remark': {'title': 'Remark', 'type': str}
     })
 
@@ -453,6 +456,7 @@ class EditorWindow(QMainWindow):
         self.btnSongIndex.clicked.connect(self.songReindex)
         self.btnSongSearch.clicked.connect(self.songSetSearchChar)
         self.btnSongMedia.clicked.connect(self.songFindMedia)
+        self.btnSongMedia2.clicked.connect(self.songFindMedia2)
         self.txtSongTitle.textEdited.connect(self.songTitleEdited)
 
         self.songCompleter = QCompleter()
@@ -598,6 +602,23 @@ class EditorWindow(QMainWindow):
             self.txtSongMedia_File.setText(filename)
 
 
+    def songFindMedia2(self):
+        path=lib=self.cmbSongLibrary2.currentText()
+        filename=self.txtSongMedia_File2.text()
+        if lib and os.path.isdir(lib) or filename:
+            lib = os.path.normpath(lib)
+            path = os.path.dirname(os.path.join(lib, filename.lstrip(os.path.sep)))
+
+        qfd=QFileDialog(self, "Open Video", path, "Video (*.avi *.wmv *.mov *.mp* *.mkv *.webm *.rm *.dat *.flv *.vob *.divx *.cdg);;All files (*.*)")
+        if lib:
+            qfd.directoryEntered.connect(lambda dir: os.path.normpath(dir).startswith(lib) or qfd.setDirectory(lib))
+        if qfd.exec():
+            filename = os.path.normpath(qfd.selectedFiles()[0])
+            if lib and filename.startswith(lib):
+                filename=filename[len(lib):]
+            self.txtSongMedia_File2.setText(filename)
+
+
     def songTitleEdited(self, txt):
         l=len(txt.strip())
         self.txtSongChars.setText(str(l) if l else '')
@@ -666,6 +687,8 @@ class EditorWindow(QMainWindow):
         pos_title=list(self.songColumns.keys()).index('title')
         pos_library=list(self.songColumns.keys()).index('library')
         pos_media=list(self.songColumns.keys()).index('media_file')
+        pos_library2=list(self.songColumns.keys()).index('library2')
+        pos_media2=list(self.songColumns.keys()).index('media_file2')
         errors=[]
 
         for i, r in enumerate(tqdm(rows, file=progress.getUpdateClass())):
@@ -686,67 +709,85 @@ class EditorWindow(QMainWindow):
 
 
     def setVolume(self):
-        if QMessageBox.question(self, 'Set volume', 'Program will scan each file to find the suitable volume.<br><b>This will take very long.</b><br><br>Are you sure?', QMessageBox.YesToAll|QMessageBox.NoToAll)==QMessageBox.NoToAll:
+        rows = [r.row() for r in self.tblSong.selectionModel().selectedRows()]
+        if len(rows)>1 and QMessageBox.question(self, 'Set volume', 'Program will scan each file to find the suitable volume.<br><b>This will take very long.</b><br><br>Are you sure?', QMessageBox.YesToAll|QMessageBox.NoToAll)==QMessageBox.NoToAll:
             return
 
-        def setVolumeTask(id, videopath, pbar):
+        def getVolume(videopath, maxbar, pbar):
             goalLUFS = -14
             maxPeak = -1
+            prevp = 0
+
+            cmd = functions.CommandRunner()
+            cmd.run_command(['ffmpeg', '-hide_banner', '-i', videopath])
+            numaudiotracks=len(re.findall(r"\s*Stream .* Audio:", cmd.output))
+
+            gain=[]
+            for i in range(numaudiotracks):
+                for p in cmd.run_ffmpeg_command(['ffmpeg', '-hide_banner', '-i', videopath, '-vn', '-filter_complex', '[0:a:%i]ebur128=dualmono=true:peak=true'%i, '-f', 'null', NUL]):
+                    p2=int((i/numaudiotracks+p/numaudiotracks)/maxbar)
+                    if prevp != p2:
+                        pbar.update(p2 - prevp)
+                        prevp = p2
+
+                summaryList = cmd.output[cmd.output.rfind('Summary:'):].split()
+                LUFS = float(summaryList[summaryList.index('I:') + 1])
+                Peak = float(summaryList[summaryList.index('Peak:') + 1])
+
+                gainDB = goalLUFS - LUFS
+                if gainDB > 0 and Peak + gainDB > maxPeak:
+                    if Peak < maxPeak:
+                        gainDB = maxPeak - Peak
+                    else:
+                        gainDB = 0
+                gain.append(str(round(gainDB,3)))
+
+                if prevp < maxbar:
+                    pbar.update(maxbar - prevp)
+
+            return gain
+
+        def setVolumeTask(id, videopath, videopath2, pbar):
+            gain = []
 
             try:
-                prevp = 0
-                cmd = functions.CommandRunner()
-                cmd.run_command(['ffmpeg', '-i', videopath])
-                numaudiotracks=len(re.findall(r"\s*Stream .* Audio:", cmd.output))
-
-                gain=[]
-                for i in range(numaudiotracks):
-                    for p in cmd.run_ffmpeg_command(['ffmpeg', '-i', videopath, '-vn', '-filter_complex', '[0:a:%i]ebur128=dualmono=true:peak=true'%i, '-f', 'null', NUL]):
-                        p2=int(i/numaudiotracks*100+p/numaudiotracks)
-                        if prevp != p2:
-                            pbar.update(p2 - prevp)
-                            prevp = p2
-
-                    summaryList = cmd.output[cmd.output.rfind('Summary:'):].split()
-                    LUFS = float(summaryList[summaryList.index('I:') + 1])
-                    Peak = float(summaryList[summaryList.index('Peak:') + 1])
-
-                    gainDB = goalLUFS - LUFS
-                    if gainDB > 0 and Peak + gainDB > maxPeak:
-                        if Peak < maxPeak:
-                            gainDB = maxPeak - Peak
-                        else:
-                            gainDB = 0
-                    gain.append(str(round(gainDB,3)))
-
-                if prevp<100:
-                    pbar.update(100-prevp)
+                maxbar = 2 if videopath2 else 1
+                gain.extend(getVolume(videopath, maxbar, pbar))
+                if videopath2:
+                    gain.extend(getVolume(videopath2, maxbar, pbar))
 
                 # new thread, need to create new SQLite objects
                 dbconn = functions.createDatabase()
                 dbconn.execute("update song set [volume]=? where id = ?", (",".join(gain), id,))
                 dbconn.commit()
+                dbconn.close()
             except:
                 settings.logger.printException()
 
-        rows = [r.row() for r in self.tblSong.selectionModel().selectedRows()]
         ids = [r.data(Qt.UserRole) for r in self.tblSong.selectionModel().selectedRows()]
         progress = QStatusDialog('Scanning medias for volume...', 'Stop', 0, len(rows) * 100, self,
                                  Qt.Dialog | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
         progress.setMinimumDuration(0)
         pos_library = list(self.songColumns.keys()).index('library')
         pos_media = list(self.songColumns.keys()).index('media_file')
+        pos_library2=list(self.songColumns.keys()).index('library2')
+        pos_media2=list(self.songColumns.keys()).index('media_file2')
         pbar = tqdm(total=len(rows) * 100, file=progress.getUpdateClass())
 
-        numthreads=int(os.cpu_count()*1.5)
+        # m = multiprocessing.Manager()
+        # lock = m.Lock()
+        numthreads=1 ### to-do - crash when running multithread
         with concurrent.futures.ThreadPoolExecutor(numthreads) as executor:
             furtures=[]
             for r in rows:
                 library = self.tblSong.model().index(r, pos_library).data()
                 mediafile = self.tblSong.model().index(r, pos_media).data()
-                videopath = functions.getVideoPath(library, mediafile)
+                videopath = functions.getVideoPath(library, mediafile, True)
+                library2 = self.tblSong.model().index(r, pos_library2).data()
+                mediafile2 = self.tblSong.model().index(r, pos_media2).data()
+                videopath2 = functions.getVideoPath(library2, mediafile2, True)
                 id = self.tblSong.model().index(r, 1).data(Qt.UserRole)
-                furtures.append(executor.submit(setVolumeTask, id, videopath, pbar))
+                furtures.append(executor.submit(setVolumeTask, id, videopath, videopath2, pbar))
 
             progress.setLabelSubText('Processing %s of %s' % (0, len(rows)))
             while len(furtures)>0:
@@ -847,11 +888,16 @@ class EditorWindow(QMainWindow):
         if len(rows)==1 and (player.idle_active or self.previousplaying!=rows[0].data()):
             library = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('library')).data()
             mediafile = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('media_file')).data()
+            library2 = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('library2')).data()
+            mediafile2 = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('media_file2')).data()
             self.volume = rows[0].sibling(rows[0].row(), list(self.songColumns.keys()).index('volume')).data().split(',')
             if not self.volume or not self.volume[0]:
                 self.volume=['0']
             videopath = functions.getVideoPath(library, mediafile)
-            player.play(videopath)
+            videopath2 = functions.getVideoPath(library2, mediafile2, True)
+            mpv_opts = {'external_files': videopath2} if videopath2 else {}
+            print(mpv_opts)
+            player.loadfile(videopath, **mpv_opts)
             time.sleep(0.2) # not sure why some songs need to wait, else it'll crash
             player.aid = 1
             volumestr='lavfi="volume=volume=%sdB"'%self.volume[0]
