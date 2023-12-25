@@ -19,7 +19,7 @@ if sys.platform == "win32":
     import ctypes.util
     # msvcr100.dll - Microsoft Visual C++ 2010
     # vcruntime140.dll - Microsoft Visual C++ 2015
-    for n in ('mpv-1.dll', 'youtube-dl.exe', 'ffmpeg.exe', 'msvcr100.dll', 'vcruntime140.dll', ):
+    for n in ('mpv-2.dll', 'yt-dlp.exe', 'ffmpeg.exe', 'msvcr100.dll', 'vcruntime140.dll', ):
         lib=ctypes.util.find_library(n)
         if lib: include_files.append(lib)
 

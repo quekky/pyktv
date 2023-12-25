@@ -272,7 +272,7 @@ class VideoWindow(CommonWindow):
         self.qrcodelabel.hide()
         self.qrcodelabel.setScaledContents(True)
         self.qrcodelabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        print(get_ip())
+        # print(get_ip())
         qr_image = qrcode.make("http://"+get_ip()+":5000", image_factory=QRImage, border=0).pixmap()
         self.qrcodelabel.setPixmap(qr_image)
         self.qrcodelabel.show()

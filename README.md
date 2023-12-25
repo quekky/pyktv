@@ -166,7 +166,7 @@ To run from sourcecode, install the python packages according to requirements.tx
 
 $ pip install -r requirements.txt
 
-Download MPV library from https://mpv.io/ and put it in the path (For Windows, download **mpv-1.dll**)
+Download MPV library from https://mpv.io/ and put it in the path (For Windows, download **mpv-2.dll**)
 If there's no library for the OS you're using, you'll need to compile it from MPV source and drop the library file
 in the root of the project
 
@@ -190,7 +190,7 @@ _(MPV uses ffmpeg to decode almost all videos, so it should be able to play almo
 
 ### Unable to play any Youtube video
 
-Make sure youtube-dl.exe in the same directory as the program, MPV will require youtube-dl.exe to play the video
+Make sure yt-dlp.exe in the same directory as the program, MPV will require yt-dlp.exe to play the video
 
 ### Unable to play some Youtube video
 
@@ -199,7 +199,7 @@ computer. If it can be play, try playing it in MPV.
 
 ### Unable to show certain YouTube playlist
 
-The program is using youtube-dl to download the playlist (current version 2020.3.24)
+The program is using youtube-dl to download the playlist (last version 2021.12.17, so many functions may or may not work)
    
 Try downloading youtube-dl.exe and run ```youtube-dl.exe -j --flat-playlist url``` If it is not able to download,
 report bug under youtube-dl project. If the latest version is working, let me know the url so that I can update the 

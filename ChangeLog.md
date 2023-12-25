@@ -1,3 +1,7 @@
+## version 2023.12.25-beta
+
+- Fix bug with Database Indexing
+
 ## version 2021.12.25-beta
 
 - Add option to have second audio from as a different file (Note: mpv may have a lag when switching audio from youtube)
